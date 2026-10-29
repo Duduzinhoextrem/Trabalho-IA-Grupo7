@@ -1,0 +1,151 @@
+{
+  "config_version": "balance-v1.0.0",
+  "description": "Configuração versionada das fórmulas de adaptação D&D 5e SRD -> Simulador Masmorra Genética (Grupo 7)",
+  "provenance_note": "Estes parâmetros definem exclusivamente as regras do simulador e o catálogo de equipamentos, mantendo separação estrita dos dados externos originais da API D&D 5e SRD.",
+  "dungeon": {
+    "total_rooms": 100,
+    "max_enemies_per_room": 3,
+    "min_cr_room_1": 0.125,
+    "max_cr_room_100": 24.0
+  },
+  "monster_adaptation": {
+    "hp_scale_factor": 0.85,
+    "hp_base_offset": 10.0,
+    "room_hp_progression_rate": 0.021,
+    "defense_ac_baseline": 10,
+    "defense_per_ac_point": 2.5,
+    "defense_per_con_mod": 1.35,
+    "defense_per_cr": 1.30,
+    "damage_scale_factor": 1.08,
+    "room_damage_progression_rate": 0.0225,
+    "max_resistance_cap": 0.55,
+    "vulnerability_multiplier": 1.25,
+    "xp_base": 14.0,
+    "xp_cr_power": 1.08,
+    "xp_srd_log_weight": 4.2,
+    "gold_base": 4.0,
+    "gold_per_cr": 1.45,
+    "gold_per_room": 0.22
+  },
+  "warrior": {
+    "initial_level": 1,
+    "initial_hp": 68,
+    "initial_strength": 10,
+    "initial_vitality": 10,
+    "initial_defense": 8,
+    "initial_gold": 20,
+    "attribute_points_per_level": 3,
+    "hp_per_vitality_point": 9,
+    "hp_per_level": 6,
+    "phys_dmg_per_strength_point": 1.45,
+    "defense_per_defense_point": 1.85,
+    "base_xp_to_level": 52,
+    "xp_level_growth_factor": 1.18,
+    "post_room_heal_fraction": 0.22
+  },
+  "allies": {
+    "slot_1_unlock_level": 5,
+    "slot_2_unlock_level": 15,
+    "max_active_allies": 2,
+    "attribute_points_per_level": 3,
+    "classes": {
+      "mage": {
+        "name": "Mago",
+        "role": "magical_ranged",
+        "position": "backline",
+        "hire_cost": 145,
+        "base_hp": 42,
+        "base_power": 14,
+        "base_vitality": 7,
+        "base_defense": 5,
+        "initiative": 14,
+        "dmg_per_power": 1.65
+      },
+      "archer": {
+        "name": "Arqueiro",
+        "role": "physical_ranged",
+        "position": "backline",
+        "hire_cost": 130,
+        "base_hp": 46,
+        "base_power": 13,
+        "base_vitality": 8,
+        "base_defense": 6,
+        "initiative": 16,
+        "dmg_per_power": 1.55
+      },
+      "monk": {
+        "name": "Monge",
+        "role": "magical_melee_tank",
+        "position": "frontline",
+        "hire_cost": 155,
+        "base_hp": 62,
+        "base_power": 11,
+        "base_vitality": 11,
+        "base_defense": 10,
+        "initiative": 15,
+        "dmg_per_power": 1.35
+      },
+      "priest": {
+        "name": "Padre",
+        "role": "healer_support",
+        "position": "backline",
+        "hire_cost": 165,
+        "base_hp": 48,
+        "base_power": 11,
+        "base_vitality": 9,
+        "base_defense": 7,
+        "initiative": 12,
+        "dmg_per_power": 1.05,
+        "max_heals_per_combat": 4,
+        "heal_base": 18,
+        "heal_per_power": 1.75
+      },
+      "alchemist": {
+        "name": "Alquimista",
+        "role": "buffer_debuffer",
+        "position": "backline",
+        "hire_cost": 150,
+        "base_hp": 45,
+        "base_power": 11,
+        "base_vitality": 8,
+        "base_defense": 6,
+        "initiative": 15,
+        "dmg_per_power": 1.15,
+        "buff_duration_turns": 3,
+        "max_buff_stacks": 2,
+        "atk_buff_per_stack": 0.13,
+        "def_debuff_per_stack": 0.13
+      }
+    }
+  },
+  "combat": {
+    "max_turns": 40,
+    "defense_mitigation_constant": 48.0,
+    "max_mitigation_cap": 0.72,
+    "min_damage_guaranteed": 1,
+    "frontline_target_weight": 0.78
+  },
+  "economy": {
+    "sell_price_ratio": 0.40,
+    "chest_drop_chance": 0.10,
+    "weapons": [
+      {"tier": 1, "name": "Espada Curta de Ferro (Inicial)", "cost": 0, "attack_bonus": 3, "phys_damage_bonus": 4, "source_type": "simulation_catalog"},
+      {"tier": 2, "name": "Espada Longa de Aço Temperado", "cost": 95, "attack_bonus": 7, "phys_damage_bonus": 11, "source_type": "simulation_catalog"},
+      {"tier": 3, "name": "Lâmina Rúnica de Mithril", "cost": 290, "attack_bonus": 12, "phys_damage_bonus": 22, "source_type": "simulation_catalog"},
+      {"tier": 4, "name": "Espada Bastarda Dracônica", "cost": 680, "attack_bonus": 18, "phys_damage_bonus": 38, "source_type": "simulation_catalog"}
+    ],
+    "armors": [
+      {"tier": 0, "name": "Túnica Simples (Sem Armadura)", "cost": 0, "defense_bonus": 0, "hp_bonus": 0, "source_type": "simulation_catalog"},
+      {"tier": 1, "name": "Armadura de Couro Batido", "cost": 80, "defense_bonus": 5, "hp_bonus": 14, "source_type": "simulation_catalog"},
+      {"tier": 2, "name": "Cota de Malha Reforçada", "cost": 230, "defense_bonus": 12, "hp_bonus": 34, "source_type": "simulation_catalog"},
+      {"tier": 3, "name": "Meia-Armadura de Aço Real", "cost": 490, "defense_bonus": 20, "hp_bonus": 65, "source_type": "simulation_catalog"},
+      {"tier": 4, "name": "Armadura Completa Adamantina", "cost": 920, "defense_bonus": 31, "hp_bonus": 110, "source_type": "simulation_catalog"}
+    ],
+    "shields": [
+      {"tier": 0, "name": "Sem Escudo", "cost": 0, "defense_bonus": 0, "block_mitigation": 0.0, "source_type": "simulation_catalog"},
+      {"tier": 1, "name": "Broquel de Madeira e Ferro", "cost": 70, "defense_bonus": 4, "block_mitigation": 0.04, "source_type": "simulation_catalog"},
+      {"tier": 2, "name": "Escudo Torre de Aço", "cost": 240, "defense_bonus": 10, "block_mitigation": 0.09, "source_type": "simulation_catalog"},
+      {"tier": 3, "name": "Égide Real Encantada", "cost": 560, "defense_bonus": 17, "block_mitigation": 0.14, "source_type": "simulation_catalog"}
+    ]
+  }
+}

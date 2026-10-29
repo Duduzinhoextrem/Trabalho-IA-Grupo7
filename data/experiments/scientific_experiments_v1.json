@@ -1,0 +1,3306 @@
+{
+  "metadata": {
+    "project": "Masmorra Genética: A Evolução do Guerreiro — Grupo 7 (IA II - FIB)",
+    "dataset_version": "srd-2014-v1.0.0",
+    "balance_version": "balance-v1.0.0",
+    "started_at_utc": "2026-10-29T13:57:17.874978+00:00",
+    "completed_at_utc": "2026-10-29T14:04:12.710221+00:00",
+    "train_seeds": [
+      101,
+      102,
+      103,
+      104,
+      105
+    ],
+    "validation_seeds": [
+      201,
+      202,
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210
+    ]
+  },
+  "best_champion_strategy": {
+    "config": {
+      "pop_size": 20,
+      "generations": 12,
+      "mutation_rate": 0.1,
+      "crossover_rate": 0.85,
+      "tournament_size": 3,
+      "elite_count": 2,
+      "stagnation_limit": 17,
+      "max_evaluations": 240,
+      "seed": 4185,
+      "num_training_seeds": 5,
+      "enable_allies": true,
+      "enable_chests": true
+    },
+    "best_chromosome": {
+      "genes": [
+        0.1628,
+        0.5511,
+        0.2861,
+        0.0788,
+        0.1887,
+        0.3096,
+        0.4657,
+        0.1828,
+        0.6686,
+        0.0121,
+        0.3193,
+        0.0113,
+        0.0,
+        38.8416,
+        1.453,
+        1.1129
+      ],
+      "named_genes": {
+        "w_weight_str": 0.1628,
+        "w_weight_vit": 0.5511,
+        "w_weight_def": 0.2861,
+        "ally_prio_mage": 0.0788,
+        "ally_prio_archer": 0.1887,
+        "ally_prio_monk": 0.3096,
+        "ally_prio_priest": 0.4657,
+        "ally_prio_alchemist": 0.1828,
+        "ally_weight_power": 0.6686,
+        "ally_weight_vit": 0.0121,
+        "ally_weight_def": 0.3193,
+        "equip_offense_priority": 0.0113,
+        "hire_before_equip_discrete": 0.0,
+        "min_gold_reserve": 38.8416,
+        "equipment_buy_threshold": 1.453,
+        "ally_hire_threshold": 1.1129
+      },
+      "fitness": 98.206331,
+      "mean_rooms_cleared": 98.2,
+      "completion_rate": 0.6,
+      "mean_hp_ratio": 0.5867,
+      "mean_gold_left": 1874.0
+    },
+    "history": [
+      {
+        "generation": 1,
+        "evaluations_cumulative": 20,
+        "best_fitness": 84.8011,
+        "mean_fitness": 74.9413,
+        "median_fitness": 77.2014,
+        "std_fitness": 6.982,
+        "best_mean_rooms": 84.8,
+        "pop_mean_rooms": 74.94,
+        "best_completion_rate": 0.0,
+        "diversity_index": 0.2005,
+        "diversity_interventions": 0,
+        "best_genes": [
+          0.3317,
+          0.3126,
+          0.3557,
+          0.2254,
+          0.2113,
+          0.2438,
+          0.2351,
+          0.2277,
+          0.3215,
+          0.3458,
+          0.3327,
+          0.2149,
+          1.0,
+          27.4585,
+          1.1609,
+          1.1747
+        ]
+      },
+      {
+        "generation": 2,
+        "evaluations_cumulative": 38,
+        "best_fitness": 90.602,
+        "mean_fitness": 78.8513,
+        "median_fitness": 83.9011,
+        "std_fitness": 9.284,
+        "best_mean_rooms": 90.6,
+        "pop_mean_rooms": 78.85,
+        "best_completion_rate": 0.0,
+        "diversity_index": 0.2394,
+        "diversity_interventions": 0,
+        "best_genes": [
+          0.3767,
+          0.3455,
+          0.2778,
+          0.5281,
+          0.0,
+          0.8278,
+          0.8391,
+          0.6387,
+          0.3269,
+          0.3351,
+          0.338,
+          0.0605,
+          1.0,
+          20.9335,
+          1.6398,
+          1.8
+        ]
+      },
+      {
+        "generation": 3,
+        "evaluations_cumulative": 56,
+        "best_fitness": 93.8028,
+        "mean_fitness": 83.7015,
+        "median_fitness": 84.701,
+        "std_fitness": 5.9152,
+        "best_mean_rooms": 93.8,
+        "pop_mean_rooms": 83.7,
+        "best_completion_rate": 0.0,
+        "diversity_index": 0.2044,
+        "diversity_interventions": 0,
+        "best_genes": [
+          0.3507,
+          0.3823,
+          0.267,
+          0.0535,
+          0.164,
+          0.5911,
+          0.8609,
+          0.1937,
+          0.3679,
+          0.2923,
+          0.3398,
+          0.0889,
+          0.0,
+          18.2121,
+          1.4856,
+          1.0
+        ]
+      },
+      {
+        "generation": 4,
+        "evaluations_cumulative": 74,
+        "best_fitness": 96.205,
+        "mean_fitness": 87.952,
+        "median_fitness": 89.8019,
+        "std_fitness": 6.8428,
+        "best_mean_rooms": 96.2,
+        "pop_mean_rooms": 87.95,
+        "best_completion_rate": 0.4,
+        "diversity_index": 0.2004,
+        "diversity_interventions": 0,
+        "best_genes": [
+          0.2433,
+          0.4756,
+          0.2811,
+          0.0788,
+          0.116,
+          0.3856,
+          0.3934,
+          0.1498,
+          0.5759,
+          0.0283,
+          0.3958,
+          0.0855,
+          0.0,
+          25.6163,
+          1.2846,
+          1.0293
+        ]
+      },
+      {
+        "generation": 5,
+        "evaluations_cumulative": 92,
+        "best_fitness": 96.205,
+        "mean_fitness": 89.1223,
+        "median_fitness": 92.2022,
+        "std_fitness": 6.2065,
+        "best_mean_rooms": 96.2,
+        "pop_mean_rooms": 89.12,
+        "best_completion_rate": 0.4,
+        "diversity_index": 0.1743,
+        "diversity_interventions": 0,
+        "best_genes": [
+          0.2433,
+          0.4756,
+          0.2811,
+          0.0788,
+          0.116,
+          0.3856,
+          0.3934,
+          0.1498,
+          0.5759,
+          0.0283,
+          0.3958,
+          0.0855,
+          0.0,
+          25.6163,
+          1.2846,
+          1.0293
+        ]
+      },
+      {
+        "generation": 6,
+        "evaluations_cumulative": 110,
+        "best_fitness": 96.205,
+        "mean_fitness": 91.4623,
+        "median_fitness": 93.8022,
+        "std_fitness": 4.9203,
+        "best_mean_rooms": 96.2,
+        "pop_mean_rooms": 91.46,
+        "best_completion_rate": 0.4,
+        "diversity_index": 0.1551,
+        "diversity_interventions": 0,
+        "best_genes": [
+          0.2433,
+          0.4756,
+          0.2811,
+          0.0788,
+          0.116,
+          0.3856,
+          0.3934,
+          0.1498,
+          0.5759,
+          0.0283,
+          0.3958,
+          0.0855,
+          0.0,
+          25.6163,
+          1.2846,
+          1.0293
+        ]
+      },
+      {
+        "generation": 7,
+        "evaluations_cumulative": 128,
+        "best_fitness": 98.2063,
+        "mean_fitness": 93.0728,
+        "median_fitness": 93.7026,
+        "std_fitness": 4.5767,
+        "best_mean_rooms": 98.2,
+        "pop_mean_rooms": 93.07,
+        "best_completion_rate": 0.6,
+        "diversity_index": 0.1351,
+        "diversity_interventions": 0,
+        "best_genes": [
+          0.1628,
+          0.5511,
+          0.2861,
+          0.0788,
+          0.1887,
+          0.3096,
+          0.4657,
+          0.1828,
+          0.6686,
+          0.0121,
+          0.3193,
+          0.0113,
+          0.0,
+          38.8416,
+          1.453,
+          1.1129
+        ]
+      },
+      {
+        "generation": 8,
+        "evaluations_cumulative": 146,
+        "best_fitness": 98.2063,
+        "mean_fitness": 94.8535,
+        "median_fitness": 94.2032,
+        "std_fitness": 1.317,
+        "best_mean_rooms": 98.2,
+        "pop_mean_rooms": 94.85,
+        "best_completion_rate": 0.6,
+        "diversity_index": 0.1025,
+        "diversity_interventions": 0,
+        "best_genes": [
+          0.1628,
+          0.5511,
+          0.2861,
+          0.0788,
+          0.1887,
+          0.3096,
+          0.4657,
+          0.1828,
+          0.6686,
+          0.0121,
+          0.3193,
+          0.0113,
+          0.0,
+          38.8416,
+          1.453,
+          1.1129
+        ]
+      },
+      {
+        "generation": 9,
+        "evaluations_cumulative": 164,
+        "best_fitness": 98.2063,
+        "mean_fitness": 94.7738,
+        "median_fitness": 94.4038,
+        "std_fitness": 1.6176,
+        "best_mean_rooms": 98.2,
+        "pop_mean_rooms": 94.77,
+        "best_completion_rate": 0.6,
+        "diversity_index": 0.0931,
+        "diversity_interventions": 0,
+        "best_genes": [
+          0.1628,
+          0.5511,
+          0.2861,
+          0.0788,
+          0.1887,
+          0.3096,
+          0.4657,
+          0.1828,
+          0.6686,
+          0.0121,
+          0.3193,
+          0.0113,
+          0.0,
+          38.8416,
+          1.453,
+          1.1129
+        ]
+      },
+      {
+        "generation": 10,
+        "evaluations_cumulative": 182,
+        "best_fitness": 98.2063,
+        "mean_fitness": 94.9039,
+        "median_fitness": 94.404,
+        "std_fitness": 1.6509,
+        "best_mean_rooms": 98.2,
+        "pop_mean_rooms": 94.9,
+        "best_completion_rate": 0.6,
+        "diversity_index": 0.0934,
+        "diversity_interventions": 0,
+        "best_genes": [
+          0.1628,
+          0.5511,
+          0.2861,
+          0.0788,
+          0.1887,
+          0.3096,
+          0.4657,
+          0.1828,
+          0.6686,
+          0.0121,
+          0.3193,
+          0.0113,
+          0.0,
+          38.8416,
+          1.453,
+          1.1129
+        ]
+      },
+      {
+        "generation": 11,
+        "evaluations_cumulative": 200,
+        "best_fitness": 98.2063,
+        "mean_fitness": 95.4541,
+        "median_fitness": 95.8041,
+        "std_fitness": 1.7987,
+        "best_mean_rooms": 98.2,
+        "pop_mean_rooms": 95.45,
+        "best_completion_rate": 0.6,
+        "diversity_index": 0.0949,
+        "diversity_interventions": 0,
+        "best_genes": [
+          0.1628,
+          0.5511,
+          0.2861,
+          0.0788,
+          0.1887,
+          0.3096,
+          0.4657,
+          0.1828,
+          0.6686,
+          0.0121,
+          0.3193,
+          0.0113,
+          0.0,
+          38.8416,
+          1.453,
+          1.1129
+        ]
+      },
+      {
+        "generation": 12,
+        "evaluations_cumulative": 218,
+        "best_fitness": 98.2063,
+        "mean_fitness": 94.784,
+        "median_fitness": 94.4038,
+        "std_fitness": 2.9826,
+        "best_mean_rooms": 98.2,
+        "pop_mean_rooms": 94.78,
+        "best_completion_rate": 0.6,
+        "diversity_index": 0.0991,
+        "diversity_interventions": 0,
+        "best_genes": [
+          0.1628,
+          0.5511,
+          0.2861,
+          0.0788,
+          0.1887,
+          0.3096,
+          0.4657,
+          0.1828,
+          0.6686,
+          0.0121,
+          0.3193,
+          0.0113,
+          0.0,
+          38.8416,
+          1.453,
+          1.1129
+        ]
+      }
+    ],
+    "total_objective_evaluations": 218,
+    "total_simulation_runs": 1090,
+    "elapsed_seconds": 10.0399,
+    "stopped_reason": "max_generations_reached"
+  },
+  "experiment_1_mutation": {
+    "experiment_name": "Experimento 1 — Taxas de Mutação (2%, 10%, 25%)",
+    "hypothesis": "Taxas de mutação muito baixas (2%) reduzem a diversidade genética e favorecem convergência prematura a ótimos locais, enquanto taxas excessivas (25%) introduzem ruído estocástico nas políticas elitistas; uma taxa intermediária (10%) equilibra exploração e explotação.",
+    "budget_objective_evaluations": 240,
+    "results": {
+      "2%": {
+        "mutation_rate": 0.02,
+        "n_repeats": 5,
+        "objective_evaluations_per_run": 240,
+        "train_rooms_summary": {
+          "mean": 95.96,
+          "median": 96.2,
+          "std": 1.8821,
+          "min": 93.8,
+          "max": 99.2
+        },
+        "val_rooms_summary": {
+          "mean": 90.58,
+          "median": 89.4,
+          "std": 4.2011,
+          "min": 84.4,
+          "max": 96.0
+        },
+        "val_completion_rate_mean": 0.28,
+        "final_diversity_summary": {
+          "mean": 0.0893,
+          "median": 0.0869,
+          "std": 0.0265,
+          "min": 0.0635,
+          "max": 0.1361
+        },
+        "mean_convergence_generation": 4.4,
+        "mean_elapsed_seconds": 9.6826,
+        "curves_by_generation": {
+          "generation": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "best_rooms_mean": [
+            92.92,
+            94.08,
+            94.32,
+            94.36,
+            94.36,
+            94.48,
+            95.08,
+            95.44,
+            95.48,
+            95.84,
+            95.96,
+            95.96
+          ],
+          "pop_rooms_mean": [
+            76.29,
+            83.656,
+            89.486,
+            90.58,
+            91.034,
+            91.64,
+            92.34,
+            91.83,
+            93.172,
+            93.412,
+            93.044,
+            94.068
+          ],
+          "diversity_mean": [
+            0.2037,
+            0.1672,
+            0.1027,
+            0.0895,
+            0.0851,
+            0.0829,
+            0.079,
+            0.0965,
+            0.0791,
+            0.078,
+            0.1036,
+            0.0893
+          ]
+        },
+        "repeats": [
+          {
+            "repeat": 1,
+            "seed": 1020,
+            "train_mean_rooms": 96.2,
+            "train_completion_rate": 0.4,
+            "val_mean_rooms": 94.5,
+            "val_median_rooms": 96.5,
+            "val_std_rooms": 6.3285,
+            "val_completion_rate": 0.4,
+            "final_diversity": 0.0869,
+            "convergence_generation": 8,
+            "elapsed_seconds": 11.8276,
+            "best_genes": [
+              0.3609,
+              0.318,
+              0.3211,
+              0.0522,
+              0.116,
+              0.0891,
+              0.173,
+              0.1175,
+              0.4982,
+              0.0153,
+              0.4865,
+              0.6758,
+              1.0,
+              16.6022,
+              1.1864,
+              1.0838
+            ]
+          },
+          {
+            "repeat": 2,
+            "seed": 1037,
+            "train_mean_rooms": 99.2,
+            "train_completion_rate": 0.6,
+            "val_mean_rooms": 96.0,
+            "val_median_rooms": 95.5,
+            "val_std_rooms": 3.2863,
+            "val_completion_rate": 0.3,
+            "final_diversity": 0.0635,
+            "convergence_generation": 10,
+            "elapsed_seconds": 9.2533,
+            "best_genes": [
+              0.1771,
+              0.5149,
+              0.308,
+              0.0019,
+              0.0518,
+              0.1092,
+              0.1133,
+              0.0295,
+              0.9669,
+              0.0131,
+              0.02,
+              0.1526,
+              1.0,
+              7.772,
+              1.0,
+              1.1044
+            ]
+          },
+          {
+            "repeat": 3,
+            "seed": 1054,
+            "train_mean_rooms": 96.2,
+            "train_completion_rate": 0.4,
+            "val_mean_rooms": 89.4,
+            "val_median_rooms": 92.5,
+            "val_std_rooms": 11.5603,
+            "val_completion_rate": 0.4,
+            "final_diversity": 0.1361,
+            "convergence_generation": 2,
+            "elapsed_seconds": 8.7616,
+            "best_genes": [
+              0.4187,
+              0.4137,
+              0.1676,
+              0.0348,
+              0.102,
+              0.0032,
+              0.1511,
+              0.1335,
+              0.4551,
+              0.1095,
+              0.4354,
+              0.3202,
+              0.0,
+              18.4624,
+              1.0184,
+              1.0566
+            ]
+          },
+          {
+            "repeat": 4,
+            "seed": 1071,
+            "train_mean_rooms": 94.4,
+            "train_completion_rate": 0.2,
+            "val_mean_rooms": 84.4,
+            "val_median_rooms": 88.0,
+            "val_std_rooms": 10.632,
+            "val_completion_rate": 0.1,
+            "final_diversity": 0.0646,
+            "convergence_generation": 1,
+            "elapsed_seconds": 9.6497,
+            "best_genes": [
+              0.1849,
+              0.226,
+              0.5891,
+              0.1319,
+              0.1351,
+              0.0836,
+              0.2245,
+              0.1926,
+              0.2957,
+              0.3222,
+              0.3821,
+              0.0828,
+              0.0,
+              24.8572,
+              1.0,
+              1.0076
+            ]
+          },
+          {
+            "repeat": 5,
+            "seed": 1088,
+            "train_mean_rooms": 93.8,
+            "train_completion_rate": 0.0,
+            "val_mean_rooms": 88.6,
+            "val_median_rooms": 92.0,
+            "val_std_rooms": 10.7907,
+            "val_completion_rate": 0.2,
+            "final_diversity": 0.0952,
+            "convergence_generation": 1,
+            "elapsed_seconds": 8.9209,
+            "best_genes": [
+              0.1896,
+              0.4369,
+              0.3735,
+              0.1966,
+              0.0523,
+              0.2389,
+              0.2782,
+              0.2005,
+              0.2845,
+              0.3578,
+              0.3577,
+              0.1567,
+              1.0,
+              0.0,
+              1.1251,
+              1.1472
+            ]
+          }
+        ]
+      },
+      "10%": {
+        "mutation_rate": 0.1,
+        "n_repeats": 5,
+        "objective_evaluations_per_run": 240,
+        "train_rooms_summary": {
+          "mean": 95.44,
+          "median": 96.0,
+          "std": 0.8523,
+          "min": 94.4,
+          "max": 96.2
+        },
+        "val_rooms_summary": {
+          "mean": 92.5,
+          "median": 94.7,
+          "std": 3.0411,
+          "min": 88.5,
+          "max": 95.5
+        },
+        "val_completion_rate_mean": 0.24,
+        "final_diversity_summary": {
+          "mean": 0.0707,
+          "median": 0.0687,
+          "std": 0.0079,
+          "min": 0.0598,
+          "max": 0.0806
+        },
+        "mean_convergence_generation": 4.0,
+        "mean_elapsed_seconds": 8.6075,
+        "curves_by_generation": {
+          "generation": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "best_rooms_mean": [
+            93.08,
+            93.76,
+            94.44,
+            94.6,
+            94.96,
+            95.16,
+            95.16,
+            95.16,
+            95.16,
+            95.4,
+            95.44,
+            95.44
+          ],
+          "pop_rooms_mean": [
+            76.216,
+            83.692,
+            87.08,
+            89.68,
+            89.978,
+            91.312,
+            92.244,
+            92.456,
+            92.56,
+            91.91,
+            92.812,
+            93.8
+          ],
+          "diversity_mean": [
+            0.2032,
+            0.167,
+            0.1328,
+            0.118,
+            0.1084,
+            0.0993,
+            0.094,
+            0.0842,
+            0.0848,
+            0.0838,
+            0.0746,
+            0.0707
+          ]
+        },
+        "repeats": [
+          {
+            "repeat": 1,
+            "seed": 1100,
+            "train_mean_rooms": 96.2,
+            "train_completion_rate": 0.4,
+            "val_mean_rooms": 94.7,
+            "val_median_rooms": 95.0,
+            "val_std_rooms": 3.6892,
+            "val_completion_rate": 0.2,
+            "final_diversity": 0.0687,
+            "convergence_generation": 10,
+            "elapsed_seconds": 8.496,
+            "best_genes": [
+              0.3899,
+              0.1955,
+              0.4146,
+              0.0,
+              0.0,
+              0.1243,
+              0.1489,
+              0.114,
+              0.3079,
+              0.2912,
+              0.4009,
+              0.1421,
+              1.0,
+              14.187,
+              1.4494,
+              1.1018
+            ]
+          },
+          {
+            "repeat": 2,
+            "seed": 1117,
+            "train_mean_rooms": 96.2,
+            "train_completion_rate": 0.4,
+            "val_mean_rooms": 95.5,
+            "val_median_rooms": 95.5,
+            "val_std_rooms": 3.8794,
+            "val_completion_rate": 0.3,
+            "final_diversity": 0.0806,
+            "convergence_generation": 5,
+            "elapsed_seconds": 8.6329,
+            "best_genes": [
+              0.3336,
+              0.4104,
+              0.256,
+              0.0781,
+              0.0978,
+              0.119,
+              0.2051,
+              0.1086,
+              0.3409,
+              0.3501,
+              0.309,
+              0.2969,
+              1.0,
+              15.1225,
+              1.3884,
+              1.0827
+            ]
+          },
+          {
+            "repeat": 3,
+            "seed": 1134,
+            "train_mean_rooms": 94.4,
+            "train_completion_rate": 0.2,
+            "val_mean_rooms": 89.1,
+            "val_median_rooms": 92.0,
+            "val_std_rooms": 11.0856,
+            "val_completion_rate": 0.3,
+            "final_diversity": 0.0788,
+            "convergence_generation": 1,
+            "elapsed_seconds": 8.2432,
+            "best_genes": [
+              0.2919,
+              0.2843,
+              0.4238,
+              0.0077,
+              0.0972,
+              0.077,
+              0.2752,
+              0.1763,
+              0.2641,
+              0.3295,
+              0.4064,
+              0.0531,
+              1.0,
+              25.6452,
+              1.0807,
+              1.0154
+            ]
+          },
+          {
+            "repeat": 4,
+            "seed": 1151,
+            "train_mean_rooms": 96.0,
+            "train_completion_rate": 0.4,
+            "val_mean_rooms": 94.7,
+            "val_median_rooms": 95.0,
+            "val_std_rooms": 3.6892,
+            "val_completion_rate": 0.2,
+            "final_diversity": 0.0598,
+            "convergence_generation": 3,
+            "elapsed_seconds": 8.5368,
+            "best_genes": [
+              0.4272,
+              0.2821,
+              0.2907,
+              0.0972,
+              0.1957,
+              0.2072,
+              0.2514,
+              0.2172,
+              0.3137,
+              0.322,
+              0.3643,
+              0.2661,
+              1.0,
+              14.1541,
+              1.4787,
+              1.0778
+            ]
+          },
+          {
+            "repeat": 5,
+            "seed": 1168,
+            "train_mean_rooms": 94.4,
+            "train_completion_rate": 0.2,
+            "val_mean_rooms": 88.5,
+            "val_median_rooms": 92.0,
+            "val_std_rooms": 10.4714,
+            "val_completion_rate": 0.2,
+            "final_diversity": 0.0656,
+            "convergence_generation": 1,
+            "elapsed_seconds": 9.1288,
+            "best_genes": [
+              0.3066,
+              0.3486,
+              0.3448,
+              0.0,
+              0.0404,
+              0.2208,
+              0.2832,
+              0.1051,
+              0.2762,
+              0.5468,
+              0.177,
+              0.0675,
+              0.0,
+              15.0172,
+              1.0557,
+              1.0721
+            ]
+          }
+        ]
+      },
+      "25%": {
+        "mutation_rate": 0.25,
+        "n_repeats": 5,
+        "objective_evaluations_per_run": 240,
+        "train_rooms_summary": {
+          "mean": 96.96,
+          "median": 96.4,
+          "std": 1.0307,
+          "min": 95.8,
+          "max": 98.2
+        },
+        "val_rooms_summary": {
+          "mean": 92.26,
+          "median": 94.4,
+          "std": 5.0492,
+          "min": 82.8,
+          "max": 97.0
+        },
+        "val_completion_rate_mean": 0.3,
+        "final_diversity_summary": {
+          "mean": 0.1347,
+          "median": 0.1369,
+          "std": 0.0111,
+          "min": 0.1174,
+          "max": 0.1466
+        },
+        "mean_convergence_generation": 7.6,
+        "mean_elapsed_seconds": 8.643,
+        "curves_by_generation": {
+          "generation": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ],
+          "best_rooms_mean": [
+            93.16,
+            93.84,
+            94.2,
+            94.28,
+            94.92,
+            94.92,
+            95.52,
+            95.92,
+            96.36,
+            96.88,
+            96.96,
+            96.96
+          ],
+          "pop_rooms_mean": [
+            76.392,
+            81.734,
+            85.446,
+            88.89,
+            89.304,
+            90.11,
+            91.896,
+            90.78,
+            91.76,
+            92.558,
+            93.33,
+            93.43
+          ],
+          "diversity_mean": [
+            0.2024,
+            0.1913,
+            0.1627,
+            0.1545,
+            0.1536,
+            0.1421,
+            0.1323,
+            0.1327,
+            0.1374,
+            0.1346,
+            0.1303,
+            0.1347
+          ]
+        },
+        "repeats": [
+          {
+            "repeat": 1,
+            "seed": 1250,
+            "train_mean_rooms": 98.2,
+            "train_completion_rate": 0.6,
+            "val_mean_rooms": 97.0,
+            "val_median_rooms": 96.5,
+            "val_std_rooms": 2.6077,
+            "val_completion_rate": 0.4,
+            "final_diversity": 0.1454,
+            "convergence_generation": 9,
+            "elapsed_seconds": 8.9525,
+            "best_genes": [
+              0.0706,
+              0.3527,
+              0.5767,
+              0.0,
+              0.0991,
+              0.1923,
+              0.7244,
+              0.1279,
+              0.6728,
+              0.0932,
+              0.234,
+              0.2376,
+              1.0,
+              0.0,
+              1.5391,
+              1.0002
+            ]
+          },
+          {
+            "repeat": 2,
+            "seed": 1267,
+            "train_mean_rooms": 98.2,
+            "train_completion_rate": 0.6,
+            "val_mean_rooms": 95.5,
+            "val_median_rooms": 95.5,
+            "val_std_rooms": 3.8794,
+            "val_completion_rate": 0.3,
+            "final_diversity": 0.1466,
+            "convergence_generation": 10,
+            "elapsed_seconds": 8.3809,
+            "best_genes": [
+              0.3389,
+              0.1746,
+              0.4865,
+              0.4051,
+              0.4539,
+              0.0,
+              0.6753,
+              0.542,
+              0.5916,
+              0.1596,
+              0.2488,
+              0.1471,
+              1.0,
+              0.0,
+              1.4195,
+              1.0
+            ]
+          },
+          {
+            "repeat": 3,
+            "seed": 1284,
+            "train_mean_rooms": 95.8,
+            "train_completion_rate": 0.2,
+            "val_mean_rooms": 82.8,
+            "val_median_rooms": 85.5,
+            "val_std_rooms": 11.9817,
+            "val_completion_rate": 0.1,
+            "final_diversity": 0.1271,
+            "convergence_generation": 7,
+            "elapsed_seconds": 8.2867,
+            "best_genes": [
+              0.4826,
+              0.3007,
+              0.2167,
+              0.1036,
+              0.2383,
+              0.0,
+              0.3336,
+              0.0258,
+              0.6564,
+              0.1403,
+              0.2033,
+              0.0,
+              0.0,
+              36.4209,
+              1.0318,
+              1.0
+            ]
+          },
+          {
+            "repeat": 4,
+            "seed": 1301,
+            "train_mean_rooms": 96.2,
+            "train_completion_rate": 0.4,
+            "val_mean_rooms": 94.4,
+            "val_median_rooms": 96.0,
+            "val_std_rooms": 6.296,
+            "val_completion_rate": 0.4,
+            "final_diversity": 0.1174,
+            "convergence_generation": 5,
+            "elapsed_seconds": 8.7029,
+            "best_genes": [
+              0.2786,
+              0.4646,
+              0.2568,
+              0.0,
+              0.1031,
+              0.0,
+              0.7249,
+              0.1238,
+              0.697,
+              0.2914,
+              0.0116,
+              0.0,
+              1.0,
+              8.0913,
+              1.1307,
+              1.1361
+            ]
+          },
+          {
+            "repeat": 5,
+            "seed": 1318,
+            "train_mean_rooms": 96.4,
+            "train_completion_rate": 0.4,
+            "val_mean_rooms": 91.6,
+            "val_median_rooms": 95.5,
+            "val_std_rooms": 9.4149,
+            "val_completion_rate": 0.3,
+            "final_diversity": 0.1369,
+            "convergence_generation": 7,
+            "elapsed_seconds": 8.8918,
+            "best_genes": [
+              0.2595,
+              0.2576,
+              0.4829,
+              0.1393,
+              0.7325,
+              0.4032,
+              0.5001,
+              0.0,
+              0.5448,
+              0.2732,
+              0.182,
+              0.2404,
+              0.0,
+              11.8444,
+              1.3594,
+              1.2081
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "experiment_2_population": {
+    "experiment_name": "Experimento 2 — Tamanho de População com Orçamento Fixo (240 avaliações)",
+    "hypothesis": "Com orçamento computacional fixo (240 avaliações), populações muito pequenas (12) sofrem maior deriva genética, enquanto populações muito grandes (40) dispõem de poucas gerações (6) para refinar blocos construtivos; configurações intermediárias (20x12) maximizam a qualidade final.",
+    "results": {
+      "Pop 12 x 20 Ger (240 aval)": {
+        "pop_size": 12,
+        "generations": 20,
+        "budget_evaluations": 240,
+        "n_repeats": 5,
+        "train_rooms_summary": {
+          "mean": 95.52,
+          "median": 95.4,
+          "std": 1.5158,
+          "min": 93.8,
+          "max": 98.2
+        },
+        "val_rooms_summary": {
+          "mean": 88.28,
+          "median": 87.5,
+          "std": 3.8917,
+          "min": 84.1,
+          "max": 95.6
+        },
+        "val_completion_rate_mean": 0.2,
+        "final_diversity_summary": {
+          "mean": 0.0791,
+          "median": 0.077,
+          "std": 0.0142,
+          "min": 0.06,
+          "max": 0.0987
+        },
+        "mean_elapsed_seconds": 10.5259,
+        "convergence_by_evaluations": {
+          "evaluations": [
+            12,
+            24,
+            36,
+            48,
+            60,
+            72,
+            84,
+            96,
+            108,
+            120,
+            132,
+            144,
+            156,
+            168,
+            180,
+            192,
+            204,
+            216,
+            228,
+            240
+          ],
+          "best_rooms_mean": [
+            90.96,
+            93.48,
+            93.68,
+            94.08,
+            94.12,
+            94.12,
+            94.12,
+            94.12,
+            94.12,
+            94.12,
+            94.12,
+            94.72,
+            94.72,
+            95.44,
+            95.44,
+            95.44,
+            95.52,
+            95.52,
+            95.52,
+            95.52
+          ]
+        },
+        "repeats": [
+          {
+            "repeat": 1,
+            "seed": 2120,
+            "train_mean_rooms": 93.8,
+            "val_mean_rooms": 86.3,
+            "val_completion_rate": 0.1,
+            "final_diversity": 0.0987,
+            "objective_evaluations": 202,
+            "elapsed_seconds": 10.3441
+          },
+          {
+            "repeat": 2,
+            "seed": 2143,
+            "train_mean_rooms": 95.8,
+            "val_mean_rooms": 87.5,
+            "val_completion_rate": 0.2,
+            "final_diversity": 0.0912,
+            "objective_evaluations": 202,
+            "elapsed_seconds": 10.1008
+          },
+          {
+            "repeat": 3,
+            "seed": 2166,
+            "train_mean_rooms": 94.4,
+            "val_mean_rooms": 87.9,
+            "val_completion_rate": 0.2,
+            "final_diversity": 0.0688,
+            "objective_evaluations": 202,
+            "elapsed_seconds": 10.4935
+          },
+          {
+            "repeat": 4,
+            "seed": 2189,
+            "train_mean_rooms": 98.2,
+            "val_mean_rooms": 95.6,
+            "val_completion_rate": 0.3,
+            "final_diversity": 0.077,
+            "objective_evaluations": 202,
+            "elapsed_seconds": 11.7212
+          },
+          {
+            "repeat": 5,
+            "seed": 2212,
+            "train_mean_rooms": 95.4,
+            "val_mean_rooms": 84.1,
+            "val_completion_rate": 0.2,
+            "final_diversity": 0.06,
+            "objective_evaluations": 202,
+            "elapsed_seconds": 9.9699
+          }
+        ]
+      },
+      "Pop 20 x 12 Ger (240 aval)": {
+        "pop_size": 20,
+        "generations": 12,
+        "budget_evaluations": 240,
+        "n_repeats": 5,
+        "train_rooms_summary": {
+          "mean": 95.28,
+          "median": 95.4,
+          "std": 0.4665,
+          "min": 94.4,
+          "max": 95.8
+        },
+        "val_rooms_summary": {
+          "mean": 83.68,
+          "median": 83.3,
+          "std": 5.4053,
+          "min": 76.3,
+          "max": 91.9
+        },
+        "val_completion_rate_mean": 0.18,
+        "final_diversity_summary": {
+          "mean": 0.067,
+          "median": 0.0648,
+          "std": 0.006,
+          "min": 0.0607,
+          "max": 0.0779
+        },
+        "mean_elapsed_seconds": 9.7542,
+        "convergence_by_evaluations": {
+          "evaluations": [
+            20,
+            40,
+            60,
+            80,
+            100,
+            120,
+            140,
+            160,
+            180,
+            200,
+            220,
+            240
+          ],
+          "best_rooms_mean": [
+            93.08,
+            94.08,
+            94.76,
+            95.2,
+            95.2,
+            95.2,
+            95.2,
+            95.2,
+            95.2,
+            95.2,
+            95.2,
+            95.28
+          ]
+        },
+        "repeats": [
+          {
+            "repeat": 1,
+            "seed": 2200,
+            "train_mean_rooms": 95.4,
+            "val_mean_rooms": 86.9,
+            "val_completion_rate": 0.2,
+            "final_diversity": 0.0607,
+            "objective_evaluations": 218,
+            "elapsed_seconds": 10.4538
+          },
+          {
+            "repeat": 2,
+            "seed": 2223,
+            "train_mean_rooms": 95.8,
+            "val_mean_rooms": 83.3,
+            "val_completion_rate": 0.2,
+            "final_diversity": 0.0685,
+            "objective_evaluations": 218,
+            "elapsed_seconds": 10.3915
+          },
+          {
+            "repeat": 3,
+            "seed": 2246,
+            "train_mean_rooms": 95.4,
+            "val_mean_rooms": 80.0,
+            "val_completion_rate": 0.1,
+            "final_diversity": 0.0779,
+            "objective_evaluations": 218,
+            "elapsed_seconds": 10.0853
+          },
+          {
+            "repeat": 4,
+            "seed": 2269,
+            "train_mean_rooms": 94.4,
+            "val_mean_rooms": 91.9,
+            "val_completion_rate": 0.3,
+            "final_diversity": 0.0632,
+            "objective_evaluations": 218,
+            "elapsed_seconds": 9.5045
+          },
+          {
+            "repeat": 5,
+            "seed": 2292,
+            "train_mean_rooms": 95.4,
+            "val_mean_rooms": 76.3,
+            "val_completion_rate": 0.1,
+            "final_diversity": 0.0648,
+            "objective_evaluations": 218,
+            "elapsed_seconds": 8.3357
+          }
+        ]
+      },
+      "Pop 40 x 6 Ger (240 aval)": {
+        "pop_size": 40,
+        "generations": 6,
+        "budget_evaluations": 240,
+        "n_repeats": 5,
+        "train_rooms_summary": {
+          "mean": 95.32,
+          "median": 95.4,
+          "std": 0.5154,
+          "min": 94.4,
+          "max": 96.0
+        },
+        "val_rooms_summary": {
+          "mean": 89.56,
+          "median": 88.8,
+          "std": 3.4343,
+          "min": 84.8,
+          "max": 94.7
+        },
+        "val_completion_rate_mean": 0.2,
+        "final_diversity_summary": {
+          "mean": 0.1166,
+          "median": 0.1162,
+          "std": 0.0072,
+          "min": 0.1049,
+          "max": 0.126
+        },
+        "mean_elapsed_seconds": 10.3718,
+        "convergence_by_evaluations": {
+          "evaluations": [
+            40,
+            80,
+            120,
+            160,
+            200,
+            240
+          ],
+          "best_rooms_mean": [
+            93.2,
+            94.0,
+            94.44,
+            94.68,
+            95.0,
+            95.32
+          ]
+        },
+        "repeats": [
+          {
+            "repeat": 1,
+            "seed": 2400,
+            "train_mean_rooms": 94.4,
+            "val_mean_rooms": 88.8,
+            "val_completion_rate": 0.3,
+            "final_diversity": 0.1162,
+            "objective_evaluations": 230,
+            "elapsed_seconds": 9.4912
+          },
+          {
+            "repeat": 2,
+            "seed": 2423,
+            "train_mean_rooms": 96.0,
+            "val_mean_rooms": 94.7,
+            "val_completion_rate": 0.2,
+            "final_diversity": 0.1141,
+            "objective_evaluations": 230,
+            "elapsed_seconds": 9.7409
+          },
+          {
+            "repeat": 3,
+            "seed": 2446,
+            "train_mean_rooms": 95.4,
+            "val_mean_rooms": 87.6,
+            "val_completion_rate": 0.2,
+            "final_diversity": 0.1216,
+            "objective_evaluations": 230,
+            "elapsed_seconds": 9.5956
+          },
+          {
+            "repeat": 4,
+            "seed": 2469,
+            "train_mean_rooms": 95.4,
+            "val_mean_rooms": 91.9,
+            "val_completion_rate": 0.2,
+            "final_diversity": 0.1049,
+            "objective_evaluations": 230,
+            "elapsed_seconds": 10.0665
+          },
+          {
+            "repeat": 5,
+            "seed": 2492,
+            "train_mean_rooms": 95.4,
+            "val_mean_rooms": 84.8,
+            "val_completion_rate": 0.1,
+            "final_diversity": 0.126,
+            "objective_evaluations": 230,
+            "elapsed_seconds": 12.965
+          }
+        ]
+      }
+    }
+  },
+  "experiment_3_baselines": {
+    "experiment_name": "Experimento 3 — Comparação com Baselines (Fixo vs Busca Aleatória vs Algoritmo Genético)",
+    "budget_objective_evaluations_per_run": 240,
+    "n_independent_repeats": 7,
+    "train_seeds": [
+      101,
+      102,
+      103,
+      104,
+      105
+    ],
+    "validation_seeds": [
+      201,
+      202,
+      203,
+      204,
+      205,
+      206,
+      207,
+      208,
+      209,
+      210
+    ],
+    "methods": {
+      "fixed_baseline": {
+        "label": "Estratégia Fixa (Baseline)",
+        "train_mean_rooms": 79.2,
+        "val_mean_rooms": 69.0,
+        "val_median_rooms": 70.5,
+        "val_std_rooms": 7.225,
+        "val_completion_rate": 0.0,
+        "objective_evaluations": 1,
+        "simulation_runs": 15,
+        "elapsed_seconds": 0.1019,
+        "per_seed_validation_rooms": {
+          "201": 69,
+          "202": 64,
+          "203": 73,
+          "204": 71,
+          "205": 83,
+          "206": 71,
+          "207": 55,
+          "208": 61,
+          "209": 73,
+          "210": 70
+        },
+        "genes": [
+          0.34,
+          0.33,
+          0.33,
+          0.7,
+          0.8,
+          0.4,
+          0.35,
+          0.3,
+          0.34,
+          0.33,
+          0.33,
+          0.5,
+          0.0,
+          40.0,
+          1.25,
+          1.25
+        ],
+        "named_genes": {
+          "w_weight_str": 0.34,
+          "w_weight_vit": 0.33,
+          "w_weight_def": 0.33,
+          "ally_prio_mage": 0.7,
+          "ally_prio_archer": 0.8,
+          "ally_prio_monk": 0.4,
+          "ally_prio_priest": 0.35,
+          "ally_prio_alchemist": 0.3,
+          "ally_weight_power": 0.34,
+          "ally_weight_vit": 0.33,
+          "ally_weight_def": 0.33,
+          "equip_offense_priority": 0.5,
+          "hire_before_equip_discrete": 0.0,
+          "min_gold_reserve": 40.0,
+          "equipment_buy_threshold": 1.25,
+          "ally_hire_threshold": 1.25
+        }
+      },
+      "random_search": {
+        "label": "Busca Aleatória (Orçamento Equivalente)",
+        "train_rooms_across_repeats": {
+          "mean": 95.1143,
+          "median": 95.4,
+          "std": 0.9672,
+          "min": 93.8,
+          "max": 96.6
+        },
+        "val_rooms_across_repeats": {
+          "mean": 92.2714,
+          "median": 94.3,
+          "std": 4.163,
+          "min": 83.6,
+          "max": 95.5
+        },
+        "pooled_val_rooms_all_seeds": {
+          "mean": 92.2714,
+          "median": 95.0,
+          "std": 7.6586,
+          "min": 70.0,
+          "max": 100.0
+        },
+        "val_completion_rate_mean": 0.2571,
+        "objective_evaluations_per_run": 240,
+        "simulation_runs_per_run": 1200,
+        "mean_elapsed_seconds": 8.202,
+        "repeats": [
+          {
+            "repeat": 1,
+            "seed": 3000,
+            "train_mean_rooms": 95.4,
+            "val_mean_rooms": 83.6,
+            "val_median_rooms": 81.5,
+            "val_std_rooms": 10.2391,
+            "val_completion_rate": 0.2,
+            "objective_evaluations": 240,
+            "elapsed_seconds": 9.414
+          },
+          {
+            "repeat": 2,
+            "seed": 3031,
+            "train_mean_rooms": 95.6,
+            "val_mean_rooms": 93.0,
+            "val_median_rooms": 94.5,
+            "val_std_rooms": 7.4967,
+            "val_completion_rate": 0.3,
+            "objective_evaluations": 240,
+            "elapsed_seconds": 9.1202
+          },
+          {
+            "repeat": 3,
+            "seed": 3062,
+            "train_mean_rooms": 93.8,
+            "val_mean_rooms": 95.2,
+            "val_median_rooms": 95.5,
+            "val_std_rooms": 4.02,
+            "val_completion_rate": 0.3,
+            "objective_evaluations": 240,
+            "elapsed_seconds": 9.2841
+          },
+          {
+            "repeat": 4,
+            "seed": 3093,
+            "train_mean_rooms": 96.6,
+            "val_mean_rooms": 94.3,
+            "val_median_rooms": 96.0,
+            "val_std_rooms": 6.2298,
+            "val_completion_rate": 0.3,
+            "objective_evaluations": 240,
+            "elapsed_seconds": 7.4889
+          },
+          {
+            "repeat": 5,
+            "seed": 3124,
+            "train_mean_rooms": 93.8,
+            "val_mean_rooms": 95.5,
+            "val_median_rooms": 95.5,
+            "val_std_rooms": 3.8794,
+            "val_completion_rate": 0.3,
+            "objective_evaluations": 240,
+            "elapsed_seconds": 7.4865
+          },
+          {
+            "repeat": 6,
+            "seed": 3155,
+            "train_mean_rooms": 94.8,
+            "val_mean_rooms": 88.8,
+            "val_median_rooms": 88.5,
+            "val_std_rooms": 6.5696,
+            "val_completion_rate": 0.1,
+            "objective_evaluations": 240,
+            "elapsed_seconds": 7.4928
+          },
+          {
+            "repeat": 7,
+            "seed": 3186,
+            "train_mean_rooms": 95.8,
+            "val_mean_rooms": 95.5,
+            "val_median_rooms": 95.5,
+            "val_std_rooms": 3.8794,
+            "val_completion_rate": 0.3,
+            "objective_evaluations": 240,
+            "elapsed_seconds": 7.1278
+          }
+        ]
+      },
+      "genetic_algorithm": {
+        "label": "Algoritmo Genético (Proposto)",
+        "train_rooms_across_repeats": {
+          "mean": 96.0857,
+          "median": 95.8,
+          "std": 1.0357,
+          "min": 94.6,
+          "max": 98.2
+        },
+        "val_rooms_across_repeats": {
+          "mean": 90.9571,
+          "median": 89.8,
+          "std": 3.8785,
+          "min": 86.0,
+          "max": 96.9
+        },
+        "pooled_val_rooms_all_seeds": {
+          "mean": 90.9571,
+          "median": 94.0,
+          "std": 9.7869,
+          "min": 64.0,
+          "max": 100.0
+        },
+        "val_completion_rate_mean": 0.2714,
+        "objective_evaluations_per_run": 240,
+        "simulation_runs_per_run": 1200,
+        "mean_elapsed_seconds": 8.9603,
+        "best_overall_chromosome": {
+          "genes": [
+            0.1628,
+            0.5511,
+            0.2861,
+            0.0788,
+            0.1887,
+            0.3096,
+            0.4657,
+            0.1828,
+            0.6686,
+            0.0121,
+            0.3193,
+            0.0113,
+            0.0,
+            38.8416,
+            1.453,
+            1.1129
+          ],
+          "named_genes": {
+            "w_weight_str": 0.1628,
+            "w_weight_vit": 0.5511,
+            "w_weight_def": 0.2861,
+            "ally_prio_mage": 0.0788,
+            "ally_prio_archer": 0.1887,
+            "ally_prio_monk": 0.3096,
+            "ally_prio_priest": 0.4657,
+            "ally_prio_alchemist": 0.1828,
+            "ally_weight_power": 0.6686,
+            "ally_weight_vit": 0.0121,
+            "ally_weight_def": 0.3193,
+            "equip_offense_priority": 0.0113,
+            "hire_before_equip_discrete": 0.0,
+            "min_gold_reserve": 38.8416,
+            "equipment_buy_threshold": 1.453,
+            "ally_hire_threshold": 1.1129
+          },
+          "train_mean_rooms": 98.2,
+          "train_completion_rate": 0.6,
+          "val_mean_rooms": 96.9,
+          "val_median_rooms": 96.0,
+          "val_std_rooms": 2.6627,
+          "val_completion_rate": 0.4,
+          "per_seed_validation_rooms": {
+            "201": 95,
+            "202": 100,
+            "203": 95,
+            "204": 94,
+            "205": 97,
+            "206": 94,
+            "207": 100,
+            "208": 100,
+            "209": 100,
+            "210": 94
+          }
+        },
+        "repeats": [
+          {
+            "repeat": 1,
+            "seed": 4000,
+            "train_mean_rooms": 96.4,
+            "val_mean_rooms": 92.6,
+            "val_median_rooms": 95.5,
+            "val_std_rooms": 8.2728,
+            "val_completion_rate": 0.3,
+            "objective_evaluations": 218,
+            "elapsed_seconds": 8.5135,
+            "best_genes": [
+              0.3646,
+              0.4065,
+              0.2289,
+              0.0783,
+              0.0172,
+              0.0945,
+              0.1579,
+              0.026,
+              0.8016,
+              0.1272,
+              0.0712,
+              0.2458,
+              0.0,
+              30.6074,
+              1.0146,
+              1.1258
+            ]
+          },
+          {
+            "repeat": 2,
+            "seed": 4037,
+            "train_mean_rooms": 96.4,
+            "val_mean_rooms": 89.8,
+            "val_median_rooms": 93.0,
+            "val_std_rooms": 10.2742,
+            "val_completion_rate": 0.3,
+            "objective_evaluations": 218,
+            "elapsed_seconds": 8.7153,
+            "best_genes": [
+              0.0816,
+              0.4341,
+              0.4843,
+              0.1154,
+              0.1834,
+              0.1782,
+              0.3349,
+              0.1974,
+              0.5079,
+              0.1542,
+              0.3379,
+              0.0,
+              0.0,
+              8.0802,
+              1.1296,
+              1.1415
+            ]
+          },
+          {
+            "repeat": 3,
+            "seed": 4074,
+            "train_mean_rooms": 94.6,
+            "val_mean_rooms": 95.5,
+            "val_median_rooms": 95.5,
+            "val_std_rooms": 3.8794,
+            "val_completion_rate": 0.3,
+            "objective_evaluations": 218,
+            "elapsed_seconds": 8.7797,
+            "best_genes": [
+              0.4635,
+              0.2715,
+              0.265,
+              0.1337,
+              0.1804,
+              0.0578,
+              0.4458,
+              0.2198,
+              0.5291,
+              0.2895,
+              0.1814,
+              0.1621,
+              1.0,
+              11.8322,
+              1.6943,
+              1.0852
+            ]
+          },
+          {
+            "repeat": 4,
+            "seed": 4111,
+            "train_mean_rooms": 95.8,
+            "val_mean_rooms": 89.1,
+            "val_median_rooms": 94.0,
+            "val_std_rooms": 10.5873,
+            "val_completion_rate": 0.2,
+            "objective_evaluations": 218,
+            "elapsed_seconds": 8.666,
+            "best_genes": [
+              0.3572,
+              0.2651,
+              0.3777,
+              0.1193,
+              0.0657,
+              0.1402,
+              0.4007,
+              0.2373,
+              0.5537,
+              0.0155,
+              0.4308,
+              0.0579,
+              1.0,
+              30.667,
+              1.0,
+              1.1148
+            ]
+          },
+          {
+            "repeat": 5,
+            "seed": 4148,
+            "train_mean_rooms": 95.8,
+            "val_mean_rooms": 86.8,
+            "val_median_rooms": 89.0,
+            "val_std_rooms": 11.1158,
+            "val_completion_rate": 0.2,
+            "objective_evaluations": 218,
+            "elapsed_seconds": 9.1031,
+            "best_genes": [
+              0.4791,
+              0.255,
+              0.2659,
+              0.194,
+              0.328,
+              0.2671,
+              0.3233,
+              0.1037,
+              0.5274,
+              0.0106,
+              0.462,
+              0.1245,
+              0.0,
+              23.2468,
+              1.0288,
+              1.1663
+            ]
+          },
+          {
+            "repeat": 6,
+            "seed": 4185,
+            "train_mean_rooms": 98.2,
+            "val_mean_rooms": 96.9,
+            "val_median_rooms": 96.0,
+            "val_std_rooms": 2.6627,
+            "val_completion_rate": 0.4,
+            "objective_evaluations": 218,
+            "elapsed_seconds": 10.0399,
+            "best_genes": [
+              0.1628,
+              0.5511,
+              0.2861,
+              0.0788,
+              0.1887,
+              0.3096,
+              0.4657,
+              0.1828,
+              0.6686,
+              0.0121,
+              0.3193,
+              0.0113,
+              0.0,
+              38.8416,
+              1.453,
+              1.1129
+            ]
+          },
+          {
+            "repeat": 7,
+            "seed": 4222,
+            "train_mean_rooms": 95.4,
+            "val_mean_rooms": 86.0,
+            "val_median_rooms": 89.0,
+            "val_std_rooms": 11.5499,
+            "val_completion_rate": 0.2,
+            "objective_evaluations": 218,
+            "elapsed_seconds": 8.9047,
+            "best_genes": [
+              0.4117,
+              0.3326,
+              0.2557,
+              0.238,
+              0.0,
+              0.2865,
+              0.3859,
+              0.0273,
+              0.1569,
+              0.3567,
+              0.4864,
+              0.2541,
+              1.0,
+              12.6756,
+              1.0583,
+              1.1745
+            ]
+          }
+        ]
+      }
+    },
+    "statistical_tests": {
+      "ga_vs_random_search_repeats": {
+        "mann_whitney_u": 21.0,
+        "mann_whitney_p": 0.700221,
+        "welch_t_stat": -0.5658,
+        "welch_t_p": 0.581998
+      },
+      "best_ga_vs_fixed_baseline_validation_seeds": {
+        "mann_whitney_u": 100.0,
+        "mann_whitney_p": 0.000166
+      }
+    }
+  },
+  "experiment_4_generalization": {
+    "experiment_name": "Experimento 4 (Adicional Obrigatório) — Generalização e Robustez",
+    "scenarios": {
+      "1_in_sample_train": {
+        "label": "Treinamento (In-Sample, Sementes 101-105)",
+        "seeds": [
+          101,
+          102,
+          103,
+          104,
+          105
+        ],
+        "difficulty_multiplier": 1.0,
+        "composition_mode": "standard",
+        "enable_chests": true,
+        "genetic_algorithm": {
+          "mean_rooms": 98.2,
+          "median_rooms": 100.0,
+          "std_rooms": 2.7129,
+          "min_rooms": 93.0,
+          "max_rooms": 100.0,
+          "completion_rate": 0.6,
+          "per_seed_rooms": {
+            "101": 93,
+            "102": 98,
+            "103": 100,
+            "104": 100,
+            "105": 100
+          },
+          "final_levels": [
+            24,
+            24,
+            25,
+            25,
+            25
+          ],
+          "active_allies_samples": [
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ]
+          ],
+          "final_equipment_tiers": [
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            }
+          ]
+        },
+        "fixed_baseline": {
+          "mean_rooms": 79.2,
+          "median_rooms": 78.0,
+          "std_rooms": 4.7917,
+          "min_rooms": 74.0,
+          "max_rooms": 87.0,
+          "completion_rate": 0.0,
+          "per_seed_rooms": {
+            "101": 87,
+            "102": 82,
+            "103": 78,
+            "104": 75,
+            "105": 74
+          },
+          "final_levels": [
+            23,
+            22,
+            22,
+            22,
+            22
+          ],
+          "active_allies_samples": [
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ]
+          ],
+          "final_equipment_tiers": [
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 3,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            }
+          ]
+        },
+        "ga_advantage_rooms": 19.0
+      },
+      "2_out_of_sample_seeds": {
+        "label": "Novas Sementes (Holdout 201-210)",
+        "seeds": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210
+        ],
+        "difficulty_multiplier": 1.0,
+        "composition_mode": "standard",
+        "enable_chests": true,
+        "genetic_algorithm": {
+          "mean_rooms": 96.9,
+          "median_rooms": 96.0,
+          "std_rooms": 2.6627,
+          "min_rooms": 94.0,
+          "max_rooms": 100.0,
+          "completion_rate": 0.4,
+          "per_seed_rooms": {
+            "201": 95,
+            "202": 100,
+            "203": 95,
+            "204": 94,
+            "205": 97,
+            "206": 94,
+            "207": 100,
+            "208": 100,
+            "209": 100,
+            "210": 94
+          },
+          "final_levels": [
+            24,
+            25,
+            24,
+            24,
+            24,
+            24,
+            24,
+            24,
+            25,
+            24
+          ],
+          "active_allies_samples": [
+            [
+              "priest"
+            ],
+            [
+              "priest",
+              "monk"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ]
+          ],
+          "final_equipment_tiers": [
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            }
+          ]
+        },
+        "fixed_baseline": {
+          "mean_rooms": 69.0,
+          "median_rooms": 70.5,
+          "std_rooms": 7.225,
+          "min_rooms": 55.0,
+          "max_rooms": 83.0,
+          "completion_rate": 0.0,
+          "per_seed_rooms": {
+            "201": 69,
+            "202": 64,
+            "203": 73,
+            "204": 71,
+            "205": 83,
+            "206": 71,
+            "207": 55,
+            "208": 61,
+            "209": 73,
+            "210": 70
+          },
+          "final_levels": [
+            21,
+            20,
+            22,
+            21,
+            23,
+            21,
+            18,
+            19,
+            21,
+            21
+          ],
+          "active_allies_samples": [
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ]
+          ],
+          "final_equipment_tiers": [
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 3,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 3,
+              "armor": 2,
+              "shield": 2
+            },
+            {
+              "weapon": 3,
+              "armor": 3,
+              "shield": 2
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            }
+          ]
+        },
+        "ga_advantage_rooms": 27.9
+      },
+      "3_alternate_monster_compositions": {
+        "label": "Novas Composições de Monstros (Pool Alternativo 301-310)",
+        "seeds": [
+          301,
+          302,
+          303,
+          304,
+          305,
+          306,
+          307,
+          308,
+          309,
+          310
+        ],
+        "difficulty_multiplier": 1.0,
+        "composition_mode": "alternate_pool",
+        "enable_chests": true,
+        "genetic_algorithm": {
+          "mean_rooms": 97.5,
+          "median_rooms": 99.0,
+          "std_rooms": 3.2634,
+          "min_rooms": 90.0,
+          "max_rooms": 100.0,
+          "completion_rate": 0.5,
+          "per_seed_rooms": {
+            "301": 94,
+            "302": 100,
+            "303": 100,
+            "304": 95,
+            "305": 100,
+            "306": 90,
+            "307": 100,
+            "308": 98,
+            "309": 100,
+            "310": 98
+          },
+          "final_levels": [
+            24,
+            24,
+            25,
+            24,
+            24,
+            23,
+            25,
+            25,
+            25,
+            24
+          ],
+          "active_allies_samples": [
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "priest",
+              "monk"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "priest"
+            ]
+          ],
+          "final_equipment_tiers": [
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            }
+          ]
+        },
+        "fixed_baseline": {
+          "mean_rooms": 75.5,
+          "median_rooms": 75.0,
+          "std_rooms": 3.7216,
+          "min_rooms": 70.0,
+          "max_rooms": 82.0,
+          "completion_rate": 0.0,
+          "per_seed_rooms": {
+            "301": 75,
+            "302": 76,
+            "303": 73,
+            "304": 78,
+            "305": 82,
+            "306": 74,
+            "307": 75,
+            "308": 81,
+            "309": 70,
+            "310": 71
+          },
+          "final_levels": [
+            22,
+            22,
+            21,
+            22,
+            22,
+            21,
+            22,
+            22,
+            21,
+            21
+          ],
+          "active_allies_samples": [
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ]
+          ],
+          "final_equipment_tiers": [
+            {
+              "weapon": 3,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 3,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            }
+          ]
+        },
+        "ga_advantage_rooms": 22.0
+      },
+      "4_increased_difficulty_15pct": {
+        "label": "Dificuldade Aumentada (+15% Status Inimigos, Sementes 201-210)",
+        "seeds": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210
+        ],
+        "difficulty_multiplier": 1.15,
+        "composition_mode": "standard",
+        "enable_chests": true,
+        "genetic_algorithm": {
+          "mean_rooms": 73.4,
+          "median_rooms": 92.0,
+          "std_rooms": 32.2775,
+          "min_rooms": 24.0,
+          "max_rooms": 100.0,
+          "completion_rate": 0.1,
+          "per_seed_rooms": {
+            "201": 24,
+            "202": 100,
+            "203": 95,
+            "204": 89,
+            "205": 97,
+            "206": 89,
+            "207": 96,
+            "208": 95,
+            "209": 25,
+            "210": 24
+          },
+          "final_levels": [
+            12,
+            25,
+            24,
+            23,
+            24,
+            23,
+            24,
+            24,
+            11,
+            11
+          ],
+          "active_allies_samples": [
+            [],
+            [
+              "priest",
+              "archer"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [],
+            [
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [],
+            []
+          ],
+          "final_equipment_tiers": [
+            {
+              "weapon": 1,
+              "armor": 1,
+              "shield": 1
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 2,
+              "armor": 1,
+              "shield": 2
+            },
+            {
+              "weapon": 2,
+              "armor": 1,
+              "shield": 1
+            }
+          ]
+        },
+        "fixed_baseline": {
+          "mean_rooms": 51.4,
+          "median_rooms": 60.0,
+          "std_rooms": 20.0509,
+          "min_rooms": 16.0,
+          "max_rooms": 71.0,
+          "completion_rate": 0.0,
+          "per_seed_rooms": {
+            "201": 25,
+            "202": 64,
+            "203": 71,
+            "204": 67,
+            "205": 66,
+            "206": 70,
+            "207": 54,
+            "208": 56,
+            "209": 25,
+            "210": 16
+          },
+          "final_levels": [
+            12,
+            20,
+            21,
+            21,
+            21,
+            21,
+            18,
+            19,
+            11,
+            8
+          ],
+          "active_allies_samples": [
+            [],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [],
+            []
+          ],
+          "final_equipment_tiers": [
+            {
+              "weapon": 2,
+              "armor": 1,
+              "shield": 1
+            },
+            {
+              "weapon": 3,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 3,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 3,
+              "armor": 2,
+              "shield": 2
+            },
+            {
+              "weapon": 3,
+              "armor": 2,
+              "shield": 2
+            },
+            {
+              "weapon": 2,
+              "armor": 1,
+              "shield": 2
+            },
+            {
+              "weapon": 2,
+              "armor": 0,
+              "shield": 1
+            }
+          ]
+        },
+        "ga_advantage_rooms": 22.0
+      },
+      "5_no_chests_strict_economy": {
+        "label": "Sem Baús (Economia Estrita, Sementes 201-210)",
+        "seeds": [
+          201,
+          202,
+          203,
+          204,
+          205,
+          206,
+          207,
+          208,
+          209,
+          210
+        ],
+        "difficulty_multiplier": 1.0,
+        "composition_mode": "standard",
+        "enable_chests": false,
+        "genetic_algorithm": {
+          "mean_rooms": 80.0,
+          "median_rooms": 94.5,
+          "std_rooms": 28.2984,
+          "min_rooms": 24.0,
+          "max_rooms": 100.0,
+          "completion_rate": 0.2,
+          "per_seed_rooms": {
+            "201": 80,
+            "202": 100,
+            "203": 95,
+            "204": 89,
+            "205": 97,
+            "206": 94,
+            "207": 96,
+            "208": 100,
+            "209": 25,
+            "210": 24
+          },
+          "final_levels": [
+            22,
+            25,
+            24,
+            23,
+            24,
+            24,
+            24,
+            24,
+            11,
+            11
+          ],
+          "active_allies_samples": [
+            [],
+            [
+              "monk",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [
+              "monk",
+              "archer"
+            ],
+            [
+              "archer",
+              "priest"
+            ],
+            [],
+            []
+          ],
+          "final_equipment_tiers": [
+            {
+              "weapon": 3,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 4,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 4,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 2,
+              "armor": 0,
+              "shield": 1
+            },
+            {
+              "weapon": 1,
+              "armor": 1,
+              "shield": 1
+            }
+          ]
+        },
+        "fixed_baseline": {
+          "mean_rooms": 61.1,
+          "median_rooms": 67.0,
+          "std_rooms": 17.3577,
+          "min_rooms": 25.0,
+          "max_rooms": 78.0,
+          "completion_rate": 0.0,
+          "per_seed_rooms": {
+            "201": 67,
+            "202": 73,
+            "203": 73,
+            "204": 67,
+            "205": 78,
+            "206": 70,
+            "207": 62,
+            "208": 30,
+            "209": 25,
+            "210": 66
+          },
+          "final_levels": [
+            21,
+            22,
+            22,
+            21,
+            22,
+            21,
+            20,
+            13,
+            11,
+            20
+          ],
+          "active_allies_samples": [
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [
+              "archer",
+              "mage"
+            ],
+            [],
+            [],
+            [
+              "archer",
+              "mage"
+            ]
+          ],
+          "final_equipment_tiers": [
+            {
+              "weapon": 3,
+              "armor": 3,
+              "shield": 2
+            },
+            {
+              "weapon": 3,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 3,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 3,
+              "armor": 3,
+              "shield": 2
+            },
+            {
+              "weapon": 3,
+              "armor": 3,
+              "shield": 3
+            },
+            {
+              "weapon": 3,
+              "armor": 3,
+              "shield": 2
+            },
+            {
+              "weapon": 3,
+              "armor": 2,
+              "shield": 2
+            },
+            {
+              "weapon": 2,
+              "armor": 1,
+              "shield": 1
+            },
+            {
+              "weapon": 1,
+              "armor": 1,
+              "shield": 1
+            },
+            {
+              "weapon": 3,
+              "armor": 3,
+              "shield": 2
+            }
+          ]
+        },
+        "ga_advantage_rooms": 18.9
+      }
+    }
+  },
+  "failure_and_dominance_analysis": {
+    "1_premature_convergence": {
+      "mut_2pct_mean_conv_gen": 4.4,
+      "mut_10pct_mean_conv_gen": 4.0,
+      "mut_25pct_mean_conv_gen": 7.6,
+      "mut_2pct_val_rooms": 90.58,
+      "mut_10pct_val_rooms": 92.5,
+      "finding": "Com mutação de 2%, a população estabiliza mais cedo (geração média 4.4) e atinge média de 90.58 salas na validação, contra 92.50 salas na taxa de 10%."
+    },
+    "2_low_genetic_diversity": {
+      "mut_2pct_final_diversity": 0.0893,
+      "mut_10pct_final_diversity": 0.0707,
+      "mut_25pct_final_diversity": 0.1347,
+      "pop12_final_diversity": 0.0791,
+      "pop40_final_diversity": 0.1166
+    },
+    "3_randomness_dependence": {
+      "validation_std_across_seeds": 2.6627,
+      "validation_min_rooms": 94.0,
+      "validation_max_rooms": 100.0,
+      "mean_rooms_with_chests": 96.9,
+      "mean_rooms_without_chests": 80.0,
+      "chest_impact_delta_rooms": 16.9
+    },
+    "4_overfitting_to_dungeon_seeds": {
+      "ga_train_mean_rooms": 96.0857,
+      "ga_validation_mean_rooms": 90.9571,
+      "generalization_gap_rooms": 5.1286,
+      "alternate_monster_pool_mean_rooms": 97.5,
+      "harder_15pct_mean_rooms": 73.4
+    },
+    "5_dominant_classes_and_builds": {
+      "ally_first_choice_frequency": {
+        "mage": 0,
+        "archer": 1,
+        "monk": 0,
+        "priest": 6,
+        "alchemist": 0
+      },
+      "ally_top2_pair_frequency": {
+        "mage": 0,
+        "archer": 1,
+        "monk": 3,
+        "priest": 7,
+        "alchemist": 3
+      },
+      "mean_warrior_weights": {
+        "strength": 0.3315,
+        "vitality": 0.3594,
+        "defense": 0.3091
+      },
+      "mean_equip_offense_priority": 0.1222
+    }
+  },
+  "generated_charts": [
+    "results/experiments/exp1_mutacao_convergencia_diversidade.png",
+    "results/experiments/exp2_populacao_orcamento_equivalente.png",
+    "results/experiments/exp3_comparacao_baselines.png",
+    "results/experiments/exp4_generalizacao_cenarios.png"
+  ]
+}

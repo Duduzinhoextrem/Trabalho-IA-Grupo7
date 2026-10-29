@@ -1,0 +1,54 @@
+name: CI & Scientific Experiments — Masmorra Genética (Grupo 7)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      recompute_experiments:
+        description: "Reexecutar os 4 experimentos científicos completos?"
+        required: false
+        default: "false"
+
+jobs:
+  test-and-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verify frozen dataset integrity and EDA
+        run: |
+          python scripts/run_etl_and_eda.py
+
+      - name: Run full pytest acceptance suite (17 criteria)
+        run: |
+          pytest -v
+
+      - name: Optionally re-run full scientific experiments
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.recompute_experiments == 'true' }}
+        run: |
+          python scripts/run_scientific_experiments.py
+
+      - name: Upload experiment artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: masmorra-genetica-results
+          path: |
+            data/metadata/
+            data/experiments/
+            results/

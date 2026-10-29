@@ -1,0 +1,539 @@
+{
+  "total_valid_records": 334,
+  "descriptive_statistics": {
+    "challenge_rating": {
+      "count": 334,
+      "mean": 4.5565,
+      "std": 5.8178,
+      "min": 0.0,
+      "q25": 0.5,
+      "median": 2.0,
+      "q75": 6.0,
+      "max": 30.0,
+      "skewness": 1.7393
+    },
+    "hit_points": {
+      "count": 334,
+      "mean": 81.8623,
+      "std": 98.035,
+      "min": 1.0,
+      "q25": 19.0,
+      "median": 45.0,
+      "q75": 117.75,
+      "max": 676.0,
+      "skewness": 2.5621
+    },
+    "armor_class": {
+      "count": 334,
+      "mean": 13.9551,
+      "std": 3.2245,
+      "min": 5.0,
+      "q25": 12.0,
+      "median": 13.0,
+      "q75": 16.75,
+      "max": 25.0,
+      "skewness": 0.4224
+    },
+    "xp": {
+      "count": 334,
+      "mean": 4149.1467,
+      "std": 12146.3327,
+      "min": 10.0,
+      "q25": 100.0,
+      "median": 450.0,
+      "q75": 2300.0,
+      "max": 155000.0,
+      "skewness": 7.3301
+    },
+    "strength": {
+      "count": 334,
+      "mean": 15.1916,
+      "std": 6.6395,
+      "min": 1.0,
+      "q25": 11.0,
+      "median": 16.0,
+      "q75": 19.0,
+      "max": 30.0,
+      "skewness": -0.1851
+    },
+    "dexterity": {
+      "count": 334,
+      "mean": 12.6557,
+      "std": 3.1951,
+      "min": 1.0,
+      "q25": 10.0,
+      "median": 13.0,
+      "q75": 15.0,
+      "max": 28.0,
+      "skewness": 0.0469
+    },
+    "constitution": {
+      "count": 334,
+      "mean": 15.0898,
+      "std": 4.4402,
+      "min": 8.0,
+      "q25": 12.0,
+      "median": 14.0,
+      "q75": 17.75,
+      "max": 30.0,
+      "skewness": 0.8492
+    },
+    "intelligence": {
+      "count": 334,
+      "mean": 7.8892,
+      "std": 5.664,
+      "min": 1.0,
+      "q25": 2.0,
+      "median": 7.0,
+      "q75": 12.0,
+      "max": 25.0,
+      "skewness": 0.4741
+    },
+    "wisdom": {
+      "count": 334,
+      "mean": 11.6976,
+      "std": 2.8979,
+      "min": 3.0,
+      "q25": 10.0,
+      "median": 12.0,
+      "q75": 13.0,
+      "max": 25.0,
+      "skewness": 0.3691
+    },
+    "charisma": {
+      "count": 334,
+      "mean": 9.7365,
+      "std": 5.7272,
+      "min": 1.0,
+      "q25": 5.0,
+      "median": 8.0,
+      "q75": 14.0,
+      "max": 30.0,
+      "skewness": 0.6563
+    },
+    "max_attack_bonus": {
+      "count": 334,
+      "mean": 5.9611,
+      "std": 3.3703,
+      "min": 0.0,
+      "q25": 4.0,
+      "median": 5.0,
+      "q75": 7.0,
+      "max": 19.0,
+      "skewness": 1.2005
+    },
+    "best_action_damage": {
+      "count": 334,
+      "mean": 14.2784,
+      "std": 14.4592,
+      "min": 0.0,
+      "q25": 5.5,
+      "median": 10.0,
+      "q75": 17.0,
+      "max": 91.0,
+      "skewness": 2.4875
+    },
+    "estimated_dpr_raw": {
+      "count": 334,
+      "mean": 28.774,
+      "std": 42.3755,
+      "min": 0.0,
+      "q25": 6.5,
+      "median": 13.0,
+      "q75": 31.125,
+      "max": 273.0,
+      "skewness": 3.0971
+    },
+    "resistances_count": {
+      "count": 334,
+      "mean": 0.506,
+      "std": 1.167,
+      "min": 0.0,
+      "q25": 0.0,
+      "median": 0.0,
+      "q75": 0.0,
+      "max": 6.0,
+      "skewness": 2.6374
+    },
+    "immunities_count": {
+      "count": 334,
+      "mean": 0.5629,
+      "std": 0.802,
+      "min": 0.0,
+      "q25": 0.0,
+      "median": 0.0,
+      "q75": 1.0,
+      "max": 4.0,
+      "skewness": 1.5507
+    }
+  },
+  "pair_correlations": {
+    "challenge_rating_vs_hit_points": {
+      "pearson_r": 0.9404,
+      "pearson_p": 1.52095350288769e-157,
+      "spearman_rho": 0.9693,
+      "spearman_p": 2.211985389718682e-204
+    },
+    "challenge_rating_vs_armor_class": {
+      "pearson_r": 0.7547,
+      "pearson_p": 9.512281299267568e-63,
+      "spearman_rho": 0.6799,
+      "spearman_p": 1.1990502850754878e-46
+    },
+    "challenge_rating_vs_xp": {
+      "pearson_r": 0.783,
+      "pearson_p": 1.9502319117968324e-70,
+      "spearman_rho": 0.9995,
+      "spearman_p": 0.0
+    },
+    "challenge_rating_vs_max_attack_bonus": {
+      "pearson_r": 0.9068,
+      "pearson_p": 1.458069354913717e-126,
+      "spearman_rho": 0.8711,
+      "spearman_p": 1.5111828012241584e-104
+    },
+    "challenge_rating_vs_best_action_damage": {
+      "pearson_r": 0.7102,
+      "pearson_p": 1.5104713380375636e-52,
+      "spearman_rho": 0.83,
+      "spearman_p": 3.5853207116856875e-86
+    },
+    "challenge_rating_vs_estimated_dpr_raw": {
+      "pearson_r": 0.7373,
+      "pearson_p": 1.6848737112572425e-58,
+      "spearman_rho": 0.8763,
+      "spearman_p": 2.4398082382372316e-107
+    },
+    "challenge_rating_vs_strength": {
+      "pearson_r": 0.7207,
+      "pearson_p": 9.272100782177777e-55,
+      "spearman_rho": 0.8085,
+      "spearman_p": 1.8812320749243435e-78
+    },
+    "challenge_rating_vs_constitution": {
+      "pearson_r": 0.8588,
+      "pearson_p": 1.9695605814931146e-98,
+      "spearman_rho": 0.8611,
+      "spearman_p": 1.4734639492297642e-99
+    },
+    "challenge_rating_vs_dexterity": {
+      "pearson_r": -0.01,
+      "pearson_p": 0.8555761759783062,
+      "spearman_rho": -0.0777,
+      "spearman_p": 0.15675279518999066
+    },
+    "constitution_vs_hit_points": {
+      "pearson_r": 0.8808,
+      "pearson_p": 7.876906491562285e-110,
+      "spearman_rho": 0.894,
+      "spearman_p": 8.774388115310902e-118
+    },
+    "strength_vs_best_action_damage": {
+      "pearson_r": 0.6471,
+      "pearson_p": 5.252212138220139e-41,
+      "spearman_rho": 0.8069,
+      "spearman_p": 6.427792771938045e-78
+    },
+    "dexterity_vs_armor_class": {
+      "pearson_r": 0.2267,
+      "pearson_p": 2.8814576148958358e-05,
+      "spearman_rho": 0.1696,
+      "spearman_p": 0.001863547138527143
+    },
+    "hit_points_vs_armor_class": {
+      "pearson_r": 0.7133,
+      "pearson_p": 3.5001531164437573e-53,
+      "spearman_rho": 0.6264,
+      "spearman_p": 8.51408953114845e-38
+    }
+  },
+  "type_distribution": {
+    "beast": 87,
+    "humanoid": 50,
+    "dragon": 43,
+    "monstrosity": 39,
+    "fiend": 23,
+    "undead": 20,
+    "elemental": 16,
+    "swarm of tiny beasts": 10,
+    "giant": 10,
+    "construct": 9,
+    "plant": 6,
+    "fey": 6,
+    "celestial": 6,
+    "aberration": 5,
+    "ooze": 4
+  },
+  "size_distribution": {
+    "Medium": 138,
+    "Large": 103,
+    "Huge": 32,
+    "Tiny": 24,
+    "Small": 22,
+    "Gargantuan": 15
+  },
+  "cr_distribution": {
+    "0.0": 29,
+    "0.125": 19,
+    "0.25": 32,
+    "0.5": 33,
+    "1.0": 25,
+    "2.0": 43,
+    "3.0": 22,
+    "4.0": 15,
+    "5.0": 27,
+    "6.0": 10,
+    "7.0": 6,
+    "8.0": 10,
+    "9.0": 8,
+    "10.0": 6,
+    "11.0": 7,
+    "12.0": 2,
+    "13.0": 8,
+    "14.0": 3,
+    "15.0": 4,
+    "16.0": 5,
+    "17.0": 4,
+    "19.0": 1,
+    "20.0": 3,
+    "21.0": 4,
+    "22.0": 2,
+    "23.0": 3,
+    "24.0": 2,
+    "30.0": 1
+  },
+  "cr_tier_progression": {
+    "CR 0-0.5": {
+      "count": 113,
+      "hp_mean": 12.5,
+      "hp_median": 13.0,
+      "ac_mean": 11.88,
+      "ac_median": 12.0,
+      "xp_mean": 49.25,
+      "atk_bonus_mean": 3.35,
+      "dpr_mean": 5.35
+    },
+    "CR 1-2": {
+      "count": 68,
+      "hp_mean": 39.66,
+      "hp_median": 37.5,
+      "ac_mean": 12.88,
+      "ac_median": 12.0,
+      "xp_mean": 356.62,
+      "atk_bonus_mean": 4.71,
+      "dpr_mean": 12.65
+    },
+    "CR 3-5": {
+      "count": 64,
+      "hp_mean": 83.89,
+      "hp_median": 82.0,
+      "ac_mean": 13.91,
+      "ac_median": 13.5,
+      "xp_mean": 1257.81,
+      "atk_bonus_mean": 6.06,
+      "dpr_mean": 24.34
+    },
+    "CR 6-10": {
+      "count": 40,
+      "hp_mean": 130.8,
+      "hp_median": 134.0,
+      "ac_mean": 16.0,
+      "ac_median": 16.5,
+      "xp_mean": 3870.0,
+      "atk_bonus_mean": 8.0,
+      "dpr_mean": 54.56
+    },
+    "CR 11-17": {
+      "count": 33,
+      "hp_mean": 191.12,
+      "hp_median": 195.0,
+      "ac_mean": 17.58,
+      "ac_median": 18.0,
+      "xp_mean": 11536.36,
+      "atk_bonus_mean": 10.55,
+      "dpr_mean": 75.39
+    },
+    "CR 18-30": {
+      "count": 16,
+      "hp_mean": 395.25,
+      "hp_median": 376.0,
+      "ac_mean": 20.81,
+      "ac_median": 21.0,
+      "xp_mean": 46250.0,
+      "atk_bonus_mean": 14.81,
+      "dpr_mean": 119.81
+    }
+  },
+  "inconsistencies_and_anomalies": {
+    "monsters_without_direct_damage_actions_count": 5,
+    "monsters_without_direct_damage_actions_examples": [
+      {
+        "index": "frog",
+        "name": "Frog",
+        "challenge_rating": 0.0,
+        "actions_count": 0
+      },
+      {
+        "index": "sea-horse",
+        "name": "Sea Horse",
+        "challenge_rating": 0.0,
+        "actions_count": 0
+      },
+      {
+        "index": "shrieker",
+        "name": "Shrieker",
+        "challenge_rating": 0.0,
+        "actions_count": 0
+      },
+      {
+        "index": "rug-of-smothering",
+        "name": "Rug of Smothering",
+        "challenge_rating": 2.0,
+        "actions_count": 1
+      },
+      {
+        "index": "vampire-mist",
+        "name": "Vampire, Mist Form",
+        "challenge_rating": 13.0,
+        "actions_count": 0
+      }
+    ],
+    "high_cr_low_ac_count": 8,
+    "high_cr_low_ac_examples": [
+      {
+        "index": "flesh-golem",
+        "name": "Flesh Golem",
+        "challenge_rating": 5.0,
+        "armor_class": 9,
+        "hit_points": 93
+      },
+      {
+        "index": "unicorn",
+        "name": "Unicorn",
+        "challenge_rating": 5.0,
+        "armor_class": 12,
+        "hit_points": 67
+      },
+      {
+        "index": "werebear-bear",
+        "name": "Werebear, Bear Form",
+        "challenge_rating": 5.0,
+        "armor_class": 11,
+        "hit_points": 135
+      },
+      {
+        "index": "werebear-human",
+        "name": "Werebear, Human Form",
+        "challenge_rating": 5.0,
+        "armor_class": 10,
+        "hit_points": 135
+      },
+      {
+        "index": "werebear-hybrid",
+        "name": "Werebear, Hybrid Form",
+        "challenge_rating": 5.0,
+        "armor_class": 11,
+        "hit_points": 135
+      },
+      {
+        "index": "mage",
+        "name": "Mage",
+        "challenge_rating": 6.0,
+        "armor_class": 12,
+        "hit_points": 40
+      },
+      {
+        "index": "giant-ape",
+        "name": "Giant Ape",
+        "challenge_rating": 7.0,
+        "armor_class": 12,
+        "hit_points": 157
+      },
+      {
+        "index": "archmage",
+        "name": "Archmage",
+        "challenge_rating": 12.0,
+        "armor_class": 12,
+        "hit_points": 99
+      }
+    ],
+    "magical_or_elemental_attackers_count": 73,
+    "physical_resistant_or_immune_count": 85,
+    "magical_resistant_or_immune_count": 133
+  },
+  "validation_summary": {
+    "total_records": 334,
+    "valid_records_count": 334,
+    "invalid_records_count": 0,
+    "duplicate_indices": [],
+    "missing_fields_count": {
+      "index": 0,
+      "name": 0,
+      "size": 0,
+      "type": 0,
+      "armor_class": 0,
+      "hit_points": 0,
+      "challenge_rating": 0,
+      "strength": 0,
+      "dexterity": 0,
+      "constitution": 0,
+      "intelligence": 0,
+      "wisdom": 0,
+      "charisma": 0,
+      "subtype": 258,
+      "alignment": 0,
+      "hit_dice": 0,
+      "hit_points_roll": 0,
+      "xp": 0,
+      "damage_vulnerabilities": 0,
+      "damage_resistances": 0,
+      "damage_immunities": 0,
+      "condition_immunities": 0,
+      "actions": 0,
+      "special_abilities": 0,
+      "legendary_actions": 0,
+      "reactions": 0,
+      "image": 0
+    },
+    "empty_lists_or_nulls_count": {
+      "index": 0,
+      "name": 0,
+      "size": 0,
+      "type": 0,
+      "armor_class": 0,
+      "hit_points": 0,
+      "challenge_rating": 0,
+      "strength": 0,
+      "dexterity": 0,
+      "constitution": 0,
+      "intelligence": 0,
+      "wisdom": 0,
+      "charisma": 0,
+      "subtype": 258,
+      "alignment": 0,
+      "hit_dice": 0,
+      "hit_points_roll": 0,
+      "xp": 0,
+      "damage_vulnerabilities": 319,
+      "damage_resistances": 264,
+      "damage_immunities": 198,
+      "condition_immunities": 242,
+      "actions": 4,
+      "special_abilities": 55,
+      "legendary_actions": 302,
+      "reactions": 322,
+      "image": 0
+    },
+    "invalid_records": [],
+    "warnings_summary": {
+      "Monstro sem lista de 'actions' ofensivas diretas": 4
+    }
+  },
+  "generated_charts": [
+    "results/eda/01_distribuicao_cr_e_hp.png",
+    "results/eda/02_relacoes_cr_hp_ac_xp.png",
+    "results/eda/03_distribuicao_tipos_criaturas.png",
+    "results/eda/04_comportamento_atributos_ofensivos.png",
+    "results/eda/05_matriz_correlacao_pearson.png"
+  ]
+}

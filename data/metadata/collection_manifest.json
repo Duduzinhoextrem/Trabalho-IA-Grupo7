@@ -1,0 +1,23 @@
+{
+  "dataset_name": "D&D 5e SRD Monsters Dataset (2014 Edition)",
+  "dataset_version": "srd-2014-v1.0.0",
+  "source_api_name": "5e-bits D&D 5e SRD API",
+  "source_list_endpoint": "https://www.dnd5eapi.co/api/2014/monsters",
+  "source_example_endpoint": "https://www.dnd5eapi.co/api/2014/monsters/goblin",
+  "source_repository": "https://github.com/5e-bits/5e-database",
+  "fallback_documented_api": "https://api.open5e.com/v2/creatures/?document__slug=wotc-srd&limit=500",
+  "license_data": "System Reference Document 5.1 (SRD 5.1) by Wizards of the Coast LLC — disponibilizado sob Creative Commons Attribution 4.0 International (CC-BY-4.0) e Open Game License (OGL) v1.0a. Código da API sob licença MIT (5e-bits).",
+  "attribution": "This work includes material taken from the System Reference Document 5.1 ('SRD 5.1') by Wizards of the Coast LLC, available at https://dnd.wizards.com/resources/systems-reference-document. The SRD 5.1 is licensed under the Creative Commons Attribution 4.0 International License.",
+  "collected_at_utc": "2026-10-29T13:40:21.736624+00:00",
+  "completed_at_utc": "2026-10-29T13:40:27.141852+00:00",
+  "expected_count_from_api": 334,
+  "collected_records_count": 334,
+  "failed_requests_count": 0,
+  "failed_requests": [],
+  "incomplete_records_count": 0,
+  "incomplete_records": [],
+  "raw_file_path": "data/raw/monsters_raw_srd2014.json",
+  "raw_file_sha256": "51a00f4785dcf07fcb4056cd97eaa1eb5b2ba0c235d2b7d5b2762a772691d397",
+  "raw_file_size_bytes": 1492317,
+  "integrity_status": "VERIFIED"
+}
