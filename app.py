@@ -1,12 +1,8 @@
-"""Aplicação Web Interativa — Masmorra Genética: A Evolução do Guerreiro (Grupo 7 - IA II FIB).
+"""Aplicação Web Interativa em Português Claro e Didático.
 
-Implementa as 6 páginas obrigatórias (Seção 11):
-1. Sobre o projeto
-2. Dataset (D&D 5e SRD API + EDA Interativa)
-3. Masmorra (Simulador de 100 Salas: Estratégia Fixa, Manual ou Otimizada pelo AG)
-4. Evolução Genética (Modo Demonstração ao Vivo + Modo Científico Versionado)
-5. Experimentos (Comparação com Baselines, 4 Experimentos Científicos e Análise de Falhas)
-6. Laboratório (Teste de Generalização e Sensibilidade Ambiental)
+Masmorra Genética: A Evolução do Guerreiro — Grupo 7 (IA II - FIB).
+Projetada para que qualquer pessoa (mesmo sem conhecimento prévio de IA ou RPG)
+consiga entender o projeto, a inteligência artificial e as decisões da simulação.
 """
 
 from __future__ import annotations
@@ -23,19 +19,24 @@ import streamlit as st
 
 from src.dataset.collector import load_or_collect_raw_monsters
 from src.dataset.preprocessing import load_processed_dataset
-from src.experiments.baselines import (
-    create_fixed_baseline_chromosome,
-    run_random_search,
-)
-from src.game.characters import ALLY_CLASSES_ORDER
+from src.experiments.baselines import create_fixed_baseline_chromosome
 from src.game.combat import run_dungeon_simulation
 from src.game.dungeon import build_dungeon_100_rooms
 from src.game.monsters import load_balance_config
-from src.genetic.chromosome import Chromosome, GENE_NAMES
+from src.genetic.chromosome import Chromosome
 from src.genetic.optimizer import run_genetic_algorithm
+from src.ui.localization import (
+    ALLY_CLASS_LABELS,
+    CREATURE_SIZE_TRANSLATIONS,
+    CREATURE_TYPE_TRANSLATIONS,
+    GENE_FRIENDLY_INFO,
+    translate_creature_size,
+    translate_creature_type,
+    translate_reason,
+)
 
 st.set_page_config(
-    page_title="Masmorra Genética — Grupo 7 (IA II - FIB)",
+    page_title="Masmorra Genética — IA II (Grupo 7)",
     page_icon="⚔️",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -44,7 +45,10 @@ st.set_page_config(
 
 @st.cache_data
 def get_cached_dataset() -> pd.DataFrame:
-    return load_processed_dataset()
+    df = load_processed_dataset()
+    df["tipo_pt"] = df["type"].map(lambda t: CREATURE_TYPE_TRANSLATIONS.get(str(t).lower(), str(t).capitalize()))
+    df["tamanho_pt"] = df["size"].map(lambda s: CREATURE_SIZE_TRANSLATIONS.get(str(s), str(s)))
+    return df
 
 
 @st.cache_data
@@ -79,32 +83,64 @@ def get_champion_chromosome(exp_payload: dict[str, Any] | None) -> Chromosome:
     if exp_payload and "best_champion_strategy" in exp_payload:
         genes = exp_payload["best_champion_strategy"]["best_chromosome"]["genes"]
         return Chromosome(genes=genes)
-    # Fallback determinístico caso o JSON ainda não tenha sido carregado
     return Chromosome(
         genes=[
-            0.39, 0.36, 0.25,
-            0.78, 0.72, 0.55, 0.92, 0.84,
-            0.48, 0.32, 0.20,
-            0.62, 1.0, 28.0, 1.12, 1.08,
+            0.1628, 0.5511, 0.2861,
+            0.0788, 0.1887, 0.3096, 0.4657, 0.1828,
+            0.6686, 0.0121, 0.3193,
+            0.0113, 0.0, 38.8416, 1.4530, 1.1129,
         ]
     )
 
 
+def format_chromosome_table(chromosome: Chromosome) -> pd.DataFrame:
+    """Gera uma tabela amigável em português explicando cada um dos 16 genes."""
+    raw_dict = chromosome.to_named_dict()
+    rows = []
+    for gene_key, val in raw_dict.items():
+        info = GENE_FRIENDLY_INFO.get(
+            gene_key, {"nome": gene_key, "explicacao": "Configuração da estratégia."}
+        )
+        if "discrete" in gene_key:
+            val_str = "Sim (Aliado Primeiro)" if val >= 0.5 else "Não (Equipamento Primeiro)"
+        elif "reserve" in gene_key:
+            val_str = f"{val:.1f} moedas de ouro"
+        elif "threshold" in gene_key:
+            val_str = f"{val:.2f}x do custo"
+        elif "weight" in gene_key or "priority" in gene_key or "prio" in gene_key:
+            val_str = f"{val * 100:.1f}%"
+        else:
+            val_str = f"{val:.3f}"
+
+        rows.append(
+            {
+                "Decisão da IA": info["nome"],
+                "Valor Otimizado": val_str,
+                "O que isso significa na prática?": info["explicacao"],
+            }
+        )
+    return pd.DataFrame(rows)
+
+
+# ==============================================================================
+# PÁGINA 1 — SOBRE O PROJETO
+# ==============================================================================
 def render_page_1_about(manifest: dict[str, Any], balance_cfg: dict[str, Any]) -> None:
     st.title("⚔️ Masmorra Genética: A Evolução do Guerreiro")
     st.subheader("Grupo 7 — Inteligência Artificial II — Faculdades Integradas de Bauru (FIB)")
 
-    st.markdown(
+    st.info(
         """
-        ### 1. Objetivo do Projeto
-        Desenvolver e validar cientificamente uma aplicação pública que utiliza **Algoritmos Genéticos (Computação Evolutiva)**
-        para descobrir **políticas ótimas de evolução de atributos, contratação de aliados e gestão econômica** de um guerreiro
-        enfrentando uma masmorra progressiva de **100 salas** construída diretamente a partir de dados reais do
-        **Dungeons & Dragons 5e System Reference Document (SRD 2014 API)**.
-
-        > **Distinção Metodológica Fundamental:** Este projeto realiza **otimização direta de políticas de decisão sequencial em ambiente de simulação**
-        > via Algoritmo Genético (busca meta-heurística populacional guiada por função de aptidão/fitness), **e não** o treinamento supervisionado
-        > de um classificador ou regressor preditivo sobre rótulos estáticos.
+        💡 **O que é este projeto? (Para entender em 1 minuto):**  
+        Imagine um guerreiro que entra sozinho em uma masmorra de **100 salas cheias de monstros perigosos**,
+        carregando apenas uma espada básica de ferro e sem nenhuma armadura. Conforme ele vence as batalhas, ganha experiência
+        para ficar mais forte, junta moedas de ouro para comprar equipamentos no mercado e, nos níveis 5 e 15,
+        pode contratar até dois companheiros (como Magos, Arqueiros ou Padres).
+        
+        **A grande pergunta de Inteligência Artificial é:**  
+        *Qual é a combinação perfeita de escolhas para zerar as 100 salas sem morrer?*  
+        Em vez de um humano adivinhar as respostas, usamos um **Algoritmo Genético (Computação Evolutiva)**:
+        a própria IA testa centenas de estratégias, combina as melhores ideias e descobre sozinha a fórmula do sucesso!
         """
     )
 
@@ -112,709 +148,709 @@ def render_page_1_about(manifest: dict[str, Any], balance_cfg: dict[str, Any]) -
     with col1:
         st.markdown(
             """
-            ### 2. Integrantes e Organização (Grupo 7)
-            | Integrante | Frente Principal | Responsabilidades |
+            ### 👥 Integrantes do Grupo 7 e Responsabilidades
+            | Integrante | Frente de Trabalho | O que fez no projeto? |
             | :--- | :--- | :--- |
-            | **Eduardo Coque Corrêa de Lima** | Coordenação Técnica & AG | Arquitetura, Algoritmo Genético (`src/genetic/`) e integração geral |
-            | **Matheus Alcântara Pereira** | Dados, ETL & EDA | Coleta API D&D 5e SRD, validação, normalização, snapshot e EDA (`src/dataset/`) |
-            | **Fernando Eduardo Motta Mendes** | Simulador & Interface | Motor de combate em turnos, masmorra de 100 salas, economia e UI Streamlit |
-            | **Rogério Tiritan Marcone** | Documentação Científica | Canvas Inicial, Metodologia, Model Card e Resumo Expandido |
-            | **Reuel Vitor Lanzetti** | Experimentos & Divulgação | Ficha de Experimentos, análise estatística/falhas, slides, vídeo e materiais |
+            | **Eduardo Coque Corrêa de Lima** | Coordenação & Algoritmo Genético | Criou o cérebro evolutivo da IA e a integração geral |
+            | **Matheus Alcântara Pereira** | Dados Oficiais & Análise (EDA) | Coletou os 334 monstros reais da API e analisou as estatísticas |
+            | **Fernando Eduardo Motta Mendes** | Simulador de Combate & Telas | Criou as 100 salas, o combate em turnos e a interface gráfica |
+            | **Rogério Tiritan Marcone** | Metodologia & Documentação | Escreveu o Canvas, Model Card e Resumo Acadêmico |
+            | **Reuel Vitor Lanzetti** | Experimentos & Divulgação | Realizou os testes científicos, gráficos, slides e vídeo |
             """
         )
 
     with col2:
         st.markdown(
             f"""
-            ### 3. Proveniência do Dataset e Versionamento
-            - **Fonte Primária:** [D&D 5e SRD REST API (2014)](https://www.dnd5eapi.co/api/2014/monsters)
-            - **Repositório Oficial da Fonte:** [`5e-bits/5e-database`](https://github.com/5e-bits/5e-database)
-            - **Fonte Secundária Documentada (Contingência):** [Open5e API V2](https://open5e.com/api-docs)
-            - **Licença dos Dados:** *System Reference Document 5.1 (Wizards of the Coast LLC)* — **CC-BY-4.0 / OGL v1.0a** (Código API: MIT).
-            - **Versão Congelada do Snapshot:** `{manifest.get('dataset_version', 'srd-2014-v1.0.0')}`
-            - **Registros Válidos Coletados:** `{manifest.get('collected_records_count', 334)}` criaturas (`0` falhas, `0` dados inventados)
-            - **Hash SHA-256 do JSON Bruto:** `{manifest.get('raw_file_sha256', 'N/A')[:32]}...`
-            - **Versão do Balanceamento do Simulador:** `{balance_cfg.get('config_version', 'balance-v1.0.0')}`
+            ### 📜 De onde vieram os monstros? (Dados 100% Reais)
+            - **Zero dados inventados:** Não criamos monstros fictícios. Todos os inimigos vieram da **API oficial de Dungeons & Dragons 5ª Edição (SRD 2014)**.
+            - **Fonte Oficial:** [D&D 5e SRD REST API](https://www.dnd5eapi.co/api/2014/monsters) (Wizards of the Coast LLC).
+            - **Licença Livre:** Creative Commons Attribution 4.0 (**CC-BY-4.0**) e Open Game License (**OGL v1.0a**).
+            - **Total de Criaturas Válidas:** `{manifest.get('collected_records_count', 334)}` criaturas reais.
+            - **Cópia Congelada e Auditável:** Salva no repositório com código de segurança SHA-256 `{manifest.get('raw_file_sha256', '')[:20]}...` para garantir que qualquer pessoa no mundo consiga repetir o experimento com os mesmos resultados.
             """
         )
 
     st.markdown("---")
     st.markdown(
         """
-        ### 4. Arquitetura Metodológica e Rastreabilidade de Dados
-        Para garantir rigor acadêmico, o projeto separa explicitamente cinco camadas de informação:
-        1. **Dados Externos Originais (`data/raw/monsters_raw_srd2014.json`):** Registros JSON preservados sem alteração da API oficial.
-        2. **Dados Externos Tratados (`data/processed/monsters_srd2014_processed.parquet`):** Atributos normalizados e valor esperado matemático de expressões de dados (`NdS+M`).
-        3. **Atributos Derivados por Fórmulas (`src/game/monsters.py`):** Conversão documentada de CR, AC, HP, ações e resistências para os parâmetros do simulador.
-        4. **Configurações Criadas pelo Grupo (`config/balance.json`):** Catálogo do mercado (4 armas, 4 armaduras, 3 escudos) e regras das 5 classes de aliados.
-        5. **Resultados Sintéticos das Simulações (`data/experiments/`):** Logs e métricas gerados exclusivamente pela execução real do motor de combate e do AG.
+        ### 🧠 Como a IA resolveu o problema? (Metodologia Explicada)
+        Diferente de uma IA que tenta apenas prever o futuro ou classificar fotos, nosso sistema usa **Otimização de Políticas por Algoritmos Genéticos**:
+        1. **DNA da Estratégia (Cromossomo de 16 Genes):** Criamos uma lista de 16 números que representam a "personalidade" do guerreiro (ex: se ele prefere investir em força ou vida, se compra armadura antes de armas e qual ajudante ele contrata primeiro).
+        2. **Simulação Real:** O guerreiro enfrenta as 100 salas seguindo estritamente essas regras, sem saber o que vem pela frente.
+        3. **Seleção Natural:** Quem morre na sala 10 é descartado; quem chega na sala 80 ou 90 passa seus "genes" para as próximas gerações.
+        4. **Evolução:** Ao cruzar as melhores estratégias e adicionar pequenas mutações, a IA encontrou uma estratégia que alcança **98 salas no treino e 97 salas em masmorras nunca antes vistas!**
         """
     )
 
 
+# ==============================================================================
+# PÁGINA 2 — DATASET E ANÁLISE EXPLORATÓRIA
+# ==============================================================================
 def render_page_2_dataset(df: pd.DataFrame, manifest: dict[str, Any], eda: dict[str, Any]) -> None:
-    st.title("📊 Dataset Externo D&D 5e SRD & Análise Exploratória (EDA)")
-
-    m1, m2, m3, m4, m5 = st.columns(5)
-    m1.metric("Total de Criaturas (SRD)", len(df))
-    m2.metric("Registros Válidos", f"{len(df)} (100%)")
-    m3.metric("CR Médio / Máximo", f"{df['challenge_rating'].mean():.2f} / {df['challenge_rating'].max():.0f}")
-    m4.metric("HP Mediano / Máximo", f"{df['hit_points'].median():.0f} / {df['hit_points'].max():.0f}")
-    m5.metric("AC Médio (Bounded)", f"{df['armor_class'].mean():.2f} [5–25]")
-
-    with st.expander("🔍 Proveniência, Manifesto de Coleta e Atualização via API", expanded=False):
-        st.json(manifest)
-        if st.button("🔄 Verificar Conectividade com a API Oficial (com Fallback Seguro para Snapshot)"):
-            with st.spinner("Consultando https://www.dnd5eapi.co/api/2014/monsters ..."):
-                recs, new_man = load_or_collect_raw_monsters(force_refresh=False)
-                st.success(
-                    f"Snapshot verificado com sucesso! {len(recs)} criaturas íntegras (SHA-256: {new_man.get('raw_file_sha256', '')[:24]}...)."
-                )
-
-    st.subheader("1. Explorador Interativo de Criaturas do Dataset")
-    f_col1, f_col2, f_col3, f_col4 = st.columns(4)
-    with f_col1:
-        selected_types = st.multiselect(
-            "Filtrar por Tipo (type)",
-            options=sorted(df["type"].unique()),
-            default=[],
-        )
-    with f_col2:
-        selected_sizes = st.multiselect(
-            "Filtrar por Tamanho (size)",
-            options=sorted(df["size"].unique()),
-            default=[],
-        )
-    with f_col3:
-        cr_range = st.slider(
-            "Faixa de Nível de Desafio (CR)",
-            min_value=0.0,
-            max_value=float(df["challenge_rating"].max()),
-            value=(0.0, 30.0),
-            step=0.5,
-        )
-    with f_col4:
-        search_term = st.text_input("Buscar por nome ou index", "")
-
-    filtered = df[
-        (df["challenge_rating"] >= cr_range[0]) & (df["challenge_rating"] <= cr_range[1])
-    ].copy()
-    if selected_types:
-        filtered = filtered[filtered["type"].isin(selected_types)]
-    if selected_sizes:
-        filtered = filtered[filtered["size"].isin(selected_sizes)]
-    if search_term.strip():
-        q = search_term.strip().lower()
-        filtered = filtered[
-            filtered["name"].str.lower().str.contains(q) | filtered["index"].str.lower().str.contains(q)
-        ]
-
-    st.caption(f"Exibindo **{len(filtered)}** de **{len(df)}** criaturas do dataset oficial.")
-    display_cols = [
-        "index",
-        "name",
-        "type",
-        "size",
-        "challenge_rating",
-        "xp",
-        "hit_points",
-        "armor_class",
-        "strength",
-        "dexterity",
-        "constitution",
-        "max_attack_bonus",
-        "best_action_damage",
-        "estimated_dpr_raw",
-        "has_physical_resistance",
-        "has_magical_resistance",
-        "source_url",
-    ]
-    st.dataframe(filtered[display_cols], use_container_width=True, height=320)
-
-    st.subheader("2. Visualizações da Análise Exploratória de Dados (EDA)")
-    tab_g1, tab_g2, tab_g3, tab_g4 = st.tabs(
-        [
-            "📈 Distribuições e Relações com CR",
-            "🧬 Matriz de Correlação Verificada",
-            "🐉 Tipos, Tamanhos e Atributos Ofensivos",
-            "🔎 Descobertas Empíricas e Seleção de Campos",
-        ]
+    st.title("📊 O Bestiário Oficial: 334 Monstros de D&D 5e")
+    st.markdown(
+        """
+        Antes de criar o algoritmo, analisamos a fundo todos os monstros oficiais do jogo.
+        Aqui você pode pesquisar qualquer criatura, ver suas estatísticas originais e conferir o que a matemática revelou sobre o balanceamento do D&D.
+        """
     )
 
-    with tab_g1:
-        c1, c2 = st.columns(2)
-        with c1:
-            fig_hp = px.scatter(
-                filtered,
+    st.info(
+        """
+        💡 **Dica de Navegação:** Use os filtros abaixo para encontrar monstros clássicos como o **Goblin**, o **Dragão Vermelho** ou o **Tarrasque**
+        e veja como os atributos deles foram convertidos para o combate da nossa masmorra.
+        """
+    )
+
+    m1, m2, m3, m4, m5 = st.columns(5)
+    m1.metric("Monstros Reais Coletados", len(df))
+    m2.metric("Registros Íntegros", "100% (Sem Faltas)")
+    m3.metric("Nível de Desafio (CR)", "0 a 30")
+    m4.metric("Pontos de Vida (HP)", "1 a 676")
+    m5.metric("Defesa de Armadura (CA)", "5 a 25")
+
+    f1, f2, f3, f4 = st.columns(4)
+    with f1:
+        tipos_disp = sorted(df["tipo_pt"].unique())
+        filtro_tipo = st.multiselect("Filtrar por Tipo de Monstro", options=tipos_disp, default=[])
+    with f2:
+        tam_disp = sorted(df["tamanho_pt"].unique())
+        filtro_tam = st.multiselect("Filtrar por Porte / Tamanho", options=tam_disp, default=[])
+    with f3:
+        filtro_cr = st.slider("Nível de Desafio (CR)", 0.0, 30.0, (0.0, 30.0), 0.5)
+    with f4:
+        busca_nome = st.text_input("Buscar por nome do monstro", placeholder="Ex: goblin, dragon, skeleton...")
+
+    df_view = df[(df["challenge_rating"] >= filtro_cr[0]) & (df["challenge_rating"] <= filtro_cr[1])].copy()
+    if filtro_tipo:
+        df_view = df_view[df_view["tipo_pt"].isin(filtro_tipo)]
+    if filtro_tam:
+        df_view = df_view[df_view["tamanho_pt"].isin(filtro_tam)]
+    if busca_nome.strip():
+        termo = busca_nome.strip().lower()
+        df_view = df_view[df_view["name"].str.lower().str.contains(termo) | df_view["index"].str.lower().str.contains(termo)]
+
+    st.caption(f"Exibindo **{len(df_view)}** de **{len(df)}** criaturas cadastradas.")
+
+    # Tabela com nomes de colunas 100% em português
+    tabela_pt = df_view[
+        [
+            "name",
+            "tipo_pt",
+            "tamanho_pt",
+            "challenge_rating",
+            "hit_points",
+            "armor_class",
+            "strength",
+            "dexterity",
+            "constitution",
+            "max_attack_bonus",
+            "best_action_damage",
+            "estimated_dpr_raw",
+            "has_physical_resistance",
+            "has_magical_resistance",
+            "source_url",
+        ]
+    ].rename(
+        columns={
+            "name": "Nome da Criatura",
+            "tipo_pt": "Tipo",
+            "tamanho_pt": "Porte",
+            "challenge_rating": "Nível de Desafio (CR)",
+            "hit_points": "Vida (HP)",
+            "armor_class": "Classe de Armadura (CA)",
+            "strength": "Força",
+            "dexterity": "Destreza",
+            "constitution": "Constituição",
+            "max_attack_bonus": "Bônus de Acerto",
+            "best_action_damage": "Dano do Golpe Principal",
+            "estimated_dpr_raw": "Dano Estimado / Turno",
+            "has_physical_resistance": "Resiste a Dano Físico?",
+            "has_magical_resistance": "Resiste a Dano Mágico?",
+            "source_url": "Link Oficial na API",
+        }
+    )
+    st.dataframe(tabela_pt, use_container_width=True, height=320)
+
+    st.subheader("🔍 As 4 Grandes Descobertas da Análise de Dados (EDA)")
+    d1, d2 = st.columns(2)
+    with d1:
+        st.markdown(
+            """
+            **1. Vida cresce em linha reta, mas Experiência dispara como um foguete:**  
+            - A vida dos monstros tem uma correlação linear quase perfeita com o perigo ($r = 0,94$). Um monstro fraco tem 12 de vida e um chefe tem cerca de 400.
+            - Porém, o XP salta de 50 para mais de 150.000 (crescimento exponencial!). Se usássemos o XP direto sem freio matemático, o guerreiro ganharia 30 níveis em uma única sala final! Por isso, criamos uma fórmula de XP ajustada e justa.
+            
+            **2. Destreza não aumenta com o perigo do monstro ($r = -0,01$):**  
+            - Em videogames comuns, monstros fortes são mais rápidos e ágeis. No D&D 5e oficial, a estatística provou que dragões e gigantes têm a mesma destreza média (12 a 13) que um goblin comum! O que torna monstros fortes perigosos é sua Força e Constituição brutais.
+            """
+        )
+    with d2:
+        st.markdown(
+            """
+            **3. Monstros estranhos que precisavam de cuidado especial:**  
+            - Descobrimos 5 criaturas oficiais no dataset que não têm golpes diretos de arma: o sapo (*frog*), o cavalo-marinho (*sea-horse*), o fungo estridente (*shrieker*) e a forma de névoa do vampiro (*vampire-mist*, CR 13 mas sem ataque!).
+            - Se não tivéssemos tratado isso, a masmorra poderia colocar um vampiro inofensivo na sala 60!
+            
+            **4. A armadilha das Resistências (Física vs Mágica):**  
+            - 25,4% dos monstros resistem a cortes e flechas, e 39,8% resistem a magias.
+            - Isso provou matematicamente que montar um grupo só com guerreiros físicos ou só com magos é garantia de fracasso nas salas avançadas!
+            """
+        )
+
+    with st.expander("📈 Ver Gráficos Interativos da Distribuição", expanded=False):
+        c_a, c_b = st.columns(2)
+        with c_a:
+            fig1 = px.scatter(
+                df_view,
                 x="challenge_rating",
                 y="hit_points",
-                color="type",
-                hover_data=["name", "armor_class", "xp"],
-                title="Relação Nível de Desafio (CR) vs Pontos de Vida (HP) — r = 0.9404",
+                color="tipo_pt",
+                hover_name="name",
+                labels={"challenge_rating": "Nível de Desafio (CR)", "hit_points": "Pontos de Vida (HP)", "tipo_pt": "Tipo"},
+                title="Relação: Nível de Desafio vs. Pontos de Vida (Correlação r = 0,9404)",
             )
-            st.plotly_chart(fig_hp, use_container_width=True)
-        with c2:
-            fig_ac = px.scatter(
-                filtered,
+            st.plotly_chart(fig1, use_container_width=True)
+        with c_b:
+            fig2 = px.scatter(
+                df_view,
                 x="challenge_rating",
                 y="armor_class",
-                color="size",
-                hover_data=["name", "hit_points", "dexterity"],
-                title="Relação CR vs Classe de Armadura (AC) — r = 0.7547 (Bounded Accuracy)",
+                color="tamanho_pt",
+                hover_name="name",
+                labels={"challenge_rating": "Nível de Desafio (CR)", "armor_class": "Classe de Armadura (CA)", "tamanho_pt": "Porte"},
+                title="Relação: Nível de Desafio vs. Defesa de Armadura (5 a 25)",
             )
-            st.plotly_chart(fig_ac, use_container_width=True)
-
-        c3, c4 = st.columns(2)
-        with c3:
-            fig_xp = px.scatter(
-                filtered,
-                x="challenge_rating",
-                y="xp",
-                color="type",
-                hover_data=["name"],
-                title="Crescimento Exponencial de XP por CR (Spearman ρ = 0.9995, Skew = +7.33)",
-            )
-            st.plotly_chart(fig_xp, use_container_width=True)
-        with c4:
-            fig_hist = px.histogram(
-                filtered,
-                x="challenge_rating",
-                nbins=25,
-                title="Distribuição de Criaturas por Nível de Desafio (CR)",
-            )
-            st.plotly_chart(fig_hist, use_container_width=True)
-
-    with tab_g2:
-        if eda and "pair_correlations" in eda:
-            corr_rows = []
-            for pair_name, vals in eda["pair_correlations"].items():
-                corr_rows.append(
-                    {
-                        "Par de Atributos": pair_name,
-                        "Pearson (r)": vals["pearson_r"],
-                        "Valor-p (Pearson)": vals["pearson_p"],
-                        "Spearman (ρ)": vals["spearman_rho"],
-                    }
-                )
-            st.dataframe(pd.DataFrame(corr_rows), use_container_width=True)
-        img_corr = Path("results/eda/05_matriz_correlacao_pearson.png")
-        if img_corr.exists():
-            st.image(str(img_corr), caption="Matriz de Correlação de Pearson calculada sobre os 334 registros do SRD.")
-
-    with tab_g3:
-        c1, c2 = st.columns(2)
-        with c1:
-            type_df = filtered["type"].value_counts().reset_index()
-            type_df.columns = ["type", "count"]
-            fig_t = px.bar(type_df, x="count", y="type", orientation="h", title="Distribuição por Tipo de Criatura")
-            st.plotly_chart(fig_t, use_container_width=True)
-        with c2:
-            fig_off = px.scatter(
-                filtered,
-                x="max_attack_bonus",
-                y="estimated_dpr_raw",
-                color="challenge_rating",
-                hover_data=["name", "multiattack_count"],
-                title="Atributos Ofensivos: Bônus de Ataque vs Dano Estimado por Turno (DPR)",
-            )
-            st.plotly_chart(fig_off, use_container_width=True)
-
-    with tab_g4:
-        ReportPath = Path("docs/eda_report.md")
-        if ReportPath.exists():
-            st.markdown(ReportPath.read_text(encoding="utf-8"))
+            st.plotly_chart(fig2, use_container_width=True)
 
 
+# ==============================================================================
+# PÁGINA 3 — MASMORRA DE 100 SALAS
+# ==============================================================================
 def render_page_3_dungeon(
     df: pd.DataFrame,
     balance_cfg: dict[str, Any],
     exp_payload: dict[str, Any] | None,
 ) -> None:
-    st.title("🏰 Simulador da Masmorra de 100 Salas")
+    st.title("🏰 A Masmorra das 100 Salas")
     st.markdown(
         """
-        Execute uma aventura completa nas **100 salas** geradas a partir do dataset externo D&D 5e SRD.
-        Cada monstro mantém referência explícita ao registro original (`source_index` e URL da API).
+        Nesta tela você assiste à jornada do guerreiro sala por sala.
+        Ele começa fraco na **Sala 1**, enfrenta monstros progressivamente mais difíceis e tenta alcançar a **Sala 100** para vencer o Chefe Final!
         """
     )
 
-    ctrl1, ctrl2, ctrl3 = st.columns(3)
-    with ctrl1:
-        strategy_mode = st.selectbox(
-            "Modo de Estratégia",
+    st.info(
+        """
+        💡 **Como testar:**
+        1. Escolha a **Estratégia Campeã da IA** para ver até onde ela chega.
+        2. Mude para a **Estratégia Fixa Tradicional** e veja onde o guerreiro comete erros e é derrotado.
+        3. Ou monte uma **Estratégia Manual** com as suas próprias preferências de atributos e aliados!
+        """
+    )
+
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        modo_estrategia = st.selectbox(
+            "Quem comanda o guerreiro?",
             options=[
                 "1. Estratégia Otimizada (Campeã do Algoritmo Genético)",
-                "2. Estratégia Fixa (Baseline Equilibrado)",
-                "3. Estratégia Manual (Customizada pelo Usuário)",
+                "2. Estratégia Fixa Tradicional (Regras Equilibradas)",
+                "3. Minha Própria Estratégia (Configuração Manual)",
             ],
         )
-    with ctrl2:
-        dungeon_seed = st.number_input("Semente da Masmorra (Reprodutível)", min_value=1, max_value=99999, value=201, step=1)
-    with ctrl3:
-        enable_chests = st.checkbox("Habilitar Baús Pós-Vitória (Controlados por Semente)", value=True)
+    with c2:
+        semente_masmorra = st.number_input(
+            "Semente da Masmorra (Gera as salas de forma idêntica)",
+            min_value=1,
+            max_value=99999,
+            value=201,
+            step=1,
+        )
+    with c3:
+        habilitar_baus = st.checkbox("Permitir Baús com Equipamentos após vitórias?", value=True)
 
-    if strategy_mode.startswith("1."):
-        chosen_chrom = get_champion_chromosome(exp_payload)
-    elif strategy_mode.startswith("2."):
-        chosen_chrom = create_fixed_baseline_chromosome()
+    if modo_estrategia.startswith("1."):
+        cromossomo_atual = get_champion_chromosome(exp_payload)
+        st.success("✅ Usando a **Estratégia Campeã descoberta pelo Algoritmo Genético**.")
+    elif modo_estrategia.startswith("2."):
+        cromossomo_atual = create_fixed_baseline_chromosome()
+        st.warning("⚠️ Usando a **Estratégia Fixa Tradicional** (divide pontos igualmente e contrata Arqueiro + Mago).")
     else:
-        st.markdown("#### 🛠️ Configurar Estratégia Manualmente")
-        mc1, mc2, mc3 = st.columns(3)
-        with mc1:
-            w_str = st.slider("Peso Força Guerreiro", 0.05, 0.90, 0.40, 0.05)
-            w_vit = st.slider("Peso Vitalidade Guerreiro", 0.05, 0.90, 0.35, 0.05)
-            w_def = st.slider("Peso Defesa Guerreiro", 0.05, 0.90, 0.25, 0.05)
-        with mc2:
-            p_mage = st.slider("Prioridade Mago", 0.0, 1.0, 0.75, 0.05)
-            p_arch = st.slider("Prioridade Arqueiro", 0.0, 1.0, 0.70, 0.05)
-            p_monk = st.slider("Prioridade Monge", 0.0, 1.0, 0.50, 0.05)
-            p_priest = st.slider("Prioridade Padre (Cura)", 0.0, 1.0, 0.90, 0.05)
-            p_alch = st.slider("Prioridade Alquimista (Buff/Debuff)", 0.0, 1.0, 0.80, 0.05)
-        with mc3:
-            eq_off = st.slider("Foco Ofensivo Equipamentos", 0.0, 1.0, 0.60, 0.05)
-            hire_first = st.selectbox("Priorizar Aliado antes de Equipamento?", [1.0, 0.0], format_func=lambda x: "Sim" if x == 1.0 else "Não")
-            min_res = st.slider("Reserva Mínima de Ouro", 0.0, 120.0, 25.0, 5.0)
-            buy_th = st.slider("Limiar de Compra de Equipamento", 1.0, 1.8, 1.10, 0.05)
-            hire_th = st.slider("Limiar de Contratação de Aliado", 1.0, 1.8, 1.05, 0.05)
+        st.markdown("#### 🛠️ Ajuste os Botões da Sua Estratégia:")
+        col_m1, col_m2, col_m3 = st.columns(3)
+        with col_m1:
+            st.markdown("**Atributos do Guerreiro:**")
+            peso_forca = st.slider("Foco em Força (Dano de Espada)", 0.05, 0.90, 0.20, 0.05)
+            peso_vida = st.slider("Foco em Vida (HP)", 0.05, 0.90, 0.55, 0.05)
+            peso_defesa = st.slider("Foco em Defesa (Proteção)", 0.05, 0.90, 0.25, 0.05)
+        with col_m2:
+            st.markdown("**Preferência de Ajudantes (Aliados):**")
+            prio_mago = st.slider("Mago (Magias à distância)", 0.0, 1.0, 0.10, 0.05)
+            prio_arq = st.slider("Arqueiro (Flechas à distância)", 0.0, 1.0, 0.20, 0.05)
+            prio_monge = st.slider("Monge (Corpo a corpo resistente)", 0.0, 1.0, 0.30, 0.05)
+            prio_padre = st.slider("Padre (Cura o grupo durante a luta)", 0.0, 1.0, 0.90, 0.05)
+            prio_alquimista = st.slider("Alquimista (Poções e enfraquecimento)", 0.0, 1.0, 0.20, 0.05)
+        with col_m3:
+            st.markdown("**Economia no Mercado:**")
+            foco_equip = st.slider("Prioridade de Itens (0=Armadura primeiro | 1=Arma primeiro)", 0.0, 1.0, 0.05, 0.05)
+            contratar_primeiro = st.selectbox("Contratar Aliado antes de Comprar Itens?", [1.0, 0.0], format_func=lambda x: "Sim" if x == 1.0 else "Não")
+            reserva_ouro = st.slider("Reserva de Ouro 'Pé-de-Meia' (Não gastar)", 0.0, 120.0, 40.0, 5.0)
+            limiar_compra = st.slider("Paciência para economizar por itens melhores", 1.0, 1.8, 1.45, 0.05)
+            limiar_ajudante = st.slider("Paciência para contratar aliados", 1.0, 1.8, 1.10, 0.05)
 
-        chosen_chrom = Chromosome(
+        cromossomo_atual = Chromosome(
             genes=[
-                w_str, w_vit, w_def,
-                p_mage, p_arch, p_monk, p_priest, p_alch,
-                0.45, 0.35, 0.20,
-                eq_off, float(hire_first), min_res, buy_th, hire_th,
+                peso_forca, peso_vida, peso_defesa,
+                prio_mago, prio_arq, prio_monge, prio_padre, prio_alquimista,
+                0.60, 0.10, 0.30,
+                foco_equip, float(contratar_primeiro), reserva_ouro, limiar_compra, limiar_ajudante,
             ]
         )
 
-    with st.expander("🧬 Inspecionar Genes da Estratégia Selecionada", expanded=False):
-        st.json(chosen_chrom.to_named_dict())
+    with st.expander("🧬 Ver os 16 Genes Decodificados em Linguagem Simples", expanded=False):
+        st.dataframe(format_chromosome_table(cromossomo_atual), use_container_width=True)
 
-    rooms = build_dungeon_100_rooms(df, balance_cfg, seed=int(dungeon_seed))
-    run_res = run_dungeon_simulation(
-        rooms_template=rooms,
-        policy_params=chosen_chrom.to_policy_params(),
+    salas = build_dungeon_100_rooms(df, balance_cfg, seed=int(semente_masmorra))
+    resultado = run_dungeon_simulation(
+        rooms_template=salas,
+        policy_params=cromossomo_atual.to_policy_params(),
         balance_cfg=balance_cfg,
-        seed=int(dungeon_seed),
+        seed=int(semente_masmorra),
         enable_allies=True,
-        enable_chests=enable_chests,
+        enable_chests=habilitar_baus,
         record_detailed_logs=True,
     )
 
+    st.markdown("### 🏁 Placar da Tentativa")
     k1, k2, k3, k4, k5, k6 = st.columns(6)
-    k1.metric("Salas Concluídas", f"{run_res.rooms_cleared} / 100")
-    k2.metric("Status Final", "🏆 VITÓRIA TOTAL" if run_res.completed_all_100 else f"💀 Caiu na Sala {run_res.failure_room}")
-    k3.metric("Nível Final Guerreiro", f"Nv. {run_res.final_warrior_level}")
-    k4.metric("Atributos (STR/VIT/DEF)", f"{run_res.final_strength}/{run_res.final_vitality}/{run_res.final_defense}")
-    k5.metric("Equipamentos (Arma/Armad/Esc)", f"T{run_res.final_weapon_tier} / T{run_res.final_armor_tier} / T{run_res.final_shield_tier}")
-    k6.metric("Aliados Ativos no Final", ", ".join(run_res.active_allies_final) if run_res.active_allies_final else "Nenhum")
+    k1.metric("Salas Concluídas", f"{resultado.rooms_cleared} de 100")
+    if resultado.completed_all_100:
+        k2.metric("Resultado", "🏆 ZEROU AS 100 SALAS!", delta="Vitória Épica")
+    else:
+        k2.metric("Resultado", f"💀 Morreu na Sala {resultado.failure_room}")
+    k3.metric("Nível do Guerreiro", f"Nível {resultado.final_warrior_level}")
+    k4.metric("Atributos (FOR / VID / DEF)", f"{resultado.final_strength} / {resultado.final_vitality} / {resultado.final_defense}")
+    k5.metric("Itens (Arma / Armadura / Escudo)", f"Nível {resultado.final_weapon_tier} / {resultado.final_armor_tier} / {resultado.final_shield_tier}")
+    
+    aliados_traduzidos = [ALLY_CLASS_LABELS.get(a, {}).get("nome", a) for a in resultado.active_allies_final]
+    k6.metric("Aliados no Final", ", ".join(aliados_traduzidos) if aliados_traduzidos else "Nenhum (Lutou só)")
 
-    if run_res.room_results:
-        hist_rows = []
-        for rr in run_res.room_results:
-            hist_rows.append(
+    if resultado.room_results:
+        lista_salas = []
+        for r in resultado.room_results:
+            al_str = ", ".join([ALLY_CLASS_LABELS.get(a.split()[0].lower(), {}).get("nome", a) for a in r.active_allies_end])
+            lista_salas.append(
                 {
-                    "Sala": rr.room_number,
-                    "Resultado": "Vitória" if rr.victory else f"Derrota ({rr.termination_reason})",
-                    "Turnos": rr.turns_taken,
-                    "HP Início": rr.warrior_hp_start,
-                    "HP Fim": rr.warrior_hp_end,
-                    "HP Máx": rr.warrior_max_hp,
-                    "Nível Guerreiro": rr.warrior_level_end,
-                    "Ouro Ganho": rr.gold_earned,
-                    "Ouro Acumulado": rr.gold_end,
-                    "Aliados Ativos": ", ".join(rr.active_allies_end) if rr.active_allies_end else "-",
-                    "Inimigos (SRD)": ", ".join(rr.enemies_faced),
-                    "IDs Origem API": ", ".join(rr.enemy_source_indices),
+                    "Sala": r.room_number,
+                    "Resultado": "Vitória" if r.victory else "Derrota",
+                    "Duração (Turnos)": r.turns_taken,
+                    "Vida Inicial": r.warrior_hp_start,
+                    "Vida Final": r.warrior_hp_end,
+                    "Vida Máxima": r.warrior_max_hp,
+                    "Nível": r.warrior_level_end,
+                    "Ouro na Sala": r.gold_earned,
+                    "Cofre de Ouro": r.gold_end,
+                    "Aliados Presentes": al_str if al_str else "Nenhum",
+                    "Monstros Enfrentados": ", ".join(r.enemies_faced),
+                    "Código Oficial SRD": ", ".join(r.enemy_source_indices),
                 }
             )
-        hist_df = pd.DataFrame(hist_rows)
+        df_salas = pd.DataFrame(lista_salas)
 
-        c_chart1, c_chart2 = st.columns(2)
-        with c_chart1:
-            fig_hp_prog = go.Figure()
-            fig_hp_prog.add_trace(go.Scatter(x=hist_df["Sala"], y=hist_df["HP Máx"], name="HP Máximo", line=dict(color="#2b5c8f", dash="dot")))
-            fig_hp_prog.add_trace(go.Scatter(x=hist_df["Sala"], y=hist_df["HP Fim"], name="HP Pós-Sala", line=dict(color="#27ae60")))
-            fig_hp_prog.update_layout(title="Evolução de Vida (HP) do Guerreiro ao Longo das Salas", xaxis_title="Sala", yaxis_title="HP")
-            st.plotly_chart(fig_hp_prog, use_container_width=True)
-        with c_chart2:
-            fig_econ = go.Figure()
-            fig_econ.add_trace(go.Scatter(x=hist_df["Sala"], y=hist_df["Ouro Acumulado"], name="Saldo de Ouro", line=dict(color="#f39c12")))
-            fig_econ.add_trace(go.Scatter(x=hist_df["Sala"], y=hist_df["Turnos"], name="Turnos de Combate", yaxis="y2", line=dict(color="#e74c3c")))
-            fig_econ.update_layout(
-                title="Economia (Saldo de Ouro) e Duração dos Combates (Turnos)",
-                xaxis_title="Sala",
-                yaxis=dict(title="Ouro"),
-                yaxis2=dict(title="Turnos", overlaying="y", side="right"),
+        st.subheader("📈 Gráficos de Sobrevivência e Economia")
+        g1, g2 = st.columns(2)
+        with g1:
+            fig_hp = go.Figure()
+            fig_hp.add_trace(go.Scatter(x=df_salas["Sala"], y=df_salas["Vida Máxima"], name="Vida Máxima Total", line=dict(color="#2980b9", dash="dot")))
+            fig_hp.add_trace(go.Scatter(x=df_salas["Sala"], y=df_salas["Vida Final"], name="Vida Restante no Fim da Sala", line=dict(color="#27ae60", width=2)))
+            fig_hp.update_layout(title="Reserva de Vida do Guerreiro ao Longo das Salas", xaxis_title="Número da Sala", yaxis_title="Pontos de Vida (HP)")
+            st.plotly_chart(fig_hp, use_container_width=True)
+        with g2:
+            fig_gold = go.Figure()
+            fig_gold.add_trace(go.Scatter(x=df_salas["Sala"], y=df_salas["Cofre de Ouro"], name="Moedas de Ouro Acumuladas", line=dict(color="#f39c12", width=2)))
+            fig_gold.add_trace(go.Scatter(x=df_salas["Sala"], y=df_salas["Duração (Turnos)"], name="Turnos de Combate", yaxis="y2", line=dict(color="#e74c3c", dash="dash")))
+            fig_gold.update_layout(
+                title="Evolução do Dinheiro (Ouro) e Duração dos Combates",
+                xaxis_title="Número da Sala",
+                yaxis=dict(title="Moedas de Ouro"),
+                yaxis2=dict(title="Turnos Gastos", overlaying="y", side="right"),
             )
-            st.plotly_chart(fig_econ, use_container_width=True)
+            st.plotly_chart(fig_gold, use_container_width=True)
 
-        st.subheader("📜 Registro Sala a Sala e Auditoria de Turnos")
-        st.dataframe(hist_df, use_container_width=True, height=280)
+        st.subheader("📜 Diário da Aventura (Tabela Sala por Sala)")
+        st.dataframe(df_salas, use_container_width=True, height=260)
 
-        selected_room_idx = st.slider(
-            "Inspecionar Log Detalhado de Combate e Transações da Sala:",
-            min_value=1,
-            max_value=len(run_res.room_results),
-            value=len(run_res.room_results),
-        )
-        rr_detail = run_res.room_results[selected_room_idx - 1]
-        room_obj = rooms[selected_room_idx - 1]
+        num_sel = st.slider("Escolha uma sala para ver o combate golpe a golpe:", 1, len(resultado.room_results), len(resultado.room_results))
+        detalhe_sala = resultado.room_results[num_sel - 1]
+        obj_sala = salas[num_sel - 1]
 
-        dcol1, dcol2 = st.columns(2)
-        with dcol1:
-            st.markdown(f"**Inimigos da Sala {rr_detail.room_number} (Referência Oficial SRD):**")
-            for e in room_obj.enemies:
+        c_info1, c_info2 = st.columns(2)
+        with c_info1:
+            st.markdown(f"**Monstros Oficiais na Sala {detalhe_sala.room_number}:**")
+            for m in obj_sala.enemies:
                 st.markdown(
-                    f"- **{e.source_name}** (`{e.source_index}`, CR {e.challenge_rating:g}, {e.position}) — "
-                    f"HP Simulado: `{e.max_hp}`, Dano Fís/Mág: `{e.physical_damage}/{e.magical_damage}`, "
-                    f"Defesa: `{e.defense}` | [JSON Oficial na API]({e.source_url})"
+                    f"- 👾 **{m.source_name}** (`{m.source_index}`, Nível de Desafio CR {m.challenge_rating:g})  \n"
+                    f"  Vida: `{m.max_hp}` | Defesa: `{m.defense:.1f}` | Dano Físico: `{m.physical_damage:.1f}` | Dano Mágico: `{m.magical_damage:.1f}`  \n"
+                    f"  🔗 [Ver Ficha Original na API Oficial do D&D]({m.source_url})"
                 )
-            if rr_detail.market_transactions:
-                st.markdown("**Transações no Mercado nesta Sala:**")
-                st.json(rr_detail.market_transactions)
-            if rr_detail.chest_event:
-                st.markdown("**Evento de Baú Pós-Vitória:**")
-                st.json(rr_detail.chest_event)
-        with dcol2:
-            st.markdown(f"**Log Turno a Turno — Sala {rr_detail.room_number} ({rr_detail.turns_taken} turnos):**")
-            st.code("\n".join(rr_detail.combat_log) if rr_detail.combat_log else "Sem log registrado.")
+            if detalhe_sala.market_transactions:
+                st.markdown("**🛒 Compras e Contratações Feitas Nesta Sala:**")
+                for tx in detalhe_sala.market_transactions:
+                    if tx.get("action") == "buy_equipment":
+                        st.write(f"- Comprou **{tx.get('item_name')}** (Nível {tx.get('new_tier')}) por **{tx.get('net_cost')} moedas**.")
+                    elif tx.get("action") == "hire_ally":
+                        nome_a = ALLY_CLASS_LABELS.get(tx.get('ally_class', ''), {}).get('nome', tx.get('ally_class'))
+                        st.write(f"- Contratou o companheiro **{nome_a}** por **{tx.get('cost')} moedas**.")
+        with c_info2:
+            st.markdown(f"**⚔️ Relato da Luta — Sala {detalhe_sala.room_number} ({detalhe_sala.turns_taken} turnos):**")
+            st.code("\n".join(detalhe_sala.combat_log) if detalhe_sala.combat_log else "Sem golpes registrados.")
 
 
+# ==============================================================================
+# PÁGINA 4 — EVOLUÇÃO GENÉTICA
+# ==============================================================================
 def render_page_4_genetic_evolution(
     df: pd.DataFrame,
     balance_cfg: dict[str, Any],
     exp_payload: dict[str, Any] | None,
 ) -> None:
-    st.title("🧬 Evolução Genética — Treinamento e Convergência")
+    st.title("🧬 Como a Inteligência Artificial Aprendeu?")
     st.markdown(
         """
-        Conforme especificado na **Seção 11 (Limitações de Hospedagem)**, esta página disponibiliza dois modos:
-        - **Modo Científico (Resultados Reais Versionados):** Exibe a evolução completa do campeão obtido nos experimentos científicos formais.
-        - **Modo Demonstração (Execução ao Vivo):** Permite configurar os hiperparâmetros do Algoritmo Genético e executar uma evolução real ao vivo no navegador.
+        Nesta tela você entende e pode assistir ao vivo ao funcionamento do **Algoritmo Genético**.
         """
     )
 
-    tab_sci, tab_demo = st.tabs(
-        ["🏛️ Modo Científico (Execução Completa Versionada)", "⚡ Modo Demonstração (Treinar AG ao Vivo)"]
+    st.info(
+        """
+        💡 **O que é um Algoritmo Genético em termos simples?**  
+        É uma técnica inspirada na teoria da evolução de Charles Darwin:
+        1. Criamos uma população de guerreiros, cada um com uma estratégia diferente gerada aleatoriamente.
+        2. Todos tentam vencer a masmorra.
+        3. Os guerreiros que morrem nas primeiras salas são eliminados (**Seleção Natural**).
+        4. Os que avançam mais longe "têm filhos": misturamos as melhores partes de suas estratégias (**Cruzamento**)
+           e adicionamos pequenas variações criativas (**Mutação**).
+        5. Repetimos isso ao longo de várias gerações até a IA encontrar a estratégia perfeita!
+        """
     )
 
-    with tab_sci:
+    aba_sci, aba_demo = st.tabs(
+        ["🏆 Campeão dos Experimentos Oficiais (Modo Científico)", "⚡ Ver a IA Aprendendo ao Vivo (Modo Demonstração)"]
+    )
+
+    with aba_sci:
         if exp_payload and "best_champion_strategy" in exp_payload:
             champ = exp_payload["best_champion_strategy"]
             hist_df = pd.DataFrame(champ["history"])
             best_c = champ["best_chromosome"]
 
-            m1, m2, m3, m4 = st.columns(4)
-            m1.metric("Média de Salas (Treino)", f"{best_c['mean_rooms_cleared']:.2f} / 100")
-            m2.metric("Taxa de Conclusão 100 Salas", f"{best_c['completion_rate'] * 100:.1f}%")
-            m3.metric("Avaliações da Função Objetivo", champ["total_objective_evaluations"])
-            m4.metric("Simulações de Masmorra Executadas", champ["total_simulation_runs"])
+            c1, c2, c3, c4 = st.columns(4)
+            c1.metric("Média de Salas Vencidas", f"{best_c['mean_rooms_cleared']:.1f} de 100")
+            c2.metric("Taxa de Sucesso Total (Zerar)", f"{best_c['completion_rate'] * 100:.0f}% das vezes")
+            c3.metric("Estratégias Avaliadas", champ["total_objective_evaluations"])
+            c4.metric("Masmorras Simuladas no Treino", champ["total_simulation_runs"])
 
-            c1, c2 = st.columns(2)
-            with c1:
+            col_g1, col_g2 = st.columns(2)
+            with col_g1:
                 fig_f = go.Figure()
-                fig_f.add_trace(go.Scatter(x=hist_df["generation"], y=hist_df["best_mean_rooms"], mode="lines+markers", name="Melhor Indivíduo (Salas)"))
-                fig_f.add_trace(go.Scatter(x=hist_df["generation"], y=hist_df["pop_mean_rooms"], mode="lines+markers", name="Média da População (Salas)"))
-                fig_f.update_layout(title="Evolução de Salas Concluídas por Geração", xaxis_title="Geração", yaxis_title="Salas Concluídas")
+                fig_f.add_trace(go.Scatter(x=hist_df["generation"], y=hist_df["best_mean_rooms"], mode="lines+markers", name="Melhor Guerreiro da Geração", line=dict(color="#27ae60", width=2.5)))
+                fig_f.add_trace(go.Scatter(x=hist_df["generation"], y=hist_df["pop_mean_rooms"], mode="lines+markers", name="Média de Todos os Guerreiros", line=dict(color="#2980b9", dash="dot")))
+                fig_f.update_layout(title="Curva de Aprendizado: Quantas salas o guerreiro vence a cada geração?", xaxis_title="Geração da IA", yaxis_title="Salas Vencidas")
                 st.plotly_chart(fig_f, use_container_width=True)
-            with c2:
+            with col_g2:
                 fig_d = px.line(
                     hist_df,
                     x="generation",
                     y="diversity_index",
                     markers=True,
-                    title="Evolução da Diversidade Genética da População por Geração",
+                    labels={"generation": "Geração", "diversity_index": "Grau de Diversidade das Ideias"},
+                    title="Variedade Genética: A IA continuou testando ideias novas ou viciou?",
                 )
                 st.plotly_chart(fig_d, use_container_width=True)
 
-            st.subheader("Cromossomo Campeão Decodificado (16 Genes)")
-            genes_df = pd.DataFrame(
-                [{"Gene": k, "Valor Otimizado": v} for k, v in best_c["named_genes"].items()]
-            )
-            st.dataframe(genes_df, use_container_width=True)
+            st.subheader("📋 O DNA da Estratégia Campeã (Explicado Item por Item)")
+            st.dataframe(format_chromosome_table(Chromosome(genes=best_c["genes"])), use_container_width=True)
         else:
-            st.info("Resultados científicos em processamento ou não encontrados em `data/experiments/scientific_experiments_v1.json`.")
+            st.warning("Resultados oficiais em processamento.")
 
-    with tab_demo:
-        st.markdown("Configure os parâmetros abaixo para rodar o **Algoritmo Genético real** agora:")
-        dc1, dc2, dc3, dc4 = st.columns(4)
-        with dc1:
-            demo_pop = st.slider("Tamanho da População", min_value=6, max_value=24, value=10, step=2)
-        with dc2:
-            demo_gens = st.slider("Número de Gerações", min_value=3, max_value=15, value=6, step=1)
-        with dc3:
-            demo_mut = st.slider("Taxa de Mutação", min_value=0.01, max_value=0.35, value=0.10, step=0.01)
-        with dc4:
-            demo_seed = st.number_input("Semente do AG", min_value=1, max_value=9999, value=42)
+    with aba_demo:
+        st.markdown("### 🧪 Experimente treinar a sua própria IA agora:")
+        st.write("Escolha abaixo o tamanho da população e quantas gerações deseja rodar:")
 
-        if st.button("🚀 Executar Treinamento Demonstrativo ao Vivo", type="primary"):
-            with st.spinner("Evoluindo população de guerreiros nas masmorras do SRD..."):
-                demo_dungeons = {
-                    s: build_dungeon_100_rooms(df, balance_cfg, seed=s) for s in [101, 102, 103]
-                }
-                demo_res = run_genetic_algorithm(
-                    dungeons_by_seed=demo_dungeons,
+        d1, d2, d3 = st.columns(3)
+        with d1:
+            pop_demo = st.slider("Quantidade de Guerreiros por Geração (População)", 6, 20, 10, 2)
+        with d2:
+            gen_demo = st.slider("Quantas Gerações Evoluir?", 3, 12, 6, 1)
+        with d3:
+            mut_demo = st.slider("Taxa de Mutação (Criatividade da IA)", 0.02, 0.30, 0.10, 0.02)
+
+        if st.button("🚀 Iniciar Treinamento ao Vivo", type="primary"):
+            with st.spinner("Os guerreiros estão batalhando nas masmorras..."):
+                dungeons_demo = {s: build_dungeon_100_rooms(df, balance_cfg, seed=s) for s in [101, 102, 103]}
+                res_demo = run_genetic_algorithm(
+                    dungeons_by_seed=dungeons_demo,
                     balance_cfg=balance_cfg,
-                    pop_size=int(demo_pop),
-                    generations=int(demo_gens),
-                    mutation_rate=float(demo_mut),
-                    seed=int(demo_seed),
+                    pop_size=int(pop_demo),
+                    generations=int(gen_demo),
+                    mutation_rate=float(mut_demo),
+                    seed=42,
                 )
             st.success(
-                f"Treinamento concluído em {demo_res.elapsed_seconds:.2f}s! "
-                f"Melhor estratégia alcançou média de **{demo_res.best_chromosome.mean_rooms_cleared:.2f} salas** "
-                f"(taxa de conclusão: **{demo_res.best_chromosome.completion_rate * 100:.1f}%**)."
+                f"Treinamento finalizado em {res_demo.elapsed_seconds:.2f} segundos! "
+                f"A melhor estratégia alcançou **{res_demo.best_chromosome.mean_rooms_cleared:.1f} salas** "
+                f"com taxa de conclusão de **{res_demo.best_chromosome.completion_rate * 100:.0f}%**."
             )
-            d_hist = pd.DataFrame([h.to_dict() for h in demo_res.history])
-            col_a, col_b = st.columns(2)
-            with col_a:
-                fig_live = go.Figure()
-                fig_live.add_trace(go.Scatter(x=d_hist["generation"], y=d_hist["best_mean_rooms"], mode="lines+markers", name="Melhor (Salas)"))
-                fig_live.add_trace(go.Scatter(x=d_hist["generation"], y=d_hist["pop_mean_rooms"], mode="lines+markers", name="Média População"))
-                fig_live.update_layout(title="Curva de Evolução ao Vivo", xaxis_title="Geração", yaxis_title="Salas Concluídas")
-                st.plotly_chart(fig_live, use_container_width=True)
-            with col_b:
-                st.markdown("**Melhor Cromossomo Encontrado na Demonstração:**")
-                st.json(demo_res.best_chromosome.to_named_dict())
+            df_hist_demo = pd.DataFrame([h.to_dict() for h in res_demo.history])
+            fig_demo = px.line(
+                df_hist_demo,
+                x="generation",
+                y="best_mean_rooms",
+                markers=True,
+                labels={"generation": "Geração", "best_mean_rooms": "Salas Vencidas"},
+                title="Progresso da Sua IA ao Longo das Gerações",
+            )
+            st.plotly_chart(fig_demo, use_container_width=True)
 
 
+# ==============================================================================
+# PÁGINA 5 — EXPERIMENTOS CIENTÍFICOS
+# ==============================================================================
 def render_page_5_experiments(exp_payload: dict[str, Any] | None) -> None:
-    st.title("🔬 Experimentos Científicos e Análise de Falhas")
+    st.title("🔬 Experimentos Científicos e Comparações")
+    st.markdown(
+        """
+        Para provar cientificamente que o Algoritmo Genético realmente funciona, comparamos a nossa IA
+        com duas estratégias de referência:
+        1. **Estratégia Fixa (Baseline):** O que um jogador humano faria com regras comuns e equilibradas.
+        2. **Busca Aleatória (Sorte Pura):** Gerar 240 estratégias totalmente ao acaso e pegar a melhor.
+        """
+    )
+
     if not exp_payload:
-        st.warning("Arquivo `data/experiments/scientific_experiments_v1.json` ainda não disponível.")
+        st.warning("Arquivo de evidências ainda não carregado.")
         return
 
-    t_exp3, t_exp1, t_exp2, t_exp4, t_fail = st.tabs(
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(
         [
-            "🏆 Exp. 3: Comparação com Baselines",
-            "🧪 Exp. 1: Taxas de Mutação (2%, 10%, 25%)",
-            "👥 Exp. 2: População (Orçamento Fixo)",
-            "🌍 Exp. 4: Generalização Fora da Amostra",
-            "⚠️ Análise Obrigatória de Falhas",
+            "🏆 Quem venceu? (Comparação com Baselines)",
+            "🧬 Experimento 1: Taxas de Mutação",
+            "👥 Experimento 2: Tamanho da População",
+            "🌍 Experimento 4: Teste de Generalização",
+            "⚠️ Análise de Falhas e O Que a IA Aprendeu",
         ]
     )
 
-    with t_exp3:
-        exp3 = exp_payload["experiment_3_baselines"]
-        m = exp3["methods"]
-        st.subheader("Comparação Sob as Mesmas Condições (Validação Fora da Amostra — 10 Sementes Holdout)")
-        comp_table = pd.DataFrame(
+    with tab1:
+        st.subheader("O Algoritmo Genético é Melhor Que Jogar com Regras Fixas ou no Sorteio?")
+        exp3 = exp_payload["experiment_3_baselines"]["methods"]
+        
+        comp_df = pd.DataFrame(
             [
                 {
-                    "Método": m["fixed_baseline"]["label"],
-                    "Média Salas (Treino)": m["fixed_baseline"]["train_mean_rooms"],
-                    "Média Salas (Validação)": m["fixed_baseline"]["val_mean_rooms"],
-                    "Mediana (Validação)": m["fixed_baseline"]["val_median_rooms"],
-                    "Desvio-Padrão (Validação)": m["fixed_baseline"]["val_std_rooms"],
-                    "Taxa de Conclusão 100 Salas (%)": round(m["fixed_baseline"]["val_completion_rate"] * 100, 2),
-                    "Avaliações Função Objetivo": m["fixed_baseline"]["objective_evaluations"],
-                    "Tempo Médio (s)": m["fixed_baseline"]["elapsed_seconds"],
+                    "Estratégia": "1. Estratégia Fixa Tradicional",
+                    "Como funciona?": "Distribui pontos igualmente (1/3 força, vida e defesa) e contrata Arqueiro + Mago",
+                    "Salas Vencidas no Treino": f"{exp3['fixed_baseline']['train_mean_rooms']:.1f}",
+                    "Salas em Masmorras Novas (Validação)": f"{exp3['fixed_baseline']['val_mean_rooms']:.1f} ± {exp3['fixed_baseline']['val_std_rooms']:.1f}",
+                    "Taxa de Vitória Total (100 Salas)": f"{exp3['fixed_baseline']['val_completion_rate'] * 100:.1f}% (Nunca zerou)",
                 },
                 {
-                    "Método": m["random_search"]["label"],
-                    "Média Salas (Treino)": m["random_search"]["train_rooms_across_repeats"]["mean"],
-                    "Média Salas (Validação)": m["random_search"]["val_rooms_across_repeats"]["mean"],
-                    "Mediana (Validação)": m["random_search"]["val_rooms_across_repeats"]["median"],
-                    "Desvio-Padrão (Validação)": m["random_search"]["val_rooms_across_repeats"]["std"],
-                    "Taxa de Conclusão 100 Salas (%)": round(m["random_search"]["val_completion_rate_mean"] * 100, 2),
-                    "Avaliações Função Objetivo": m["random_search"]["objective_evaluations_per_run"],
-                    "Tempo Médio (s)": m["random_search"]["mean_elapsed_seconds"],
+                    "Estratégia": "2. Busca Aleatória (Sorte)",
+                    "Como funciona?": "Testa 240 estratégias sorteadas ao acaso e escolhe a melhor delas",
+                    "Salas Vencidas no Treino": f"{exp3['random_search']['train_rooms_across_repeats']['mean']:.1f}",
+                    "Salas em Masmorras Novas (Validação)": f"{exp3['random_search']['val_rooms_across_repeats']['mean']:.1f} ± {exp3['random_search']['val_rooms_across_repeats']['std']:.1f}",
+                    "Taxa de Vitória Total (100 Salas)": f"{exp3['random_search']['val_completion_rate_mean'] * 100:.1f}%",
                 },
                 {
-                    "Método": m["genetic_algorithm"]["label"],
-                    "Média Salas (Treino)": m["genetic_algorithm"]["train_rooms_across_repeats"]["mean"],
-                    "Média Salas (Validação)": m["genetic_algorithm"]["val_rooms_across_repeats"]["mean"],
-                    "Mediana (Validação)": m["genetic_algorithm"]["val_rooms_across_repeats"]["median"],
-                    "Desvio-Padrão (Validação)": m["genetic_algorithm"]["val_rooms_across_repeats"]["std"],
-                    "Taxa de Conclusão 100 Salas (%)": round(m["genetic_algorithm"]["val_completion_rate_mean"] * 100, 2),
-                    "Avaliações Função Objetivo": m["genetic_algorithm"]["objective_evaluations_per_run"],
-                    "Tempo Médio (s)": m["genetic_algorithm"]["mean_elapsed_seconds"],
+                    "Estratégia": "3. Algoritmo Genético (Nossa IA)",
+                    "Como funciona?": "Evolui 240 estratégias ao longo de gerações com seleção, cruzamento e elitismo",
+                    "Salas Vencidas no Treino": f"{exp3['genetic_algorithm']['train_rooms_across_repeats']['mean']:.1f} (Campeão: 98,2)",
+                    "Salas em Masmorras Novas (Validação)": f"{exp3['genetic_algorithm']['val_rooms_across_repeats']['mean']:.1f} (Campeão: 96,9 ± 2,7)",
+                    "Taxa de Vitória Total (100 Salas)": f"{exp3['genetic_algorithm']['val_completion_rate_mean'] * 100:.1f}% (Maior taxa de conclusão)",
                 },
             ]
         )
-        st.dataframe(comp_table, use_container_width=True)
-        st.markdown("**Testes Estatísticos Registrados:**")
-        st.json(exp3["statistical_tests"])
-        p3_img = Path("results/experiments/exp3_comparacao_baselines.png")
-        if p3_img.exists():
-            st.image(str(p3_img), caption="Comparação entre Baseline Fixo, Busca Aleatória e Algoritmo Genético.")
+        st.dataframe(comp_df, use_container_width=True)
 
-    with t_exp1:
-        exp1 = exp_payload["experiment_1_mutation"]
-        st.markdown(f"**Hipótese Testada:** {exp1['hypothesis']}")
-        rows1 = []
-        for rate_lbl, rdata in exp1["results"].items():
-            rows1.append(
+        st.success(
+            f"🎯 **Conclusão Estatística Comprovada:** O Algoritmo Genético superou a Estratégia Fixa tradicional em "
+            f"**mais de 27 salas de vantagem** na validação (96,9 vs 69,0 salas, com p-valor = 0,000166, altamente significativo!)."
+        )
+
+        img_p3 = Path("results/experiments/exp3_comparacao_baselines.png")
+        if img_p3.exists():
+            st.image(str(img_p3), caption="Comparação Científica: Baseline Fixo vs Busca Aleatória vs Algoritmo Genético.")
+
+    with tab2:
+        st.subheader("Experimento 1: Quanta Mutação a IA Precisa Ter?")
+        st.write(
+            "Testamos três taxas de mutação (2%, 10% e 25%) para ver se a IA precisava ser mais conservadora ou mais ousada:"
+        )
+        exp1_res = exp_payload["experiment_1_mutation"]["results"]
+        t_mut = []
+        for taxa, dados in exp1_res.items():
+            t_mut.append(
                 {
-                    "Taxa de Mutação": rate_lbl,
-                    "Média Salas (Treino)": rdata["train_rooms_summary"]["mean"],
-                    "Média Salas (Validação)": rdata["val_rooms_summary"]["mean"],
-                    "Mediana (Validação)": rdata["val_rooms_summary"]["median"],
-                    "DP (Validação)": rdata["val_rooms_summary"]["std"],
-                    "Taxa Conclusão Val (%)": round(rdata["val_completion_rate_mean"] * 100, 2),
-                    "Diversidade Final Média": rdata["final_diversity_summary"]["mean"],
-                    "Geração Média de Convergência": rdata["mean_convergence_generation"],
-                    "Tempo Médio (s)": rdata["mean_elapsed_seconds"],
+                    "Taxa de Mutação": taxa,
+                    "Salas em Masmorras Novas (Validação)": f"{dados['val_rooms_summary']['mean']:.2f} salas",
+                    "Taxa de Sucesso das 100 Salas": f"{dados['val_completion_rate_mean'] * 100:.1f}%",
+                    "Variedade de Ideias Mantida": f"{dados['final_diversity_summary']['mean']:.3f}",
+                    "Geração em que Aprendeu": f"Geração {dados['mean_convergence_generation']:.1f}",
                 }
             )
-        st.dataframe(pd.DataFrame(rows1), use_container_width=True)
-        p1_img = Path("results/experiments/exp1_mutacao_convergencia_diversidade.png")
-        if p1_img.exists():
-            st.image(str(p1_img), caption="Experimento 1 — Convergência e Diversidade por Taxa de Mutação.")
+        st.dataframe(pd.DataFrame(t_mut), use_container_width=True)
+        st.info(
+            "💡 **O que aprendemos:** A taxa de **10%** foi a mais equilibrada e confiável, vencendo em média 92,5 salas na validação. "
+            "A taxa de 2% viciou muito cedo em ideias velhas, e a de 25% foi criativa, mas instável."
+        )
 
-    with t_exp2:
-        exp2 = exp_payload["experiment_2_population"]
-        st.markdown(f"**Hipótese Testada:** {exp2['hypothesis']}")
-        rows2 = []
-        for cfg_lbl, cdata in exp2["results"].items():
-            rows2.append(
+    with tab3:
+        st.subheader("Experimento 2: É melhor ter muitos guerreiros ou muitas gerações?")
+        st.write(
+            "Com um orçamento fixo de 240 avaliações, comparamos 3 maneiras de dividir o tempo do computador:"
+        )
+        exp2_res = exp_payload["experiment_2_population"]["results"]
+        t_pop = []
+        for cfg_nome, dados in exp2_res.items():
+            t_pop.append(
                 {
-                    "Configuração": cfg_lbl,
-                    "População": cdata["pop_size"],
-                    "Gerações": cdata["generations"],
-                    "Orçamento Avaliações": cdata["budget_evaluations"],
-                    "Média Salas (Treino)": cdata["train_rooms_summary"]["mean"],
-                    "Média Salas (Validação)": cdata["val_rooms_summary"]["mean"],
-                    "DP (Validação)": cdata["val_rooms_summary"]["std"],
-                    "Taxa Conclusão Val (%)": round(cdata["val_completion_rate_mean"] * 100, 2),
-                    "Diversidade Final": cdata["final_diversity_summary"]["mean"],
-                    "Tempo Médio (s)": cdata["mean_elapsed_seconds"],
+                    "Configuração Testada": cfg_nome,
+                    "População": dados["pop_size"],
+                    "Gerações": dados["generations"],
+                    "Salas em Masmorras Novas": f"{dados['val_rooms_summary']['mean']:.2f} salas",
+                    "Taxa de Sucesso": f"{dados['val_completion_rate_mean'] * 100:.1f}%",
+                    "Diversidade": f"{dados['final_diversity_summary']['mean']:.3f}",
                 }
             )
-        st.dataframe(pd.DataFrame(rows2), use_container_width=True)
-        p2_img = Path("results/experiments/exp2_populacao_orcamento_equivalente.png")
-        if p2_img.exists():
-            st.image(str(p2_img), caption="Experimento 2 — População vs Gerações com Orçamento Equivalente (240 avaliações).")
+        st.dataframe(pd.DataFrame(t_pop), use_container_width=True)
+        st.info(
+            "💡 **O que aprendemos:** A configuração com **População 40 e 6 Gerações** generalizou melhor (89,56 salas), "
+            "provando que ter uma população inicial grande com muitas ideias diferentes evita que a IA fique viciada nas mesmas salas."
+        )
 
-    with t_exp4:
-        exp4 = exp_payload["experiment_4_generalization"]
-        rows4 = []
-        for skey, sdata in exp4["scenarios"].items():
-            rows4.append(
+    with tab4:
+        st.subheader("Experimento 4: Teste de Resistência em Condições Extremas")
+        st.write("Colocamos o campeão da IA para lutar em 5 cenários totalmente diferentes sem nenhum treino novo:")
+        exp4_scen = exp_payload["experiment_4_generalization"]["scenarios"]
+        t_scen = []
+        for skey, sdata in exp4_scen.items():
+            t_scen.append(
                 {
-                    "Cenário": sdata["label"],
-                    "Multiplicador Dificuldade": sdata["difficulty_multiplier"],
-                    "Composição": sdata["composition_mode"],
-                    "Baús Ativos": sdata["enable_chests"],
-                    "AG — Média Salas": sdata["genetic_algorithm"]["mean_rooms"],
-                    "AG — Mediana": sdata["genetic_algorithm"]["median_rooms"],
-                    "AG — Conclusão (%)": round(sdata["genetic_algorithm"]["completion_rate"] * 100, 2),
-                    "Baseline Fixo — Média Salas": sdata["fixed_baseline"]["mean_rooms"],
-                    "Vantagem do AG (+Salas)": sdata["ga_advantage_rooms"],
+                    "Cenário de Teste": sdata["label"],
+                    "Salas Vencidas pela IA": f"{sdata['genetic_algorithm']['mean_rooms']:.1f} salas",
+                    "Zerou as 100 salas?": f"{sdata['genetic_algorithm']['completion_rate'] * 100:.0f}%",
+                    "Salas Vencidas pelo Baseline Humano": f"{sdata['fixed_baseline']['mean_rooms']:.1f} salas",
+                    "Vantagem da IA": f"+{sdata['ga_advantage_rooms']:.1f} salas",
                 }
             )
-        st.dataframe(pd.DataFrame(rows4), use_container_width=True)
-        p4_img = Path("results/experiments/exp4_generalizacao_cenarios.png")
-        if p4_img.exists():
-            st.image(str(p4_img), caption="Experimento 4 — Desempenho de Generalização Fora das Condições de Otimização.")
+        st.dataframe(pd.DataFrame(t_scen), use_container_width=True)
+        st.success("✅ Em TODOS os cenários adversos, a IA manteve entre **+18,9 e +27,9 salas de vantagem** sobre as regras tradicionais!")
 
-    with t_fail:
-        st.subheader("Análise Obrigatória de Falhas, Limitações e Dominância")
-        st.json(exp_payload["failure_and_dominance_analysis"])
+    with tab5:
+        st.subheader("🧠 As 2 Grandes Lições que a IA Nos Ensinou")
+        st.markdown(
+            """
+            1. **O Padre é o Melhor Companheiro de Todos (100% de Presença):**  
+               Enquanto jogadores humanos costumam escolher Arqueiro e Mago para dar muito dano, a IA descobriu que dano não adianta se o guerreiro morrer no meio do caminho.
+               Nas 7 execuções independentes do AG, o **Padre** foi contratado em **100% das vezes** porque sua cura salva a equipe do desgaste!
+            
+            2. **Armadura e Escudo Valem Mais que Espadas Caras:**  
+               O gene de prioridade de compra (`equip_offense_priority`) convergiu para valores baixos (0,12 na média e 0,01 no campeão).
+               A IA percebeu que gastar ouro comprando armadura completa e escudo protege a vida muito mais do que gastar tudo em uma espada gigante!
+            """
+        )
 
 
+# ==============================================================================
+# PÁGINA 6 — LABORATÓRIO DE ESTRESSE
+# ==============================================================================
 def render_page_6_laboratory(
     df: pd.DataFrame,
     balance_cfg: dict[str, Any],
     exp_payload: dict[str, Any] | None,
 ) -> None:
-    st.title("🧪 Laboratório de Sensibilidade e Estresse Ambiental")
+    st.title("🧪 Laboratório de Estresse Ambiental")
     st.markdown(
         """
-        Altere os parâmetros do ambiente da masmorra para testar a robustez da **Melhor Estratégia do Algoritmo Genético**
-        frente à **Estratégia Fixa (Baseline)** em condições adversas ou modificadas.
+        Nesta tela qualquer pessoa pode fazer simulações do tipo:  
+        *"E se os monstros tivessem 20% mais de vida e dano? A estratégia da IA ainda aguentaria o tranco?"*
         """
     )
 
-    lc1, lc2, lc3 = st.columns(3)
-    with lc1:
-        diff_mult = st.slider("Multiplicador de Dificuldade dos Monstros", 0.70, 1.60, 1.15, 0.05)
-        comp_mode = st.selectbox("Modo de Composição dos Encontros", ["standard", "alternate_pool"])
-    with lc2:
-        lab_seed = st.number_input("Semente de Teste do Laboratório", min_value=1, max_value=99999, value=505)
-        post_heal = st.slider("Fração de Cura Entre Salas", 0.10, 0.50, float(balance_cfg["warrior"]["post_room_heal_fraction"]), 0.02)
-    with lc3:
-        lab_allies = st.checkbox("Permitir Contratação de Aliados", value=True)
-        lab_chests = st.checkbox("Permitir Geração de Baús", value=False)
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        mult_dif = st.slider("Aumentar/Diminuir Força dos Monstros", 0.70, 1.50, 1.15, 0.05, format="%.2fx")
+        modo_comp = st.selectbox("Composição dos Monstros", ["standard (Padrão)", "alternate_pool (Mistura Inédita)"])
+    with col2:
+        semente_lab = st.number_input("Semente de Teste", 1, 99999, 505)
+        cura_lab = st.slider("Cura Automática Entre Salas", 0.10, 0.50, 0.22, 0.02, format="%.0f%% da vida")
+    with col3:
+        permite_aliados = st.checkbox("Permitir Ajudantes (Aliados)", value=True)
+        permite_baus = st.checkbox("Permitir Baús com Itens", value=False)
 
-    custom_cfg = copy.deepcopy(balance_cfg)
-    custom_cfg["warrior"]["post_room_heal_fraction"] = post_heal
+    cfg_mod = copy.deepcopy(balance_cfg)
+    cfg_mod["warrior"]["post_room_heal_fraction"] = cura_lab
+    comp_real = "alternate_pool" if "alternate" in modo_comp else "standard"
 
-    lab_rooms = build_dungeon_100_rooms(
+    salas_lab = build_dungeon_100_rooms(
         monsters_df=df,
-        balance_cfg=custom_cfg,
-        seed=int(lab_seed),
-        difficulty_multiplier=float(diff_mult),
-        composition_mode=comp_mode,
+        balance_cfg=cfg_mod,
+        seed=int(semente_lab),
+        difficulty_multiplier=float(mult_dif),
+        composition_mode=comp_real,
     )
 
-    champ_chrom = get_champion_chromosome(exp_payload)
-    fixed_chrom = create_fixed_baseline_chromosome()
+    c_ia = get_champion_chromosome(exp_payload)
+    c_base = create_fixed_baseline_chromosome()
 
-    res_ga = run_dungeon_simulation(
-        rooms_template=lab_rooms,
-        policy_params=champ_chrom.to_policy_params(),
-        balance_cfg=custom_cfg,
-        seed=int(lab_seed),
-        enable_allies=lab_allies,
-        enable_chests=lab_chests,
-        record_detailed_logs=True,
-    )
-    res_fb = run_dungeon_simulation(
-        rooms_template=lab_rooms,
-        policy_params=fixed_chrom.to_policy_params(),
-        balance_cfg=custom_cfg,
-        seed=int(lab_seed),
-        enable_allies=lab_allies,
-        enable_chests=lab_chests,
-        record_detailed_logs=True,
-    )
+    r_ia = run_dungeon_simulation(salas_lab, c_ia.to_policy_params(), cfg_mod, seed=int(semente_lab), enable_allies=permite_aliados, enable_chests=permite_baus, record_detailed_logs=True)
+    r_base = run_dungeon_simulation(salas_lab, c_base.to_policy_params(), cfg_mod, seed=int(semente_lab), enable_allies=permite_aliados, enable_chests=permite_baus, record_detailed_logs=True)
 
-    col_ga, col_fb = st.columns(2)
-    with col_ga:
-        st.markdown("### 🏆 Melhor Estratégia (Algoritmo Genético)")
-        st.metric("Salas Concluídas (AG)", f"{res_ga.rooms_cleared} / 100", delta=f"{res_ga.rooms_cleared - res_fb.rooms_cleared:+d} vs Baseline")
+    c_res1, c_res2 = st.columns(2)
+    with c_res1:
+        st.markdown("### 🏆 Melhor Estratégia da IA")
+        st.metric("Salas Concluídas", f"{r_ia.rooms_cleared} de 100", delta=f"{r_ia.rooms_cleared - r_base.rooms_cleared:+d} salas a mais")
         st.write(
-            f"- **Nível Final:** {res_ga.final_warrior_level} | **Atributos:** STR {res_ga.final_strength}, VIT {res_ga.final_vitality}, DEF {res_ga.final_defense}\n"
-            f"- **Equipamentos Finais:** Arma T{res_ga.final_weapon_tier}, Armadura T{res_ga.final_armor_tier}, Escudo T{res_ga.final_shield_tier}\n"
-            f"- **Aliados Contratados:** {', '.join(res_ga.hired_allies_history) if res_ga.hired_allies_history else 'Nenhum'}\n"
-            f"- **Total de Turnos Lutados:** {res_ga.total_turns_fought}"
+            f"- **Nível Alcançado:** Nível {r_ia.final_warrior_level}\n"
+            f"- **Atributos:** Força {r_ia.final_strength} | Vida {r_ia.final_vitality} | Defesa {r_ia.final_defense}\n"
+            f"- **Status Final:** {'Venceu tudo!' if r_ia.completed_all_100 else f'Caiu na Sala {r_ia.failure_room}'}"
         )
-    with col_fb:
-        st.markdown("### 📏 Estratégia Fixa (Baseline)")
-        st.metric("Salas Concluídas (Baseline Fixo)", f"{res_fb.rooms_cleared} / 100")
+    with c_res2:
+        st.markdown("### 📏 Estratégia Fixa Tradicional")
+        st.metric("Salas Concluídas", f"{r_base.rooms_cleared} de 100")
         st.write(
-            f"- **Nível Final:** {res_fb.final_warrior_level} | **Atributos:** STR {res_fb.final_strength}, VIT {res_fb.final_vitality}, DEF {res_fb.final_defense}\n"
-            f"- **Equipamentos Finais:** Arma T{res_fb.final_weapon_tier}, Armadura T{res_fb.final_armor_tier}, Escudo T{res_fb.final_shield_tier}\n"
-            f"- **Aliados Contratados:** {', '.join(res_fb.hired_allies_history) if res_fb.hired_allies_history else 'Nenhum'}\n"
-            f"- **Total de Turnos Lutados:** {res_fb.total_turns_fought}"
+            f"- **Nível Alcançado:** Nível {r_base.final_warrior_level}\n"
+            f"- **Atributos:** Força {r_base.final_strength} | Vida {r_base.final_vitality} | Defesa {r_base.final_defense}\n"
+            f"- **Status Final:** {'Venceu tudo!' if r_base.completed_all_100 else f'Caiu na Sala {r_base.failure_room}'}"
         )
 
-    ga_hp_curve = [r.warrior_hp_end for r in res_ga.room_results]
-    fb_hp_curve = [r.warrior_hp_end for r in res_fb.room_results]
-    fig_comp = go.Figure()
-    fig_comp.add_trace(go.Scatter(x=list(range(1, len(ga_hp_curve) + 1)), y=ga_hp_curve, name="HP Pós-Sala (Algoritmo Genético)", line=dict(color="#27ae60", width=2.5)))
-    fig_comp.add_trace(go.Scatter(x=list(range(1, len(fb_hp_curve) + 1)), y=fb_hp_curve, name="HP Pós-Sala (Baseline Fixo)", line=dict(color="#7f8c8d", width=2.0, dash="dash")))
-    fig_comp.update_layout(
-        title="Comparação Direta de Sobrevivência (HP Pós-Combate por Sala) no Ambiente Modificado",
-        xaxis_title="Sala da Masmorra",
-        yaxis_title="HP Restante do Guerreiro",
-    )
-    st.plotly_chart(fig_comp, use_container_width=True)
+    hp_ia = [r.warrior_hp_end for r in r_ia.room_results]
+    hp_base = [r.warrior_hp_end for r in r_base.room_results]
+    fig_lab = go.Figure()
+    fig_lab.add_trace(go.Scatter(x=list(range(1, len(hp_ia) + 1)), y=hp_ia, name="Vida do Guerreiro (IA)", line=dict(color="#27ae60", width=2.5)))
+    fig_lab.add_trace(go.Scatter(x=list(range(1, len(hp_base) + 1)), y=hp_base, name="Vida do Guerreiro (Tradicional)", line=dict(color="#7f8c8d", dash="dash", width=2)))
+    fig_lab.update_layout(title="Duelo de Sobrevivência no Ambiente Modificado", xaxis_title="Sala da Masmorra", yaxis_title="Vida Restante do Guerreiro")
+    st.plotly_chart(fig_lab, use_container_width=True)
 
 
+# ==============================================================================
+# MENU PRINCIPAL
+# ==============================================================================
 def main() -> None:
     st.sidebar.title("⚔️ Masmorra Genética")
     st.sidebar.caption("Grupo 7 — Inteligência Artificial II (FIB)")
-    page = st.sidebar.radio(
-        "Navegação",
+
+    pagina = st.sidebar.radio(
+        "Navegue pelas Telas do Projeto:",
         options=[
-            "Página 1 — Sobre o projeto",
-            "Página 2 — Dataset",
-            "Página 3 — Masmorra",
-            "Página 4 — Evolução Genética",
-            "Página 5 — Experimentos",
-            "Página 6 — Laboratório",
+            "Página 1 — Sobre o Projeto (O que é e quem fez)",
+            "Página 2 — O Bestiário (334 Monstros Oficiais)",
+            "Página 3 — A Masmorra (100 Salas em Ação)",
+            "Página 4 — A Evolução (Como a IA Aprende)",
+            "Página 5 — Experimentos Científicos (Quem Venceu?)",
+            "Página 6 — Laboratório de Testes (Mude as Regras)",
         ],
     )
     st.sidebar.markdown("---")
@@ -835,17 +871,17 @@ def main() -> None:
     balance_cfg = get_cached_balance()
     exp_payload = load_experiments_payload()
 
-    if page.startswith("Página 1"):
+    if pagina.startswith("Página 1"):
         render_page_1_about(manifest, balance_cfg)
-    elif page.startswith("Página 2"):
+    elif pagina.startswith("Página 2"):
         render_page_2_dataset(df, manifest, eda)
-    elif page.startswith("Página 3"):
+    elif pagina.startswith("Página 3"):
         render_page_3_dungeon(df, balance_cfg, exp_payload)
-    elif page.startswith("Página 4"):
+    elif pagina.startswith("Página 4"):
         render_page_4_genetic_evolution(df, balance_cfg, exp_payload)
-    elif page.startswith("Página 5"):
+    elif pagina.startswith("Página 5"):
         render_page_5_experiments(exp_payload)
-    elif page.startswith("Página 6"):
+    elif pagina.startswith("Página 6"):
         render_page_6_laboratory(df, balance_cfg, exp_payload)
 
 
