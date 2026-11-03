@@ -1,1 +1,1 @@
-"""Módulos de baselines, execução de experimentos científicos e geração de relatórios."""
+"""Estratégias de referência, execução de experimentos e geração de relatórios."""

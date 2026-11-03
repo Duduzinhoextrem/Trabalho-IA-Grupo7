@@ -1,1 +1,1 @@
-"""Pacote do Algoritmo Genético implementado do zero (Cromossomo, Fitness, Operadores e Otimizador)."""
+"""Implementação própria do algoritmo genético: cromossomo, aptidão, operadores e otimizador."""

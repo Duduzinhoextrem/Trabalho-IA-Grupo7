@@ -1,11 +1,11 @@
-"""Representação de Cromossomo de Tamanho Fixo (16 Genes), Reparo e Decodificação de Política.
+"""Cromossomo de 16 genes, reparo de valores e conversão em política de decisões.
 
 Estrutura dos 16 genes:
-- [0, 1, 2]: Pesos de distribuição de atributos do Guerreiro (Força, Vitalidade, Defesa) — contínuos, soma = 1.0
+- [0, 1, 2]: Pesos de distribuição de atributos do guerreiro (Força, Vitalidade, Defesa): contínuos, soma = 1.0
 - [3, 4, 5, 6, 7]: Prioridade de contratação das 5 classes de aliados (Mago, Arqueiro, Monge, Padre, Alquimista) em [0, 1]
-- [8, 9, 10]: Pesos de evolução dos atributos dos Aliados (Poder, Vitalidade, Defesa) — contínuos, soma = 1.0
-- [11]: Prioridade ofensiva vs defensiva de equipamentos em [0.0, 1.0]
-- [12]: Gene discreto {0.0, 1.0} — Priorizar contratação de aliado antes de compra de equipamento
+- [8, 9, 10]: Pesos de evolução dos atributos dos aliados (Poder, Vitalidade, Defesa): contínuos, soma = 1.0
+- [11]: Prioridade entre equipamentos ofensivos e defensivos em [0.0, 1.0]
+- [12]: Gene discreto {0.0, 1.0}: priorizar a contratação de aliado antes da compra de equipamento
 - [13]: Quantidade mínima de dinheiro a reservar (ouro) em [0.0, 120.0]
 - [14]: Limiar econômico (multiplicador) para compra de equipamentos em [1.0, 1.8]
 - [15]: Limiar econômico (multiplicador) para contratação de aliados em [1.0, 1.8]
@@ -40,22 +40,22 @@ GENE_NAMES = (
 )
 
 GENE_BOUNDS: tuple[tuple[float, float], ...] = (
-    (0.01, 1.0),   # 0: w_weight_str
-    (0.01, 1.0),   # 1: w_weight_vit
-    (0.01, 1.0),   # 2: w_weight_def
-    (0.0, 1.0),    # 3: ally_prio_mage
-    (0.0, 1.0),    # 4: ally_prio_archer
-    (0.0, 1.0),    # 5: ally_prio_monk
-    (0.0, 1.0),    # 6: ally_prio_priest
-    (0.0, 1.0),    # 7: ally_prio_alchemist
-    (0.01, 1.0),   # 8: ally_weight_power
-    (0.01, 1.0),   # 9: ally_weight_vit
-    (0.01, 1.0),   # 10: ally_weight_def
-    (0.0, 1.0),    # 11: equip_offense_priority
-    (0.0, 1.0),    # 12: hire_before_equip_discrete {0.0, 1.0}
-    (0.0, 120.0),  # 13: min_gold_reserve
-    (1.0, 1.8),    # 14: equipment_buy_threshold
-    (1.0, 1.8),    # 15: ally_hire_threshold
+    (0.01, 1.0),   # 0: peso da força do guerreiro (w_weight_str)
+    (0.01, 1.0),   # 1: peso da vitalidade do guerreiro (w_weight_vit)
+    (0.01, 1.0),   # 2: peso da defesa do guerreiro (w_weight_def)
+    (0.0, 1.0),    # 3: prioridade de contratação do mago (ally_prio_mage)
+    (0.0, 1.0),    # 4: prioridade de contratação do arqueiro (ally_prio_archer)
+    (0.0, 1.0),    # 5: prioridade de contratação do monge (ally_prio_monk)
+    (0.0, 1.0),    # 6: prioridade de contratação do padre (ally_prio_priest)
+    (0.0, 1.0),    # 7: prioridade de contratação do alquimista (ally_prio_alchemist)
+    (0.01, 1.0),   # 8: peso do poder dos aliados (ally_weight_power)
+    (0.01, 1.0),   # 9: peso da vitalidade dos aliados (ally_weight_vit)
+    (0.01, 1.0),   # 10: peso da defesa dos aliados (ally_weight_def)
+    (0.0, 1.0),    # 11: prioridade de equipamento ofensivo (equip_offense_priority)
+    (0.0, 1.0),    # 12: contratar antes de equipar (hire_before_equip_discrete) {0.0, 1.0}
+    (0.0, 120.0),  # 13: reserva mínima de ouro (min_gold_reserve)
+    (1.0, 1.8),    # 14: limiar de compra de equipamento (equipment_buy_threshold)
+    (1.0, 1.8),    # 15: limiar de contratação de aliado (ally_hire_threshold)
 )
 
 DISCRETE_GENE_INDICES = {12}
@@ -63,7 +63,7 @@ NUM_GENES = len(GENE_NAMES)
 
 
 def repair_genes(raw_genes: list[float] | tuple[float, ...]) -> list[float]:
-    """Repara um vetor de genes garantindo limites válidos, normalização de pesos e valores discretos."""
+    """Ajusta os genes aos limites, normaliza os pesos e corrige os valores discretos."""
     if len(raw_genes) != NUM_GENES:
         raise ValueError(f"Esperados {NUM_GENES} genes, recebido {len(raw_genes)}.")
 
@@ -98,7 +98,7 @@ def repair_genes(raw_genes: list[float] | tuple[float, ...]) -> list[float]:
 
 
 def is_valid_chromosome_genes(genes: list[float] | tuple[float, ...]) -> bool:
-    """Verifica se um vetor de genes respeita todos os domínios e invariantes de soma."""
+    """Verifica os limites dos genes e as somas dos pesos."""
     if len(genes) != NUM_GENES:
         return False
     for i, val in enumerate(genes):
@@ -118,7 +118,7 @@ def is_valid_chromosome_genes(genes: list[float] | tuple[float, ...]) -> bool:
 
 @dataclass
 class Chromosome:
-    """Indivíduo da população do Algoritmo Genético."""
+    """Indivíduo da população do algoritmo genético."""
 
     genes: list[float]
     fitness: float | None = None
@@ -143,14 +143,14 @@ class Chromosome:
         )
 
     def to_policy_params(self) -> dict[str, Any]:
-        """Decodifica os 16 genes nos parâmetros de política online do simulador."""
+        """Converte os 16 genes nos parâmetros que orientam as decisões durante a simulação."""
         g = self.genes
         ally_prios = {
-            ALLY_CLASSES_ORDER[0]: g[3],  # mage
-            ALLY_CLASSES_ORDER[1]: g[4],  # archer
-            ALLY_CLASSES_ORDER[2]: g[5],  # monk
-            ALLY_CLASSES_ORDER[3]: g[6],  # priest
-            ALLY_CLASSES_ORDER[4]: g[7],  # alchemist
+            ALLY_CLASSES_ORDER[0]: g[3],  # Mago
+            ALLY_CLASSES_ORDER[1]: g[4],  # Arqueiro
+            ALLY_CLASSES_ORDER[2]: g[5],  # Monge
+            ALLY_CLASSES_ORDER[3]: g[6],  # Padre
+            ALLY_CLASSES_ORDER[4]: g[7],  # Alquimista
         }
         return {
             "warrior_attr_weights": (g[0], g[1], g[2]),

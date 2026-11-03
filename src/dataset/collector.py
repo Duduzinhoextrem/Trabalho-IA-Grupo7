@@ -1,11 +1,11 @@
-"""Coletor ETL do Dataset Externo D&D 5e SRD API (2014).
+"""Coleta de dados da API D&D 5e SRD (2014).
 
-Responsável por:
+Etapas da coleta:
 1. Consultar a listagem oficial de monstros em https://www.dnd5eapi.co/api/2014/monsters
-2. Recuperar os registros completos de cada criatura mantendo referência original
-3. Tratar falhas HTTP, timeouts e limites de taxa (retry com backoff exponencial)
+2. Obter os registros completos de cada criatura e manter a referência original
+3. Tratar erros HTTP, tempo limite e limites de requisições, com novas tentativas e espera exponencial
 4. Preservar os dados brutos (JSON) em `data/raw/monsters_raw_srd2014.json`
-5. Registrar manifesto completo de proveniência, licenciamento, versão e integridade (SHA-256)
+5. Registrar a origem, a licença, a versão e o hash SHA-256 no manifesto
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ DEFAULT_MANIFEST_PATH = Path("data/metadata/collection_manifest.json")
 
 
 class DataCollectionError(RuntimeError):
-    """Exceção lançada quando a coleta falha e não há snapshot válido disponível."""
+    """Erro de coleta quando não há uma cópia local válida disponível."""
 
 
 def fetch_json_with_retry(
@@ -44,7 +44,7 @@ def fetch_json_with_retry(
     max_retries: int = 3,
     backoff_base: float = 0.75,
 ) -> dict[str, Any]:
-    """Realiza requisição HTTP GET com tratamento de timeout, erros HTTP e backoff."""
+    """Faz uma requisição HTTP GET e trata erros e tempo limite com espera entre tentativas."""
     http = session or requests
     last_error: Exception | None = None
 
@@ -135,13 +135,13 @@ def collect_monsters_from_api(
             if error_msg is not None or detail is None:
                 failed_urls.append({"index": idx, "error": error_msg or "Unknown error"})
                 continue
-            # Verificação básica de registro incompleto na coleta
+            # Verifica se o registro coletado está incompleto.
             required_minimal = ("index", "name", "hit_points", "challenge_rating")
             if any(detail.get(k) is None for k in required_minimal):
                 incomplete_records.append(idx)
             records.append(detail)
 
-    # Ordena deterministicamente por index para reprodutibilidade do hash SHA-256
+    # Ordena pelo campo index para reproduzir o hash SHA-256.
     records.sort(key=lambda r: str(r.get("index", "")))
 
     if not records:
@@ -199,10 +199,10 @@ def load_or_collect_raw_monsters(
     manifest_path: Path = DEFAULT_MANIFEST_PATH,
     force_refresh: bool = False,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    """Carrega o snapshot bruto congelado ou consulta a API caso solicitado/ausente.
+    """Carrega a cópia dos dados brutos ou consulta a API se ela estiver ausente ou houver pedido de atualização.
 
-    Se a API falhar durante uma tentativa de atualização, utiliza o snapshot local
-    versionado e documenta o evento sem jamais inventar registros fictícios.
+    Se a API falhar na atualização, usa a cópia local versionada e registra a falha.
+    Os registros vêm da API ou dessa cópia.
     """
     if not force_refresh and raw_path.exists() and manifest_path.exists():
         records = json.loads(raw_path.read_text(encoding="utf-8"))

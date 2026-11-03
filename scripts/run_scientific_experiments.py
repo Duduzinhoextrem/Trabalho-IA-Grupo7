@@ -1,12 +1,12 @@
-"""Script executável de execução completa dos Experimentos Científicos (Modo Científico).
+"""Execução dos experimentos no modo científico.
 
 Executa com dados reais do SRD 2014:
-1. Experimento 1 — Taxas de Mutação (2%, 10%, 25%)
-2. Experimento 2 — Configurações de População com orçamento equivalente (240 avaliações)
-3. Experimento 3 — Comparação formal com Baselines (Estratégia Fixa, Busca Aleatória e AG)
-4. Experimento 4 — Generalização (Novas sementes, Novas composições, Dificuldade +15%, Sem baús)
-5. Análise Obrigatória de Falhas
-Exporta resultados auditáveis em `data/experiments/scientific_experiments_v1.json` e gráficos em `results/experiments/`.
+1. Experimento 1: taxas de mutação (2%, 10%, 25%)
+2. Experimento 2: configurações de população com orçamento equivalente (240 avaliações)
+3. Experimento 3: comparação entre estratégia fixa, busca aleatória e AG
+4. Experimento 4: generalização (novas sementes, novas composições, dificuldade +15%, sem baús)
+5. Análise de falhas obrigatória
+Exporta uma nova versão dos resultados, preservando o histórico anterior.
 """
 
 from __future__ import annotations
@@ -97,6 +97,9 @@ def main() -> None:
     payload = {
         "metadata": {
             "project": "Masmorra Genética: A Evolução do Guerreiro — Grupo 7 (IA II - FIB)",
+            "results_version": "v2",
+            "budget_note": "O orçamento conta avaliações efetivas; elites preservadas não são reavaliadas. A última geração pode ser parcial.",
+            "dungeon_version": "v2-composicao-alternativa-deterministica",
             "dataset_version": "srd-2014-v1.0.0",
             "balance_version": balance_cfg.get("config_version", "balance-v1.0.0"),
             "started_at_utc": started_utc,
@@ -112,12 +115,12 @@ def main() -> None:
         "failure_and_dominance_analysis": failure_analysis,
     }
 
-    out_data_path = Path("data/experiments/scientific_experiments_v1.json")
-    out_res_path = Path("results/experiments/experiments_summary.json")
+    out_data_path = Path("data/experiments/scientific_experiments_v2.json")
+    out_res_path = Path("results/experiments_v2/experiments_summary.json")
     out_data_path.parent.mkdir(parents=True, exist_ok=True)
     out_res_path.parent.mkdir(parents=True, exist_ok=True)
 
-    charts = generate_experiment_charts(payload, output_dir=Path("results/experiments"))
+    charts = generate_experiment_charts(payload, output_dir=Path("results/experiments_v2"))
     payload["generated_charts"] = charts
 
     json_str = json.dumps(payload, ensure_ascii=False, indent=2)

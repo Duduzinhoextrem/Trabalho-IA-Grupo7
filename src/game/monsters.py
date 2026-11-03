@@ -1,17 +1,17 @@
-"""Camada de adaptação explícita dos registros externos (D&D 5e SRD) para o simulador.
+"""Adaptação dos registros D&D 5e SRD para o simulador.
 
-Cada instância de combate gerada mantém referência rastreável ao registro original:
+Cada monstro simulado mantém a referência ao registro original:
 - `source_index` (ID na API D&D 5e SRD)
-- `source_name` (Nome original)
-- `source_url` (URL do endpoint oficial)
+- `source_name` (nome original)
+- `source_url` (URL do endereço oficial na API)
 - `is_simulated_instance = True`
 
 Fórmulas documentadas em `config/balance.json`:
 1. Vida (`max_hp`): combina `hit_points` real do SRD, bônus de `constitution` e fator moderado da sala.
 2. Ataque (`attack_skill`): derivado de `max_attack_bonus` e maior modificador ofensivo (STR/DEX/INT).
 3. Defesa (`defense`): derivada de `(armor_class - 10) * k_ac + mod(CON) * k_con + CR * k_cr`
-   (compensa a Bounded Accuracy verificada na Descoberta 2 da EDA).
-4. Dano Físico (`physical_damage`) e Dano Mágico (`magical_damage`): derivados de
+   (compensa a precisão limitada pelas regras, observada na descoberta 2 da EDA).
+4. Dano físico (`physical_damage`) e Dano mágico (`magical_damage`): derivados de
    `best_action_physical_damage`, `best_action_magical_damage`, `multiattack_count` e atributos.
 5. Resistências (`phys_resistance`, `mag_resistance`): derivadas das listas reais de resistências,
    imunidades e vulnerabilidades do SRD, limitadas a `max_resistance_cap` (55%) para impedir invulnerabilidade.
@@ -33,7 +33,7 @@ PASSIVE_EXCLUDED_INDICES = {"frog", "sea-horse", "shrieker", "vampire-mist"}
 
 @dataclass
 class MonsterCombatInstance:
-    """Instância simulada de monstro derivada de um registro real do dataset D&D 5e SRD."""
+    """Monstro simulado a partir de um registro D&D 5e SRD."""
 
     instance_id: str
     source_index: str
@@ -44,7 +44,7 @@ class MonsterCombatInstance:
     challenge_rating: float
     srd_xp: int
     room_number: int
-    position: str  # "frontline" ou "backline"
+    position: str  # Linha de frente ("frontline") ou retaguarda ("backline").
     max_hp: int
     current_hp: int
     attack_skill: int
@@ -111,12 +111,12 @@ def adapt_srd_row_to_monster_instance(
     con_mod = (constitution - 10) / 2.0
     mental_mod = max(intelligence, wisdom, charisma) / 2.0 - 5.0
 
-    # 1. Cálculo explícito de Vida (HP)
+    # 1. Vida (HP).
     room_hp_mult = 1.0 + m_cfg["room_hp_progression_rate"] * (room_number - 1)
     base_hp = m_cfg["hp_base_offset"] + raw_hp * m_cfg["hp_scale_factor"] + max(0.0, con_mod * 2.0)
     max_hp = max(12, int(round(base_hp * room_hp_mult * difficulty_multiplier)))
 
-    # 2. Cálculo explícito de Defesa
+    # 2. Defesa.
     ac_delta = max(-3.0, raw_ac - m_cfg["defense_ac_baseline"])
     defense = max(
         2.0,
@@ -132,18 +132,18 @@ def adapt_srd_row_to_monster_instance(
         ),
     )
 
-    # 3. Cálculo explícito de Ataque e Iniciativa
+    # 3. Ataque e iniciativa.
     max_atk_bonus = int(row.get("max_attack_bonus", 3))
     attack_skill = max(1, int(round(max_atk_bonus + cr * 0.35 + room_number * 0.08)))
     initiative = max(1, int(round(10 + dex_mod + cr * 0.15)))
 
-    # 4. Cálculo explícito de Dano Físico e Dano Mágico
+    # 4. Dano físico e mágico.
     raw_phys = float(row.get("best_action_physical_damage", 0.0))
     raw_mag = float(row.get("best_action_magical_damage", 0.0))
     multi = min(3, max(1, int(row.get("multiattack_count", 1))))
     multi_factor = 1.0 + 0.28 * (multi - 1)
 
-    # Tratamento explícito para conjuradores (ex: mage, archmage) ou ataques especiais (rug-of-smothering)
+    # Ajusta conjuradores (mage, archmage) e ataques especiais (rug-of-smothering).
     if raw_phys + raw_mag <= 0.5:
         if mental_mod > str_mod:
             raw_mag = max(6.0, cr * 4.5 + mental_mod * 2.0)
@@ -167,7 +167,7 @@ def adapt_srd_row_to_monster_instance(
             2,
         )
 
-    # 5. Cálculo explícito de Resistências (com teto estrito de 55% para impedir invulnerabilidade)
+    # 5. Resistências limitadas a 55% para impedir invulnerabilidade.
     cap = float(m_cfg["max_resistance_cap"])
     has_phys_res = bool(row.get("has_physical_resistance", False))
     has_mag_res = bool(row.get("has_magical_resistance", False))
@@ -187,10 +187,10 @@ def adapt_srd_row_to_monster_instance(
     if vuln_cnt > 0 and not has_mag_res:
         mag_res = max(-0.25, mag_res - 0.15)
 
-    # 6. Posicionamento tático (Linha de frente vs Retaguarda)
+    # 6. Posição na linha de frente ou na retaguarda.
     position = "backline" if (mag_dmg > phys_dmg and size in ("Tiny", "Small", "Medium")) else "frontline"
 
-    # 7. Experiência e Recompensa Econômica (Ouro)
+    # 7. Experiência e recompensa em ouro.
     xp_reward = max(
         12,
         int(

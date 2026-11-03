@@ -1,6 +1,6 @@
-"""Suíte Completa de Testes Automatizados e Critérios de Aceitação (Seção 16).
+"""Testes automatizados dos critérios de aceitação da Seção 16.
 
-Cobre todos os 17 itens obrigatórios usando dados externos reais e verificações formais.
+Verifica os 17 itens obrigatórios com os dados externos do projeto.
 """
 
 from __future__ import annotations
@@ -85,7 +85,7 @@ def processed_df():
 
 # 1. Coleta de dados com erros de rede
 def test_01_network_error_handling_and_snapshot_fallback(tmp_path: Path) -> None:
-    """Verifica que falhas HTTP/timeout são tratadas com retry e usam o snapshot real sem inventar dados."""
+    """Verifica as novas tentativas após erros HTTP ou tempo limite e o uso da cópia local dos dados."""
     class FailingSession:
         def get(self, *args: Any, **kwargs: Any) -> Any:
             raise requests.ConnectionError("Simulated network outage")
@@ -98,7 +98,7 @@ def test_01_network_error_handling_and_snapshot_fallback(tmp_path: Path) -> None
             backoff_base=0.01,
         )
 
-    # Verifica que load_or_collect_raw_monsters carrega o snapshot versionado real
+    # Confere se load_or_collect_raw_monsters carrega a cópia versionada dos dados.
     records, manifest = load_or_collect_raw_monsters(force_refresh=False)
     assert len(records) == 334
     assert manifest["integrity_status"] == "VERIFIED"
@@ -106,7 +106,7 @@ def test_01_network_error_handling_and_snapshot_fallback(tmp_path: Path) -> None
 
 # 2. Integridade dos dados externos
 def test_02_external_dataset_integrity(processed_df) -> None:
-    """Verifica a integridade do snapshot bruto, manifesto SHA-256 e dataset processado (334 criaturas)."""
+    """Confere a cópia dos dados brutos, o manifesto SHA-256 e os dados processados (334 criaturas)."""
     manifest_path = Path("data/metadata/collection_manifest.json")
     raw_path = Path("data/raw/monsters_raw_srd2014.json")
     assert manifest_path.exists()
@@ -122,7 +122,7 @@ def test_02_external_dataset_integrity(processed_df) -> None:
 
 # 3. Transformação consistente dos registros
 def test_03_consistent_record_transformation() -> None:
-    """Verifica que expressões de dados e registros aninhados da API são normalizados consistentemente."""
+    """Confere a normalização de expressões de dados e registros aninhados da API."""
     assert parse_dice_average("1d6+2") == 5.5
     assert parse_dice_average("2d8+4") == 13.0
     assert parse_dice_average("16d6") == 56.0
@@ -141,20 +141,20 @@ def test_03_consistent_record_transformation() -> None:
 
 # 4. Validação dos atributos dos monstros
 def test_04_monster_attribute_validation(balance_cfg, processed_df) -> None:
-    """Verifica validação de campos obrigatórios, intervalos [1, 30] e adaptação para combate."""
+    """Testa os campos obrigatórios, os intervalos [1, 30] e a adaptação para combate."""
     raw_records, _ = load_or_collect_raw_monsters(force_refresh=False)
     valid_recs, report = validate_raw_dataset(raw_records)
     assert len(valid_recs) == 334
     assert report.invalid_records_count == 0
     assert len(report.duplicate_indices) == 0
 
-    # Testa detecção de registro corrompido artificialmente
+    # Altera um registro para testar a detecção de dados corrompidos.
     bad_rec = {"index": "broken-monster", "name": "Broken", "hit_points": -5, "strength": 99}
     bad_res = validate_single_raw_record(bad_rec)
     assert not bad_res.is_valid
     assert len(bad_res.errors) >= 3
 
-    # Verifica adaptação de registro real para instância simulada
+    # Confere a conversão do registro original em um monstro simulado.
     row = processed_df[processed_df["index"] == "goblin"].iloc[0]
     inst = adapt_srd_row_to_monster_instance(row, room_number=1, instance_seq=1, balance_cfg=balance_cfg)
     assert inst.source_index == "goblin"
@@ -165,7 +165,7 @@ def test_04_monster_attribute_validation(balance_cfg, processed_df) -> None:
 
 # 5. Reprodutibilidade da masmorra
 def test_05_dungeon_reproducibility_by_seed(processed_df, balance_cfg) -> None:
-    """Garante que a mesma semente produz exatamente as mesmas 100 salas e sementes diferentes variam."""
+    """Confere se a mesma semente reproduz as 100 salas e se outras sementes mudam a composição."""
     d1 = build_dungeon_100_rooms(processed_df, balance_cfg, seed=101)
     d2 = build_dungeon_100_rooms(processed_df, balance_cfg, seed=101)
     d3 = build_dungeon_100_rooms(processed_df, balance_cfg, seed=202)
@@ -179,7 +179,7 @@ def test_05_dungeon_reproducibility_by_seed(processed_df, balance_cfg) -> None:
 
 # 6. Regras de combate (sem invulnerabilidade e com limite de turnos)
 def test_06_combat_rules_no_invulnerability_and_turn_limit(processed_df, balance_cfg) -> None:
-    """Garante dano mínimo >= 1 mesmo com defesa extrema, limite de turnos e encerramento na morte do guerreiro."""
+    """Testa o dano mínimo >= 1 com defesa extrema, o limite de turnos e o fim do combate na morte do guerreiro."""
     # Mesmo contra defesa 99999 e resistência máxima, o dano mitigado é >= 1
     dmg = compute_mitigated_damage(raw_damage=10.0, target_defense=99999.0, target_resistance=0.99)
     assert dmg >= 1
@@ -212,16 +212,16 @@ def test_07_level_progression_and_non_refundable_points(balance_cfg) -> None:
 
 # 8. Contratações e proibição de classes duplicadas
 def test_08_ally_hiring_levels_and_no_duplicates(balance_cfg) -> None:
-    """Verifica desbloqueio nos níveis 5 e 15, máximo de 2 aliados e proibição de classe duplicada."""
+    """Testa a abertura de vagas nos níveis 5 e 15, o limite de 2 aliados e o bloqueio de classes duplicadas."""
     w = create_initial_warrior(balance_cfg)
     w.gold = 2000
     prios = {"mage": 0.9, "archer": 0.8, "monk": 0.7, "priest": 0.6, "alchemist": 0.5}
 
-    # Nível 1: nenhum slot liberado
+    # Nível 1: nenhuma vaga de aliado.
     assert w.unlocked_ally_slots(balance_cfg) == 0
     assert try_hire_ally_by_priority(w, prios, balance_cfg) is None
 
-    # Nível 5: 1 slot liberado
+    # Nível 5: 1 vaga de aliado.
     w.level = 5
     assert w.unlocked_ally_slots(balance_cfg) == 1
     tx1 = try_hire_ally_by_priority(w, prios, balance_cfg)
@@ -229,7 +229,7 @@ def test_08_ally_hiring_levels_and_no_duplicates(balance_cfg) -> None:
     # Não pode contratar segundo aliado ainda no nível 5
     assert try_hire_ally_by_priority(w, prios, balance_cfg) is None
 
-    # Nível 15: 2 slots liberados; não pode duplicar 'mage'
+    # Nível 15: 2 vagas de aliado; não pode repetir a classe de mago ('mage').
     w.level = 15
     assert w.unlocked_ally_slots(balance_cfg) == 2
     assert not w.can_hire_ally("mage", balance_cfg)
@@ -246,7 +246,7 @@ def test_09_economy_no_negative_gold_and_40pct_resale(balance_cfg) -> None:
     """Verifica venda por 40%, bloqueio de compras sem ouro suficiente e desligamento de baús."""
     assert compute_resale_value(100, 0.40) == 40
     w = create_initial_warrior(balance_cfg)
-    w.gold = 10  # Insuficiente para comprar arma tier 2 (custo 95)
+    w.gold = 10  # Ouro insuficiente para uma arma de categoria 2 (custo 95).
     assert try_purchase_equipment_upgrade(w, "weapon", balance_cfg) is None
     assert w.gold == 10
 
@@ -256,7 +256,7 @@ def test_09_economy_no_negative_gold_and_40pct_resale(balance_cfg) -> None:
     assert w.weapon_tier == 2
     assert w.gold >= 0
 
-    # Verifica que baús desligados (enable_chests=False) sempre retornam None
+    # Com baús desativados (enable_chests=False), o sorteio deve retornar None.
     rng = random.Random(1)
     for _ in range(50):
         assert roll_post_victory_chest(w, 20, rng, balance_cfg, enable_chests=False) is None
@@ -295,7 +295,7 @@ def test_11_crossover_and_mutation_operators() -> None:
 
 # 12. Elitismo
 def test_12_elitism_preservation() -> None:
-    """Verifica que o operador de elitismo preserva os melhores indivíduos intactos."""
+    """Confere se o elitismo mantém os melhores indivíduos sem alterações."""
     rng = random.Random(77)
     pop = initialize_diverse_population(10, rng)
     for idx, ind in enumerate(pop):
@@ -307,24 +307,24 @@ def test_12_elitism_preservation() -> None:
     assert compute_population_diversity(pop) > 0.0
 
 
-# 13. Cálculo da função fitness (prioridade lexicográfica estrita)
+# 13. Cálculo da aptidão (prioridade lexicográfica estrita).
 def test_13_fitness_strict_room_priority() -> None:
     """Garante que vida restante e ouro nunca invertam a prioridade de avanço de salas."""
-    # Estratégia A avançou 80.2 salas com 0% HP e 0 ouro
+    # Estratégia A: média de 80.2 salas, 0% de vida e 0 ouro.
     f_a = compute_lexicographic_fitness(mean_rooms=80.2, mean_hp_ratio=0.0, mean_gold=0.0)
-    # Estratégia B avançou 80.0 salas com 100% HP e 5000 ouro
+    # Estratégia B: média de 80.0 salas, 100% de vida e 5000 ouro.
     f_b = compute_lexicographic_fitness(mean_rooms=80.0, mean_hp_ratio=1.0, mean_gold=5000.0)
     assert f_a > f_b
 
-    # Em caso de empate exato de salas (80.0 vs 80.0), maior HP e ouro desempatam positivamente
+    # Com a mesma média de salas (80.0), mais vida e ouro aumentam a aptidão para o desempate.
     f_c = compute_lexicographic_fitness(mean_rooms=80.0, mean_hp_ratio=0.8, mean_gold=500.0)
     f_d = compute_lexicographic_fitness(mean_rooms=80.0, mean_hp_ratio=0.2, mean_gold=100.0)
     assert f_c > f_d
 
 
-# 14. Comparação de baselines e orçamento equivalente
+# 14. Comparação de estratégias de referência com orçamento equivalente.
 def test_14_baselines_and_equivalent_budget(processed_df, balance_cfg) -> None:
-    """Verifica execução de Baseline Fixo, Busca Aleatória e AG com mesmo orçamento de avaliações."""
+    """Compara a estratégia fixa, a busca aleatória e o AG com o mesmo orçamento de avaliações."""
     d_suite = {101: build_dungeon_100_rooms(processed_df, balance_cfg, seed=101)}
     fb = create_fixed_baseline_chromosome()
     evaluate_chromosome(fb, d_suite, balance_cfg)
@@ -339,7 +339,7 @@ def test_14_baselines_and_equivalent_budget(processed_df, balance_cfg) -> None:
 
 # 15. Separação entre otimização e validação final
 def test_15_separation_between_train_and_validation_seeds() -> None:
-    """Garante disjunção estrita entre sementes de treinamento, validação e composições alternativas."""
+    """Confere se as sementes de treino, validação e composições alternativas são distintas."""
     train_set = set(TRAIN_SEEDS)
     val_set = set(VALIDATION_SEEDS)
     alt_set = set(ALT_COMPOSITION_SEEDS)
@@ -350,7 +350,7 @@ def test_15_separation_between_train_and_validation_seeds() -> None:
 
 # 16. Execução das 100 salas com rastreabilidade ao SRD
 def test_16_full_100_rooms_execution_and_srd_traceability(processed_df, balance_cfg) -> None:
-    """Verifica execução da simulação completa de 100 salas e rastreabilidade dos monstros ao SRD."""
+    """Testa a simulação das 100 salas e a referência de cada monstro ao registro do SRD."""
     rooms = build_dungeon_100_rooms(processed_df, balance_cfg, seed=101)
     assert len(rooms) == 100
     srd_indices = set(processed_df["index"])
@@ -366,9 +366,9 @@ def test_16_full_100_rooms_execution_and_srd_traceability(processed_df, balance_
     assert len(run_res.room_results) >= run_res.rooms_cleared
 
 
-# 17. Funcionamento e estrutura dos artefatos para aplicação publicada
-def test_17_published_app_artifacts_and_dependencies() -> None:
-    """Verifica presença dos arquivos de deploy, dataset congelado, resultados de EDA e 4 experimentos."""
+# 17. Arquivos necessários para publicação (não verifica uma URL pública)
+def test_17_app_artifacts_and_dependencies() -> None:
+    """Verifica os arquivos de configuração, os dados e os resultados registrados."""
     assert Path("app.py").exists()
     assert Path("requirements.txt").exists()
     assert Path(".streamlit/config.toml").exists()
@@ -376,7 +376,7 @@ def test_17_published_app_artifacts_and_dependencies() -> None:
     assert Path("data/processed/monsters_srd2014_processed.parquet").exists()
     assert Path("data/processed/monsters_srd2014_processed.csv").exists()
     assert Path("results/eda/eda_summary.json").exists()
-    exp_file = Path("data/experiments/scientific_experiments_v1.json")
+    exp_file = Path("data/experiments/scientific_experiments_v2.json")
     assert exp_file.exists()
     exp_data = json.loads(exp_file.read_text(encoding="utf-8"))
     assert "experiment_1_mutation" in exp_data
@@ -384,3 +384,6 @@ def test_17_published_app_artifacts_and_dependencies() -> None:
     assert "experiment_3_baselines" in exp_data
     assert "experiment_4_generalization" in exp_data
     assert "failure_and_dominance_analysis" in exp_data
+    for name in ("random_search", "genetic_algorithm"):
+        runs = exp_data["experiment_3_baselines"]["methods"][name]["repeats"]
+        assert all(run["objective_evaluations"] == 240 for run in runs)

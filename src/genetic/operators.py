@@ -1,4 +1,4 @@
-"""Operadores Evolutivos do Algoritmo Genético (Seleção, Cruzamento, Mutação, Elitismo e Diversidade)."""
+"""Seleção, cruzamento, mutação, elitismo e controle de diversidade do algoritmo genético."""
 
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ def initialize_diverse_population(pop_size: int, rng: random.Random) -> list[Chr
             if g_idx in DISCRETE_GENE_INDICES:
                 raw.append(float((idx + rng.randint(0, 1)) % 2))
             else:
-                # Amostragem tipo Latin-Hypercube estratificada por indivíduo + ruído
+                # Amostragem por hipercubo latino, estratificada por indivíduo e acrescida de ruído.
                 stratum_low = lo + (hi - lo) * (idx / pop_size)
                 stratum_high = lo + (hi - lo) * ((idx + 1) / pop_size)
                 raw.append(rng.uniform(stratum_low, stratum_high))
@@ -43,7 +43,7 @@ def tournament_selection(
     tournament_size: int,
     rng: random.Random,
 ) -> Chromosome:
-    """Seleção por torneio: escolhe `tournament_size` candidatos ao acaso e retorna o de maior fitness."""
+    """Seleção por torneio: escolhe `tournament_size` candidatos ao acaso e retorna o de maior aptidão."""
     k = max(2, min(len(population), tournament_size))
     contenders = rng.sample(population, k)
     winner = max(contenders, key=lambda c: float(c.fitness if c.fitness is not None else -1e9))
@@ -153,7 +153,7 @@ def enforce_diversity_control(
     rng: random.Random,
     min_diversity_threshold: float = 0.06,
 ) -> tuple[list[Chromosome], int]:
-    """Remove clones exatos na prole e injeta perturbação caso a diversidade caia abaixo do limiar."""
+    """Altera clones exatos na prole e adiciona variação se a diversidade cair abaixo do limiar."""
     seen_signatures: set[tuple[float, ...]] = set()
     adjusted: list[Chromosome] = []
     interventions = 0
@@ -161,7 +161,7 @@ def enforce_diversity_control(
     for ind in offspring:
         sig = tuple(round(g, 3) for g in ind.genes)
         if sig in seen_signatures:
-            # Perturba clone para preservar variedade genética
+            # Altera o clone para manter a variedade genética.
             mut = mutate_chromosome(ind, mutation_rate=0.35, rng=rng, sigma_scale=0.25)
             adjusted.append(mut)
             seen_signatures.add(tuple(round(g, 3) for g in mut.genes))

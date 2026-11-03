@@ -1,16 +1,17 @@
-"""Execução dos Experimentos Científicos Reais e Análise de Falhas (Seção 10).
+"""Experimentos e análise de falhas da Seção 10.
 
-Implementa:
-- Experimento 1: Taxas de Mutação (2%, 10%, 25%)
-- Experimento 2: Configurações de População com orçamento equivalente (240 avaliações)
-- Experimento 3: Comparação formal (Estratégia Fixa vs Busca Aleatória vs Algoritmo Genético)
+Experimentos:
+- Experimento 1: Taxas de mutação (2%, 10%, 25%)
+- Experimento 2: Configurações de população com orçamento equivalente (240 avaliações)
+- Experimento 3: Comparação entre estratégia fixa, busca aleatória e algoritmo genético
 - Experimento 4: Generalização fora das condições de treinamento (novas sementes, novas composições, dificuldade +15%, sem baús)
-- Análise Obrigatória de Falhas (convergência prematura, diversidade, aleatoriedade, sobreajuste, dominância de classes/equipamentos)
+- Análise de falhas obrigatória (convergência prematura, diversidade, aleatoriedade, sobreajuste, dominância de classes/equipamentos)
 """
 
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 import statistics
 import time
@@ -32,6 +33,13 @@ from src.genetic.optimizer import GARunResult, run_genetic_algorithm
 TRAIN_SEEDS = [101, 102, 103, 104, 105]
 VALIDATION_SEEDS = [201, 202, 203, 204, 205, 206, 207, 208, 209, 210]
 ALT_COMPOSITION_SEEDS = [301, 302, 303, 304, 305, 306, 307, 308, 309, 310]
+
+
+def generations_for_budget(pop_size: int, budget: int, elite_count: int = 2) -> int:
+    """Inclui uma geração parcial quando o orçamento não cobre a população inteira."""
+    if pop_size <= elite_count or budget <= 0:
+        raise ValueError("População deve ser maior que o número de elites e orçamento positivo.")
+    return 1 + math.ceil(max(0, budget - pop_size) / (pop_size - elite_count))
 
 
 def summarize_metric_list(values: list[float]) -> dict[str, float]:
@@ -57,7 +65,7 @@ def evaluate_chromosome_detailed_on_suite(
     enable_allies: bool = True,
     enable_chests: bool = True,
 ) -> dict[str, Any]:
-    """Avalia um cromossomo em um conjunto de masmorras e retorna estatísticas completas por semente."""
+    """Avalia um cromossomo nas masmorras e retorna as estatísticas por semente."""
     copy_ind = chromosome.copy()
     _, runs = evaluate_chromosome(
         chromosome=copy_ind,
@@ -99,8 +107,10 @@ def run_experiment_1_mutation(
     generations: int = 12,
     n_repeats: int = 5,
 ) -> dict[str, Any]:
-    """Experimento 1 — Impacto da Taxa de Mutação (2%, 10%, 25%) na convergência e diversidade."""
+    """Experimento 1: efeito da taxa de mutação (2%, 10%, 25%) na convergência e na diversidade."""
     results_by_rate: dict[str, Any] = {}
+    budget = pop_size * generations
+    generation_limit = generations_for_budget(pop_size, budget)
 
     for m_rate in mutation_rates:
         rate_label = f"{int(round(m_rate * 100))}%"
@@ -123,18 +133,19 @@ def run_experiment_1_mutation(
                 dungeons_by_seed=train_dungeons,
                 balance_cfg=balance_cfg,
                 pop_size=pop_size,
-                generations=generations,
+                generations=generation_limit,
                 mutation_rate=m_rate,
+                max_evaluations=budget,
                 seed=run_seed,
-                stagnation_limit=generations + 5,  # Executa todas as gerações para comparar curvas
+                stagnation_limit=generation_limit + 5,
             )
             val_eval = evaluate_chromosome_detailed_on_suite(
                 ga_res.best_chromosome, val_dungeons, balance_cfg
             )
 
-            # Identifica geração em que atingiu 99% do fitness final da execução
+            # Localiza a geração que atingiu 99% da aptidão final da execução.
             target_f = (ga_res.best_chromosome.fitness or 0.0) * 0.99
-            conv_gen = generations
+            conv_gen = len(ga_res.history)
             for h in ga_res.history:
                 if h.best_fitness >= target_f:
                     conv_gen = h.generation
@@ -161,6 +172,8 @@ def run_experiment_1_mutation(
                     "val_median_rooms": val_eval["median_rooms"],
                     "val_std_rooms": val_eval["std_rooms"],
                     "val_completion_rate": val_eval["completion_rate"],
+                    "objective_evaluations": ga_res.total_objective_evaluations,
+                    "simulation_runs": ga_res.total_simulation_runs,
                     "final_diversity": ga_res.history[-1].diversity_index,
                     "convergence_generation": conv_gen,
                     "elapsed_seconds": round(ga_res.elapsed_seconds, 4),
@@ -175,7 +188,7 @@ def run_experiment_1_mutation(
         results_by_rate[rate_label] = {
             "mutation_rate": m_rate,
             "n_repeats": n_repeats,
-            "objective_evaluations_per_run": pop_size * generations,
+            "objective_evaluations_per_run": budget,
             "train_rooms_summary": summarize_metric_list(train_rooms_all),
             "val_rooms_summary": summarize_metric_list(val_rooms_all),
             "val_completion_rate_mean": round(float(statistics.mean(val_comp_all)), 4),
@@ -183,7 +196,7 @@ def run_experiment_1_mutation(
             "mean_convergence_generation": round(float(statistics.mean(convergence_gens)), 2),
             "mean_elapsed_seconds": round(float(statistics.mean(elapsed_list)), 4),
             "curves_by_generation": {
-                "generation": list(range(1, generations + 1)),
+                "generation": list(range(1, len(avg_best_curve) + 1)),
                 "best_rooms_mean": avg_best_curve,
                 "pop_rooms_mean": avg_mean_curve,
                 "diversity_mean": avg_div_curve,
@@ -194,7 +207,7 @@ def run_experiment_1_mutation(
     return {
         "experiment_name": "Experimento 1 — Taxas de Mutação (2%, 10%, 25%)",
         "hypothesis": "Taxas de mutação muito baixas (2%) reduzem a diversidade genética e favorecem convergência prematura a ótimos locais, enquanto taxas excessivas (25%) introduzem ruído estocástico nas políticas elitistas; uma taxa intermediária (10%) equilibra exploração e explotação.",
-        "budget_objective_evaluations": pop_size * generations,
+        "budget_objective_evaluations": budget,
         "results": results_by_rate,
     }
 
@@ -204,25 +217,26 @@ def run_experiment_2_population(
     val_dungeons: dict[int, list[DungeonRoom]],
     balance_cfg: dict[str, Any],
     configs: tuple[tuple[str, int, int], ...] = (
-        ("Pop 12 x 20 Ger (240 aval)", 12, 20),
-        ("Pop 20 x 12 Ger (240 aval)", 20, 12),
-        ("Pop 40 x 6 Ger (240 aval)", 40, 6),
+        ("População 12", 12, 20),
+        ("População 20", 20, 12),
+        ("População 40", 40, 6),
     ),
     mutation_rate: float = 0.10,
     n_repeats: int = 5,
 ) -> dict[str, Any]:
-    """Experimento 2 — Configurações de População sob orçamento equivalente (240 avaliações)."""
+    """Experimento 2: configurações de população com orçamento equivalente (240 avaliações)."""
     results_by_cfg: dict[str, Any] = {}
 
     for label, pop_sz, gens in configs:
         budget = pop_sz * gens
+        generation_limit = generations_for_budget(pop_sz, budget)
         train_rooms_all: list[float] = []
         val_rooms_all: list[float] = []
         val_comp_all: list[float] = []
         final_div_all: list[float] = []
         elapsed_all: list[float] = []
         runs_data: list[dict[str, Any]] = []
-        eval_axis = [g * pop_sz for g in range(1, gens + 1)]
+        eval_axis: list[int] = []
         best_curves: list[list[float]] = []
 
         for rep in range(n_repeats):
@@ -231,11 +245,11 @@ def run_experiment_2_population(
                 dungeons_by_seed=train_dungeons,
                 balance_cfg=balance_cfg,
                 pop_size=pop_sz,
-                generations=gens,
+                generations=generation_limit,
                 mutation_rate=mutation_rate,
                 max_evaluations=budget,
                 seed=run_seed,
-                stagnation_limit=gens + 5,
+                stagnation_limit=generation_limit + 5,
             )
             val_eval = evaluate_chromosome_detailed_on_suite(
                 ga_res.best_chromosome, val_dungeons, balance_cfg
@@ -246,6 +260,7 @@ def run_experiment_2_population(
             final_div_all.append(ga_res.history[-1].diversity_index)
             elapsed_all.append(ga_res.elapsed_seconds)
             best_curves.append([h.best_mean_rooms for h in ga_res.history])
+            eval_axis = [h.evaluations_cumulative for h in ga_res.history]
 
             runs_data.append(
                 {
@@ -256,13 +271,14 @@ def run_experiment_2_population(
                     "val_completion_rate": val_eval["completion_rate"],
                     "final_diversity": ga_res.history[-1].diversity_index,
                     "objective_evaluations": ga_res.total_objective_evaluations,
+                    "simulation_runs": ga_res.total_simulation_runs,
                     "elapsed_seconds": round(ga_res.elapsed_seconds, 4),
                 }
             )
 
         results_by_cfg[label] = {
             "pop_size": pop_sz,
-            "generations": gens,
+            "generations": generation_limit,
             "budget_evaluations": budget,
             "n_repeats": n_repeats,
             "train_rooms_summary": summarize_metric_list(train_rooms_all),
@@ -279,7 +295,7 @@ def run_experiment_2_population(
 
     return {
         "experiment_name": "Experimento 2 — Tamanho de População com Orçamento Fixo (240 avaliações)",
-        "hypothesis": "Com orçamento computacional fixo (240 avaliações), populações muito pequenas (12) sofrem maior deriva genética, enquanto populações muito grandes (40) dispõem de poucas gerações (6) para refinar blocos construtivos; configurações intermediárias (20x12) maximizam a qualidade final.",
+        "hypothesis": "Com orçamento fixo de avaliações, o tamanho da população pode alterar a diversidade e a qualidade das estratégias encontradas.",
         "results": results_by_cfg,
     }
 
@@ -292,17 +308,18 @@ def run_experiment_3_baselines_comparison(
     generations: int = 12,
     n_repeats: int = 7,
 ) -> tuple[dict[str, Any], Chromosome, GARunResult]:
-    """Experimento 3 — Comparação formal: Estratégia Fixa vs Busca Aleatória vs Algoritmo Genético."""
+    """Experimento 3: comparação entre estratégia fixa, busca aleatória e algoritmo genético."""
     budget = pop_size * generations
+    generation_limit = generations_for_budget(pop_size, budget)
 
-    # 1. Estratégia Fixa (Baseline Determinístico de Regra)
+    # 1. Estratégia fixa com regras determinísticas.
     t0_fb = time.perf_counter()
     fixed_chrom = create_fixed_baseline_chromosome()
     fb_train_eval = evaluate_chromosome_detailed_on_suite(fixed_chrom, train_dungeons, balance_cfg)
     fb_val_eval = evaluate_chromosome_detailed_on_suite(fixed_chrom, val_dungeons, balance_cfg)
     fb_elapsed = time.perf_counter() - t0_fb
 
-    # 2. Busca Aleatória (Random Search) com mesmo orçamento (budget avaliações por repetição)
+    # 2. Busca aleatória com o mesmo orçamento (budget define as avaliações por repetição).
     rs_train_rooms: list[float] = []
     rs_val_rooms: list[float] = []
     rs_val_comp: list[float] = []
@@ -338,7 +355,7 @@ def run_experiment_3_baselines_comparison(
             }
         )
 
-    # 3. Algoritmo Genético (GA) com mesmo orçamento (budget avaliações por repetição)
+    # 3. Algoritmo genético com o mesmo orçamento (budget define as avaliações por repetição).
     ga_train_rooms: list[float] = []
     ga_val_rooms: list[float] = []
     ga_val_comp: list[float] = []
@@ -354,11 +371,11 @@ def run_experiment_3_baselines_comparison(
             dungeons_by_seed=train_dungeons,
             balance_cfg=balance_cfg,
             pop_size=pop_size,
-            generations=generations,
+            generations=generation_limit,
             mutation_rate=0.10,
             max_evaluations=budget,
             seed=g_seed,
-            stagnation_limit=generations + 5,
+            stagnation_limit=generation_limit + 5,
         )
         val_ev = evaluate_chromosome_detailed_on_suite(ga_res.best_chromosome, val_dungeons, balance_cfg)
         ga_train_rooms.append(ga_res.best_chromosome.mean_rooms_cleared)
@@ -381,6 +398,7 @@ def run_experiment_3_baselines_comparison(
                 "val_std_rooms": val_ev["std_rooms"],
                 "val_completion_rate": val_ev["completion_rate"],
                 "objective_evaluations": ga_res.total_objective_evaluations,
+                "simulation_runs": ga_res.total_simulation_runs,
                 "elapsed_seconds": round(ga_res.elapsed_seconds, 4),
                 "best_genes": ga_res.best_chromosome.genes,
             }
@@ -388,14 +406,18 @@ def run_experiment_3_baselines_comparison(
 
     assert best_ga_overall is not None and best_ga_run_result is not None
 
-    # Testes estatísticos (Mann-Whitney U e t-test de Welch sobre as médias de validação das repetições)
+    # Testes U de Mann-Whitney e t de Welch sobre as médias de validação das repetições.
     u_stat, u_pval = stats.mannwhitneyu(ga_val_rooms, rs_val_rooms, alternative="two-sided")
     t_stat, t_pval = stats.ttest_ind(ga_val_rooms, rs_val_rooms, equal_var=False)
 
-    fb_seed_vals = [float(v) for v in fb_val_eval["per_seed_rooms"].values()]
     best_ga_val_eval = evaluate_chromosome_detailed_on_suite(best_ga_overall, val_dungeons, balance_cfg)
-    best_ga_seed_vals = [float(v) for v in best_ga_val_eval["per_seed_rooms"].values()]
-    u_fb_stat, u_fb_pval = stats.mannwhitneyu(best_ga_seed_vals, fb_seed_vals, alternative="two-sided")
+    paired_seeds = sorted(fb_val_eval["per_seed_rooms"], key=int)
+    fb_seed_vals = [float(fb_val_eval["per_seed_rooms"][s]) for s in paired_seeds]
+    best_ga_seed_vals = [float(best_ga_val_eval["per_seed_rooms"][s]) for s in paired_seeds]
+    if best_ga_seed_vals == fb_seed_vals:
+        paired_stat, paired_pval = 0.0, 1.0
+    else:
+        paired_stat, paired_pval = stats.wilcoxon(best_ga_seed_vals, fb_seed_vals, alternative="two-sided")
 
     summary = {
         "experiment_name": "Experimento 3 — Comparação com Baselines (Fixo vs Busca Aleatória vs Algoritmo Genético)",
@@ -460,8 +482,10 @@ def run_experiment_3_baselines_comparison(
                 "welch_t_p": round(float(t_pval), 6),
             },
             "best_ga_vs_fixed_baseline_validation_seeds": {
-                "mann_whitney_u": float(u_fb_stat),
-                "mann_whitney_p": round(float(u_fb_pval), 6),
+                "test": "wilcoxon_paired_by_dungeon_seed",
+                "statistic": float(paired_stat),
+                "p_value": round(float(paired_pval), 6),
+                "note": "Comparação exploratória nas sementes de validação registradas; não garante generalização.",
             },
         },
     }
@@ -474,7 +498,7 @@ def run_experiment_4_generalization(
     monsters_df: pd.DataFrame,
     balance_cfg: dict[str, Any],
 ) -> dict[str, Any]:
-    """Experimento Adicional Obrigatório — Generalização fora das condições de otimização."""
+    """Experimento adicional obrigatório: generalização fora das condições de otimização."""
     scenarios: dict[str, dict[str, Any]] = {}
 
     suite_configs = [
@@ -546,7 +570,7 @@ def build_failure_and_dominance_analysis(
     exp3: dict[str, Any],
     exp4: dict[str, Any],
 ) -> dict[str, Any]:
-    """Consolida evidências empíricas para os 5 itens obrigatórios de Análise de Falhas (Seção 10)."""
+    """Reúne os resultados dos 5 itens obrigatórios da análise de falhas (Seção 10)."""
     # 1. Convergência prematura e 2. Baixa diversidade genética
     r2 = exp1["results"]["2%"]
     r10 = exp1["results"]["10%"]
@@ -556,7 +580,7 @@ def build_failure_and_dominance_analysis(
     with_chests = exp4["scenarios"]["2_out_of_sample_seeds"]["genetic_algorithm"]
     without_chests = exp4["scenarios"]["5_no_chests_strict_economy"]["genetic_algorithm"]
 
-    # 4. Sobreajuste à configuração de treinamento (Gap Treino vs Validação/Composições/Dificuldade)
+    # 4. Sobreajuste: diferença entre treino e validação, outras composições e dificuldade.
     ga_methods = exp3["methods"]["genetic_algorithm"]
     train_mean = ga_methods["train_rooms_across_repeats"]["mean"]
     val_mean = ga_methods["val_rooms_across_repeats"]["mean"]
@@ -591,7 +615,7 @@ def build_failure_and_dominance_analysis(
             "mut_2pct_val_rooms": r2["val_rooms_summary"]["mean"],
             "mut_10pct_val_rooms": r10["val_rooms_summary"]["mean"],
             "finding": (
-                f"Com mutação de 2%, a população estabiliza mais cedo (geração média {r2['mean_convergence_generation']}) "
+                f"Com mutação de 2%, a geração média de convergência foi {r2['mean_convergence_generation']} "
                 f"e atinge média de {r2['val_rooms_summary']['mean']:.2f} salas na validação, contra "
                 f"{r10['val_rooms_summary']['mean']:.2f} salas na taxa de 10%."
             ),
@@ -600,8 +624,8 @@ def build_failure_and_dominance_analysis(
             "mut_2pct_final_diversity": r2["final_diversity_summary"]["mean"],
             "mut_10pct_final_diversity": r10["final_diversity_summary"]["mean"],
             "mut_25pct_final_diversity": r25["final_diversity_summary"]["mean"],
-            "pop12_final_diversity": exp2["results"]["Pop 12 x 20 Ger (240 aval)"]["final_diversity_summary"]["mean"],
-            "pop40_final_diversity": exp2["results"]["Pop 40 x 6 Ger (240 aval)"]["final_diversity_summary"]["mean"],
+            "pop12_final_diversity": next(v for v in exp2["results"].values() if v["pop_size"] == 12)["final_diversity_summary"]["mean"],
+            "pop40_final_diversity": next(v for v in exp2["results"].values() if v["pop_size"] == 40)["final_diversity_summary"]["mean"],
         },
         "3_randomness_dependence": {
             "validation_std_across_seeds": with_chests["std_rooms"],

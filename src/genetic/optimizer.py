@@ -1,8 +1,8 @@
-"""Otimizador por Algoritmo Genético da Masmorra Genética.
+"""Busca de estratégias por algoritmo genético na Masmorra Genética.
 
 Registra os cromossomos, métricas de aptidão, diversidade e orçamento de avaliações
-a cada geração, suportando parada por número de gerações, orçamento máximo de avaliações
-ou estagnação.
+a cada geração. A busca termina pelo limite de gerações, de avaliações
+ou por estagnação.
 """
 
 from __future__ import annotations
@@ -10,8 +10,9 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 import random
 import time
-from typing import Any
+from typing import Any, Callable, Sequence
 
+from src.game.combat import DungeonRunResult
 from src.game.dungeon import DungeonRoom
 from src.genetic.chromosome import Chromosome
 from src.genetic.fitness import evaluate_chromosome
@@ -28,7 +29,7 @@ from src.genetic.operators import (
 
 @dataclass
 class GenerationRecord:
-    """Registro auditável de uma geração do Algoritmo Genético."""
+    """Registro das métricas de uma geração do algoritmo genético."""
 
     generation: int
     evaluations_cumulative: int
@@ -49,7 +50,7 @@ class GenerationRecord:
 
 @dataclass
 class GARunResult:
-    """Resultado completo de uma execução do Algoritmo Genético."""
+    """Resultado de uma execução do algoritmo genético."""
 
     config: dict[str, Any]
     best_chromosome: Chromosome
@@ -93,27 +94,46 @@ def run_genetic_algorithm(
     seed: int = 42,
     enable_allies: bool = True,
     enable_chests: bool = True,
+    on_generation: Callable[[GenerationRecord], None] | None = None,
+    initial_chromosomes: Sequence[Chromosome] | None = None,
+    stop_when: Callable[[Chromosome, list[DungeonRunResult]], bool] | None = None,
 ) -> GARunResult:
-    """Executa o ciclo evolutivo completo do Algoritmo Genético."""
+    """Executa a busca por algoritmo genético."""
+    if pop_size < 2 or generations < 1:
+        raise ValueError("Use ao menos duas estratégias e uma geração.")
+    if not 0 <= elite_count < pop_size:
+        raise ValueError("O número de elites deve ser menor que a população e não negativo.")
+    if tournament_size < 1 or stagnation_limit < 1:
+        raise ValueError("Torneio e limite de estagnação devem ser positivos.")
+    if max_evaluations is not None and max_evaluations < 1:
+        raise ValueError("O orçamento de avaliações deve ser positivo.")
+    if not (0 <= mutation_rate <= 1 and 0 <= crossover_rate <= 1):
+        raise ValueError("As taxas de mutação e cruzamento devem estar entre zero e um.")
+    if not dungeons_by_seed:
+        raise ValueError("Forneça ao menos uma masmorra de treino.")
     t0 = time.perf_counter()
     rng = random.Random(seed)
     num_seeds = len(dungeons_by_seed)
 
     population = initialize_diverse_population(pop_size=pop_size, rng=rng)
+    for index, chromosome in enumerate((initial_chromosomes or [])[:pop_size]):
+        # Reavalia a estratégia nas condições do treino atual.
+        population[index] = Chromosome(genes=list(chromosome.genes))
     total_evals = 0
     history: list[GenerationRecord] = []
 
     best_overall: Chromosome | None = None
+    goal_individual: Chromosome | None = None
     generations_without_improvement = 0
     stopped_reason = "max_generations_reached"
 
     for gen in range(1, generations + 1):
-        # Avalia indivíduos que ainda não possuem fitness calculado
+        # Avalia os indivíduos que ainda não têm aptidão calculada.
         for ind in population:
             if ind.fitness is None:
                 if max_evaluations is not None and total_evals >= max_evaluations:
                     break
-                evaluate_chromosome(
+                _, runs = evaluate_chromosome(
                     chromosome=ind,
                     dungeons_by_seed=dungeons_by_seed,
                     balance_cfg=balance_cfg,
@@ -121,8 +141,11 @@ def run_genetic_algorithm(
                     enable_chests=enable_chests,
                 )
                 total_evals += 1
+                if stop_when is not None and stop_when(ind, runs):
+                    goal_individual = ind.copy()
+                    break
 
-        # Filtra apenas indivíduos avaliados caso o orçamento tenha esgotado no meio da geração
+        # Se o orçamento acabar no meio da geração, mantém apenas os indivíduos avaliados.
         evaluated_pop = [ind for ind in population if ind.fitness is not None]
         if not evaluated_pop:
             break
@@ -149,7 +172,29 @@ def run_genetic_algorithm(
         std_fit = (sum((x - mean_fit) ** 2 for x in fit_vals) / n_eval) ** 0.5
         div_idx = compute_population_diversity(evaluated_pop)
 
-        # Verifica critério de parada por orçamento máximo ou estagnação
+        # Verifica se o orçamento acabou ou se a busca estagnou.
+        if goal_individual is not None:
+            history.append(
+                GenerationRecord(
+                    generation=gen,
+                    evaluations_cumulative=total_evals,
+                    best_fitness=round(float(best_overall.fitness or 0.0), 4),
+                    mean_fitness=round(mean_fit, 4),
+                    median_fitness=round(median_fit, 4),
+                    std_fitness=round(std_fit, 4),
+                    best_mean_rooms=round(best_overall.mean_rooms_cleared, 4),
+                    pop_mean_rooms=round(sum(room_vals) / n_eval, 4),
+                    best_completion_rate=round(best_overall.completion_rate, 4),
+                    diversity_index=div_idx,
+                    diversity_interventions=0,
+                    best_genes=list(best_overall.genes),
+                )
+            )
+            if on_generation is not None:
+                on_generation(history[-1])
+            stopped_reason = "target_reached"
+            break
+
         if max_evaluations is not None and total_evals >= max_evaluations:
             history.append(
                 GenerationRecord(
@@ -167,6 +212,8 @@ def run_genetic_algorithm(
                     best_genes=list(best_overall.genes),
                 )
             )
+            if on_generation is not None:
+                on_generation(history[-1])
             stopped_reason = "max_evaluations_reached"
             break
 
@@ -187,10 +234,12 @@ def run_genetic_algorithm(
                     best_genes=list(best_overall.genes),
                 )
             )
+            if on_generation is not None:
+                on_generation(history[-1])
             stopped_reason = "stagnation_limit_reached"
             break
 
-        # Cria próxima geração se ainda não for a última
+        # Cria a próxima geração se houver outra iteração.
         interventions = 0
         if gen < generations:
             elites = apply_elitism(evaluated_pop, elite_count=min(elite_count, len(evaluated_pop)))
@@ -225,6 +274,8 @@ def run_genetic_algorithm(
                 best_genes=list(best_overall.genes),
             )
         )
+        if on_generation is not None:
+            on_generation(history[-1])
 
     elapsed = time.perf_counter() - t0
     assert best_overall is not None
@@ -244,7 +295,7 @@ def run_genetic_algorithm(
             "enable_allies": enable_allies,
             "enable_chests": enable_chests,
         },
-        best_chromosome=best_overall,
+        best_chromosome=goal_individual if goal_individual is not None else best_overall,
         history=history,
         total_objective_evaluations=total_evals,
         total_simulation_runs=total_evals * num_seeds,

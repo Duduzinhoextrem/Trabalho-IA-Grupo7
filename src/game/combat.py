@@ -1,13 +1,13 @@
-"""Motor Único de Combate Automático por Turnos e Simulador das 100 Salas.
+"""Combate automático por turnos e simulação das 100 salas.
 
 Compartilhado entre:
 - Modo de aventura interativo (Streamlit)
 - Treinamento do Algoritmo Genético
-- Estratégias de referência (Baseline Fixo e Busca Aleatória)
+- Estratégias de referência (estratégia fixa e busca aleatória)
 - Experimentos científicos e testes de generalização
 
-Funciona 100% sem interface gráfica (headless) e garante ausência de invulnerabilidade
-ou combates infinitos (`min_damage_guaranteed = 1`, `max_mitigation_cap = 0.75`, `max_turns = 40`).
+Funciona sem interface gráfica. O dano mínimo e os limites de mitigação e turnos
+impedem a invulnerabilidade e os combates infinitos (`min_damage_guaranteed = 1`, `max_mitigation_cap = 0.75`, `max_turns = 40`).
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ class RoomCombatResult:
     room_number: int
     victory: bool
     turns_taken: int
-    termination_reason: str  # "enemies_defeated", "warrior_died", "max_turns_exceeded"
+    termination_reason: str  # Vitória ("enemies_defeated"), morte ("warrior_died") ou limite de turnos ("max_turns_exceeded").
     warrior_hp_start: int
     warrior_hp_end: int
     warrior_max_hp: int
@@ -43,6 +43,9 @@ class RoomCombatResult:
     market_transactions: list[dict[str, Any]] = field(default_factory=list)
     chest_event: dict[str, Any] | None = None
     combat_log: list[str] = field(default_factory=list)
+    weapon_tier_end: int = 1
+    armor_tier_end: int = 0
+    shield_tier_end: int = 0
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -100,7 +103,7 @@ def select_enemy_target_for_hero(
     is_ranged_or_magic: bool,
     prefer_low_phys_res: bool = False,
 ) -> MonsterCombatInstance | None:
-    """Seleciona o alvo inimigo respeitando linha de frente vs retaguarda."""
+    """Escolhe o alvo inimigo conforme a posição na linha de frente ou na retaguarda."""
     living = [e for e in enemies if e.is_alive]
     if not living:
         return None
@@ -110,7 +113,7 @@ def select_enemy_target_for_hero(
         pool = frontline if frontline else living
         return min(pool, key=lambda e: (e.current_hp, e.defense, e.instance_id))
 
-    # Atacantes a distância (Mago/Arqueiro) podem focar retaguarda ou inimigos mais vulneráveis
+    # Mago e arqueiro podem atacar a retaguarda ou os inimigos mais vulneráveis.
     if prefer_low_phys_res:
         return min(living, key=lambda e: (e.phys_resistance, e.current_hp, e.instance_id))
     return min(living, key=lambda e: (e.mag_resistance, e.current_hp, e.instance_id))
@@ -134,7 +137,7 @@ def simulate_single_room_combat(
     enemies = room.enemies
     combat_log: list[str] = []
 
-    # Reinicia estados temporários de início de combate (cargas de cura do Padre e buffs/debuffs)
+    # Reinicia as cargas de cura do padre e os bônus e penalidades temporários.
     warrior.buff_stacks = 0
     warrior.buff_turns_left = 0
     for ally in warrior.allies:
@@ -148,7 +151,7 @@ def simulate_single_room_combat(
         if not any(e.is_alive for e in enemies):
             return True, turn - 1, "enemies_defeated", combat_log
 
-        # Decrementa duração de buffs/debuffs ativos no início de cada rodada a partir do turno 2
+        # A partir do turno 2, reduz a duração dos bônus e penalidades no início da rodada.
         if turn > 1:
             if warrior.buff_turns_left > 0:
                 warrior.buff_turns_left -= 1
@@ -160,7 +163,7 @@ def simulate_single_room_combat(
                     if e.debuff_turns_left == 0:
                         e.debuff_stacks = 0
 
-        # Monta fila de iniciativa do turno
+        # Monta a ordem de ação do turno.
         actors: list[tuple[int, int, str, Any]] = []
         w_init = 12 + warrior.weapon_tier
         actors.append((w_init, 0, "warrior", warrior))
@@ -171,7 +174,7 @@ def simulate_single_room_combat(
             if enemy.is_alive:
                 actors.append((enemy.initiative, idx_e + 10, "enemy", enemy))
 
-        # Ordena por maior iniciativa; desempate determinístico pela prioridade de índice
+        # Ordena pela maior iniciativa e desempata pela prioridade do índice.
         actors.sort(key=lambda item: (-item[0], item[1]))
 
         party_buff_mult = 1.0 + 0.14 * warrior.buff_stacks
@@ -208,7 +211,7 @@ def simulate_single_room_combat(
                     continue
 
                 if ally.ally_class == "priest":
-                    # Verifica se o Guerreiro ou algum aliado precisa de cura e há cargas restantes
+                    # Verifica se alguém precisa de cura e se restam cargas.
                     wounded_candidates: list[Any] = []
                     if warrior.current_hp < int(warrior.max_hp * 0.78):
                         wounded_candidates.append(warrior)
@@ -217,7 +220,7 @@ def simulate_single_room_combat(
                             wounded_candidates.append(other_a)
 
                     if wounded_candidates and ally.heals_remaining > 0:
-                        # Prioriza curar o guerreiro se estiver com < 55% HP, senão o menor % de HP
+                        # Cura primeiro o guerreiro se estiver com menos de 55% de vida; caso contrário, quem tiver a menor porcentagem.
                         if warrior.current_hp < int(warrior.max_hp * 0.55):
                             heal_target = warrior
                             target_name = "Guerreiro"
@@ -236,7 +239,7 @@ def simulate_single_room_combat(
                             )
                         continue
 
-                    # Caso contrário, Padre realiza ataque sagrado mágico
+                    # Sem cura a realizar, o padre faz um ataque sagrado mágico.
                     target = select_enemy_target_for_hero(enemies, is_ranged_or_magic=True)
                     if target is not None:
                         raw_mag = ally.compute_raw_damage(buff_multiplier=party_buff_mult)
@@ -256,7 +259,7 @@ def simulate_single_room_combat(
                             )
 
                 elif ally.ally_class == "alchemist":
-                    # Aplica buff na equipe e debuff no inimigo principal + dano químico
+                    # Aplica um bônus na equipe e uma penalidade no inimigo principal, além de dano químico.
                     warrior.buff_stacks = min(ally.max_buff_stacks, warrior.buff_stacks + 1)
                     warrior.buff_turns_left = ally.buff_duration_turns
                     target = select_enemy_target_for_hero(enemies, is_ranged_or_magic=True)
@@ -345,7 +348,7 @@ def simulate_single_room_combat(
                 if not enemy.is_alive:
                     continue
 
-                # Seleção de alvo da equipe do guerreiro (linha de frente vs retaguarda)
+                # Escolhe o alvo na equipe do guerreiro conforme a linha de frente e a retaguarda.
                 living_allies = [a for a in warrior.allies if a.is_alive]
                 frontline_allies = [a for a in living_allies if a.position == "frontline"]
                 backline_allies = [a for a in living_allies if a.position == "backline"]
@@ -355,12 +358,12 @@ def simulate_single_room_combat(
 
                 if living_allies:
                     if enemy.position == "frontline" and rng.random() < frontline_weight:
-                        # Inimigo foca linha de frente (Guerreiro ou Monge)
+                        # O inimigo ataca a linha de frente (guerreiro ou monge).
                         if frontline_allies and rng.random() < 0.45:
                             target_is_warrior = False
                             chosen_ally = frontline_allies[0]
                     else:
-                        # Ataque à distância/mágico pode atingir retaguarda se existir
+                        # Ataques à distância ou mágicos podem atingir a retaguarda, se houver alguém nela.
                         if backline_allies and rng.random() < 0.35:
                             target_is_warrior = False
                             chosen_ally = min(backline_allies, key=lambda a: a.current_hp)
@@ -435,7 +438,7 @@ def simulate_single_room_combat(
         if not any(e.is_alive for e in enemies):
             return True, turn, "enemies_defeated", combat_log
 
-    # Se atingiu o limite máximo de turnos e ainda há inimigos vivos, encerra tentativa por exaustão
+    # Encerra por exaustão se restarem inimigos vivos ao atingir o limite de turnos.
     return False, max_turns, "max_turns_exceeded", combat_log
 
 
@@ -450,8 +453,8 @@ def run_dungeon_simulation(
 ) -> DungeonRunResult:
     """Executa uma tentativa completa na masmorra de 100 salas seguindo a política informada.
 
-    As decisões da política usam exclusivamente o estado atual do guerreiro/mercado,
-    sem qualquer acesso a informações futuras das próximas salas.
+    A política decide com base no estado atual do guerreiro e do mercado,
+    sem acesso às informações das próximas salas.
     """
     rng = random.Random(seed + 10007)
     warrior = create_initial_warrior(balance_cfg)
@@ -478,7 +481,7 @@ def run_dungeon_simulation(
         room = template_room.clone_for_simulation()
         warrior.current_room = room.room_number
 
-        # Fase de mercado pré-luta
+        # Decisões de mercado antes da luta.
         tx_before = execute_market_phase(
             warrior=warrior,
             policy_params=policy_params,
@@ -522,11 +525,14 @@ def run_dungeon_simulation(
                         market_transactions=tx_before,
                         chest_event=None,
                         combat_log=c_log,
+                        weapon_tier_end=warrior.weapon_tier,
+                        armor_tier_end=warrior.armor_tier,
+                        shield_tier_end=warrior.shield_tier,
                     )
                 )
             break
 
-        # Vitória na sala! Contabiliza recompensas
+        # Soma as recompensas pela vitória na sala.
         rooms_cleared += 1
         room_gold = sum(e.gold_reward for e in room.enemies)
         room_xp = sum(e.xp_reward for e in room.enemies)
@@ -546,7 +552,7 @@ def run_dungeon_simulation(
                 base_hp=base_hp_cls,
             )
 
-        # Verifica baú pós-vitória (controlado por semente e flag enable_chests)
+        # Sorteia o baú após a vitória conforme a semente e a opção enable_chests.
         chest_ev = roll_post_victory_chest(
             warrior=warrior,
             room_number=room.room_number,
@@ -555,7 +561,7 @@ def run_dungeon_simulation(
             enable_chests=enable_chests,
         )
 
-        # Fase de mercado pós-luta
+        # Decisões de mercado após a luta.
         tx_after = execute_market_phase(
             warrior=warrior,
             policy_params=policy_params,
@@ -600,6 +606,9 @@ def run_dungeon_simulation(
                     market_transactions=tx_before + tx_after,
                     chest_event=chest_ev,
                     combat_log=c_log,
+                    weapon_tier_end=warrior.weapon_tier,
+                    armor_tier_end=warrior.armor_tier,
+                    shield_tier_end=warrior.shield_tier,
                 )
             )
 

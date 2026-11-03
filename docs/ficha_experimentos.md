@@ -1,108 +1,73 @@
-# Ficha de Experimentos Científicos — Masmorra Genética (Grupo 7)
+# Ficha de experimentos
 
-**Projeto:** Masmorra Genética: A Evolução do Guerreiro — Grupo 7 (IA II — FIB)  
-**Responsáveis principais:** Reuel Vitor Lanzetti e Eduardo Coque Corrêa de Lima  
-**Arquivo de Evidências Reais:** `data/experiments/scientific_experiments_v1.json`  
-**Versão do Dataset:** `srd-2014-v1.0.0` (334 criaturas, SHA-256 `51a00f4785dcf07fcb4056cd97eaa1eb5b2ba0c235d2b7d5b2762a772691d397`)  
-**Versão do Simulador:** `balance-v1.0.0`  
+Os resultados abaixo vêm de `data/experiments/scientific_experiments_v2.json`. O snapshot é `srd-2014-v1.0.0` e as regras são `balance-v1.0.0`. Os gráficos estão em `results/experiments_v2/`.
 
----
+A versão anterior foi preservada, mas contabilizava incorretamente o orçamento: o AG preservava elites sem reavaliá-las e, com a configuração anunciada como 240 avaliações, realizou 218; na busca aleatória foram 240. A versão atual conta avaliações efetivas, permite uma última geração parcial e usa 240 avaliações em cada execução dos métodos de busca.
 
-## Configuração Experimental Comum e Separação Treino/Validação
+As sementes 101–105 são usadas na otimização; 201–210 são usadas na validação; 301–310 são usadas no cenário de composição alternativa. A estratégia individual apresentada no experimento 4 foi escolhida pelo desempenho no treino. O conjunto de validação é reutilizado entre experimentos: isso limita sua independência se ele orientar ajustes posteriores do grupo.
 
-- **Conjunto de Otimização (Treinamento):** 5 masmorras fixas de 100 salas geradas com as sementes `[101, 102, 103, 104, 105]`.
-- **Conjunto de Validação Final (Holdout Fora da Amostra):** 10 masmorras inéditas de 100 salas geradas com as sementes `[201, 202, 203, 204, 205, 206, 207, 208, 209, 210]`, totalmente disjuntas das sementes de otimização.
-- **Conjunto de Composições Alternativas:** 10 masmorras geradas com as sementes `[301..310]` e `composition_mode="alternate_pool"`.
-- **Métrica Principal:** Média de salas concluídas (`mean_rooms_cleared` $\in [0, 100]$).
-- **Métrica Reportada Separadamente:** Taxa de conclusão das 100 salas (`completion_rate` $\in [0\%, 100\%]$).
-- **Critérios Secundários de Desempate:** Fração de vida restante (`0,006 * mean_hp_ratio`) e ouro restante (`0,003 * min(1, gold/2000)`), cujo teto combinado (`0,009`) é matematicamente inferior a `1/K` salas, impedindo qualquer inversão de prioridade de avanço.
+A métrica principal é a média de salas concluídas. A taxa de conclusão das 100 salas é mostrada à parte. Vida e ouro participam do desempate no fitness. Os desvios das tabelas de mutação e população são calculados sobre as médias das repetições; eles não são o desvio de todas as batalhas individuais.
 
----
+## E1 — Taxa de mutação
 
-## Experimento 1 — Impacto da Taxa de Mutação (`2%`, `10%`, `25%`)
+**Hipótese:** taxas diferentes afetam diversidade, convergência e desempenho. A hipótese inicial de que 10% ofereceria o melhor equilíbrio precisa ser confrontada com os dados.
 
-- **Hipótese:** Taxas diferentes de mutação afetam a velocidade de convergência, a diversidade genética da população e a capacidade de generalização fora da amostra.
-- **Parâmetros Fixos:** População = `20`, Gerações = `12` (`240` avaliações da função objetivo = `1.200` simulações de masmorra por execução), Torneio = `3`, Elitismo = `2`, Cruzamento = `85%`, Repetições independentes = `5` por taxa.
+Foram realizadas cinco repetições para cada taxa, com população inicial de 20 e 240 avaliações efetivas por repetição. A última geração pode ser parcial.
 
-### Resultados Reais Observados
+| Mutação | Média de salas na validação | Taxa média de conclusão | Diversidade final média |
+| --- | ---: | ---: | ---: |
+| 2% | 91,28 ± 3,31 | 28% | 0,0346 |
+| 10% | 92,12 ± 3,42 | 20% | 0,0510 |
+| 25% | 95,06 ± 2,02 | 36% | 0,1104 |
 
-| Taxa de Mutação | Salas em Treino (Média ± DP) | Salas em Validação (Média ± DP) | Mediana (Validação) | Taxa de Conclusão 100 Salas (Val) | Diversidade Final Média | Geração Média de Convergência | Tempo Médio (s) |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **2%** (`0,02`) | 95,96 ± 1,88 | 90,58 ± 4,20 | 89,40 | 28,0% | 0,0893 | 4,4 | 9,68s |
-| **10%** (`0,10`) | 95,44 ± 0,85 | **92,50 ± 3,04** | **94,70** | 24,0% | 0,0707 | **4,0** | **8,61s** |
-| **25%** (`0,25`) | **96,96 ± 1,03** | 92,26 ± 5,05 | 94,40 | **30,0%** | **0,1347** | 7,6 | 8,64s |
+**Interpretação:** nesta execução, 25% teve a maior média de salas e maior taxa média de conclusão entre as configurações testadas. Isso não comprova que 25% será melhor em outras regras ou sementes. A diversidade final considera apenas os indivíduos avaliados da última geração, que pode estar incompleta.
 
-### Interpretação
-Confirmou-se a hipótese experimental:
-1. A taxa de **10%** obteve a maior média (`92,50` salas), a maior mediana (`94,70` salas) e o menor desvio-padrão (`3,04`) no conjunto de validação fora da amostra.
-2. A taxa de **2%** estagnou cedo em ótimos locais do conjunto de treino, resultando na pior média (`90,58`) e mediana (`89,40`) em validação.
-3. A taxa de **25%** preservou quase o dobro de diversidade genética (`0,1347` vs `0,0707`), permitindo explorar picos mais altos no treino (`96,96` salas) e atingir `30,0%` de conclusão total, mas exigiu quase o dobro de gerações para convergir (`7,6` vs `4,0`) e apresentou maior instabilidade (`DP = 5,05`).
+## E2 — Tamanho da população
 
----
+**Hipótese:** com o mesmo orçamento, mudar a quantidade de estratégias por geração altera o comportamento da busca. Foram feitas cinco repetições por configuração e 240 avaliações efetivas por execução.
 
-## Experimento 2 — Configurações de População sob Orçamento Equivalente (`240` avaliações)
+| População | Gerações avaliadas | Média de salas na validação | Taxa média de conclusão |
+| --- | ---: | ---: | ---: |
+| 12 | 24 | 86,28 ± 5,63 | 18% |
+| 20 | 14 | 86,82 ± 3,58 | 20% |
+| 40 | 7 | 89,56 ± 3,43 | 20% |
 
-- **Hipótese:** Mantendo o orçamento total de avaliações fixo em `240` avaliações da função objetivo, o balanço entre tamanho da população (`N`) e número de gerações (`G`) altera o compromisso entre diversidade populacional e especialização geracional.
-- **Alterações Avaliadas:**
-  - **Cenário A:** `Pop = 12 × 20 Gerações = 240 avaliações`
-  - **Cenário B:** `Pop = 20 × 12 Gerações = 240 avaliações`
-  - **Cenário C:** `Pop = 40 × 6 Gerações = 240 avaliações`
-  - Repetições independentes = `5` por cenário (Taxa de mutação = `10%`).
+**Interpretação:** a população de 40 teve a maior média de validação entre as três configurações nesta amostra. As últimas gerações são parciais e a diversidade final reflete apenas os indivíduos avaliados; o resultado não demonstra que populações maiores sejam sempre melhores.
 
-### Resultados Reais Observados
+## E3 — Comparação com referências
 
-| Configuração (`N × G`) | Orçamento (Avaliações) | Salas em Treino (Média ± DP) | Salas em Validação (Média ± DP) | Mediana (Validação) | Taxa de Conclusão 100 Salas (Val) | Diversidade Final Média | Tempo Médio (s) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Pop 12 × 20 Ger** | 240 | **95,52 ± 1,52** | 88,28 ± 3,89 | 87,50 | **20,0%** | 0,0791 | 10,53s |
-| **Pop 20 × 12 Ger** | 240 | 95,28 ± 0,47 | 83,68 ± 5,41 | 83,30 | 18,0% | 0,0670 | **9,75s** |
-| **Pop 40 × 6 Ger** | 240 | 95,32 ± 0,52 | **89,56 ± 3,43** | **88,80** | **20,0%** | **0,1166** | 10,37s |
+**Hipótese:** a busca genética pode encontrar estratégias competitivas em relação à estratégia fixa e à busca aleatória. Busca aleatória e AG tiveram sete repetições de 240 avaliações; a regra fixa foi avaliada sem busca.
 
-### Interpretação
-Todas as três configurações alcançaram desempenho semelhante no conjunto de treinamento (`~95,3` a `95,5` salas), porém **Pop 40 × 6 Gerações** obteve a maior média (`89,56 ± 3,43` salas) e a maior mediana (`88,80` salas) na validação fora da amostra, além da maior diversidade genética final (`0,1166`). Isso demonstra que, quando o conjunto de treino possui poucas sementes (`5`), executar muitas gerações com populações menores aumenta a pressão seletiva sobre peculiaridades das sementes de treino (sobreajuste), enquanto uma população inicial mais ampla preserva políticas mais robustas.
+| Método | Média de salas no treino | Média de salas na validação | Taxa média de conclusão na validação |
+| --- | ---: | ---: | ---: |
+| Estratégia fixa | 79,20 | 69,00 | 0,00% |
+| Busca aleatória | 95,11 ± 0,97 | 92,27 ± 4,16 | 25,71% |
+| Algoritmo genético | 96,09 ± 1,04 | 91,27 ± 4,11 | 28,57% |
 
----
+As médias e desvios da busca aleatória e do AG resumem as sete médias de cada repetição. Cada repetição foi avaliada nas mesmas dez sementes de validação; a estratégia fixa foi avaliada uma vez nessas dez sementes. As diferenças entre os métodos são observações desta configuração, não uma garantia de superioridade.
 
-## Experimento 3 — Comparação Formal com Baselines (`7` Repetições Independentes)
+A estratégia do AG selecionada no treino obteve média de 98,2 salas no treino e 96,9 na validação. Nas dez sementes de validação ela concluiu 100 salas em **4 de 10 tentativas (40%)**. Essa estratégia individual não deve ser confundida com a média das sete repetições.
 
-- **Hipótese:** Estratégias evoluídas pelo Algoritmo Genético e pela Busca Aleatória superam amplamente a Estratégia Fixa equilibrada, e o Algoritmo Genético atinge o maior desempenho de otimização e taxa de conclusão das 100 salas sob o mesmo orçamento computacional (`240` avaliações).
+## E4 — Novos cenários
 
-### Resultados Reais Observados
+**Hipótese:** alterar a composição dos encontros, a dificuldade ou os baús pode reduzir o desempenho da estratégia selecionada. Não houve novo treino nos cenários.
 
-| Método | Orçamento (Avaliações / Simulações) | Salas em Treino (Média ± DP) | Salas em Validação (Média ± DP) | Mediana em Validação | Taxa Média de Conclusão 100 Salas (Val) | Melhor Indivíduo em Validação (Salas / Conclusão) | Tempo Médio (s) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **1. Estratégia Fixa (Baseline)** | 1 / 15 | 79,20 ± 0,00 | 69,00 ± 7,23 | 70,50 | 0,00% | 69,00 (`0,0%`) | **0,03s** |
-| **2. Busca Aleatória** | 240 / 1.200 | 95,11 ± 0,97 | **92,27 ± 4,16** | **94,30** | 25,71% | 95,50 (`40,0%`) | 8,20s |
-| **3. Algoritmo Genético** | 240 / 1.200 | **96,09 ± 1,04** | 90,96 ± 3,88 | 89,80 | **27,14%** | **96,90** (`30,0%`) | 8,96s |
+| Cenário | Sementes | Média do AG | Média da regra fixa | Conclusão do AG |
+| --- | --- | ---: | ---: | ---: |
+| Treino | 101–105 | 98,2 | 79,2 | 60% |
+| Validação padrão | 201–210 | 96,9 | 69,0 | 40% |
+| Composição alternativa | 301–310 | 94,4 | 74,9 | 20% |
+| Dificuldade +15% | 201–210 | 73,4 | 51,4 | 10% |
+| Sem baús | 201–210 | 80,0 | 61,1 | 20% |
 
-### Testes Estatísticos e Análise Científica Crítica
-- **Algoritmo Genético (Campeão) vs. Baseline Fixo nas 10 sementes de validação:** Teste de Mann-Whitney $U = 100,0$, **$p = 0,000166 < 0,001$** (diferença altamente significativa de **`+27,90` salas** na validação: `96,90` vs `69,00`).
-- **Algoritmo Genético vs. Busca Aleatória (7 repetições com 240 avaliações):**
-  - No **conjunto de treinamento (otimização)**, o Algoritmo Genético superou a Busca Aleatória (`96,09 ± 1,04` vs `95,11 ± 0,97` salas, chegando a `98,20` salas e `60%` de conclusão no treino).
-  - Na **validação fora da amostra**, o AG obteve a **maior taxa média de conclusão das 100 salas (`27,14%` vs `25,71%`)** e encontrou a **melhor política global (`96,90` salas médias em validação)**, mas na média das 7 repetições empatou estatisticamente com a Busca Aleatória (`90,96` vs `92,27`, Mann-Whitney $p = 0,7002$, Welch $t = -0,5658, p = 0,5820$).
-  - **Por que isso ocorre?** Em um espaço contínuo compacto de 16 genes onde políticas com Padre + Vitalidade alta ocupam uma região favorável, amostrar 240 cromossomos independentes (Busca Aleatória) encontra boas soluções sem concentrar a população nas 5 sementes de treino, ao passo que 12 gerações do AG especializam os limiares econômicos para as 5 sementes de treino (`gap` de `5,13` salas). Documentar esse comportamento empírico cumpre rigorosamente a diretriz científica da Seção 10 (*"Não exigir que o algoritmo genético sempre vença. Resultados negativos documentados são válidos"*).
+**Interpretação:** o desempenho da estratégia selecionada caiu nos cenários mais difíceis e sem baús. As comparações usam as mesmas sementes e regras de cenário, mas trajetórias diferentes podem consumir a sequência aleatória de forma diferente. Os resultados não isolam, por si só, uma causa única para cada diferença.
 
----
+## Três situações para discutir na apresentação
 
-## Experimento 4 (Adicional Obrigatório) — Generalização e Robustez
+Os casos abaixo foram reproduzidos com a estratégia selecionada do `v2` e a configuração de combate versionada. A sala indicada é a que encerrou a tentativa; o total de salas concluídas é uma unidade menor.
 
-Avaliação da estratégia campeã do Algoritmo Genético (`seed=4185`) frente ao Baseline Fixo em cinco cenários distintos sem qualquer re-treinamento:
+1. **Semente 201, dificuldade +15%:** o guerreiro concluiu 24 salas e morreu na sala 25 contra `Black Pudding`. A regra fixa concluiu 25 salas no mesmo cenário. É um caso em que a estratégia selecionada não foi a melhor das duas.
+2. **Semente 209, sem baús:** concluiu 25 salas e morreu na sala 26 contra `Succubus/Incubus`. Nesse registro estava com arma nível 2, escudo nível 1 e sem armadura. Isso descreve o estado observado, sem provar que uma única compra teria mudado o resultado.
+3. **Semente 308, composição alternativa:** concluiu 78 salas e morreu na sala 79 contra `Adult Red Dragon`. Nas salas 77 e 78 a vida após recuperação caiu de 372 para 332, antes do encontro final. Isso ilustra a influência do desgaste em uma sequência de combates.
 
-| Cenário de Teste | Sementes | Dificuldade | Composição | Baús | AG — Média ± DP (Mediana) | AG — Conclusão 100 Salas | Baseline Fixo — Média ± DP | Vantagem do AG |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **1. Treinamento (In-Sample)** | `101–105` | 1,00x | Padrão | Sim | **98,20 ± 2,40** (100,0) | **60,0%** | 79,20 ± 8,98 | **+19,00 salas** |
-| **2. Novas Sementes (Holdout)** | `201–210` | 1,00x | Padrão | Sim | **96,90 ± 2,66** (96,5) | **30,0%** | 69,00 ± 7,23 | **+27,90 salas** |
-| **3. Novas Composições de Monstros** | `301–310` | 1,00x | Pool Alternativo | Sim | **97,50 ± 1,75** (97,5) | **30,0%** | 75,50 ± 3,72 | **+22,00 salas** |
-| **4. Dificuldade Aumentada (+15%)** | `201–210` | **1,15x** | Padrão | Sim | **73,40 ± 32,28** (92,0) | **10,0%** | 51,40 ± 20,05 | **+22,00 salas** |
-| **5. Sem Baús (Economia Estrita)** | `201–210` | 1,00x | Padrão | **Não** | **80,00 ± 28,30** (94,5) | **20,0%** | 61,10 ± 17,36 | **+18,90 salas** |
-
----
-
-## 5. Análise Obrigatória de Falhas e Dominância
-
-1. **Convergência Prematura:** Na taxa de mutação de `2%`, a população atinge 99% de seu fitness máximo já por volta da geração `4,4`, estacionando em ótimos locais que generalizam pior (`90,58` salas na validação contra `92,50` na mutação de `10%`).
-2. **Baixa Diversidade Genética:** Sem imigração/mutação alta, o índice de diversidade cai de `~0,20` na Geração 1 para `0,067–0,079` na Geração 12 (`Pop 20` e `Pop 12`), enquanto `Mutação 25%` (`0,1347`) e `Pop 40` (`0,1166`) preservam maior variedade genética.
-3. **Dependência de Aleatoriedade e Baús:** Com baús ativos nas sementes de validação `201–210`, a estratégia campeã do AG é altamente consistente (`96,90 ± 2,66` salas, mínimo `94`, máximo `100`). Porém, ao desligar completamente os baús (`enable_chests=False`) ou elevar os atributos dos monstros em `+15%`, surge um gargalo crítico por volta da **Sala 24–25** nas sementes `209` e `210`: quando a transição econômica inicial atrasa a compra de armadura antes do subchefe da Sala 25, o guerreiro morre no nível 11; se ultrapassa a Sala 25 (8 de 10 sementes), avança até as salas `89–100` (mediana `94,5` sem baús e `92,0` na dificuldade `+15%`).
-4. **Sobreajuste à Configuração da Masmorra:** A média das 7 execuções do AG apresenta `96,09` salas nas 5 sementes de treino e `90,96` salas nas 10 sementes de validação (`gap = 5,13` salas), mostrando que otimizar limiares contínuos finos (`equipment_buy_threshold`, `min_gold_reserve`) sobre apenas 5 sementes gera especialização parcial aos drops daquelas sementes.
-5. **Classes e Equipamentos Dominantes Identificados:**
-   - **Dominância absoluta do Padre (`priest`):** Nas 7 repetições independentes do AG, o **Padre** foi selecionado no par prioritário de aliados em **100% das execuções (7/7)** e como primeiro aliado contratado no nível 5 em **85,7% (6/7)**. A segunda vaga (nível 15) foi dividida entre **Monge (`3/7`)**, **Alquimista (`3/7`)** e **Arqueiro (`1/7`)**, enquanto o **Mago (`0/7`)** foi preterido devido ao seu alto custo e baixa sobrevivência contra ataques à distância inimigos.
-   - **Dominância de Equipamentos Defensivos Iniciais:** O gene `equip_offense_priority` convergiu para média de **`0,1222`** nas 7 execuções (`0,0113` no campeão), indicando que priorizar **Armadura e Escudo antes da Arma** (`equip_offense_priority < 0,40`) é decisivo para evitar a morte precoce do guerreiro.
+Também é possível discutir a perda de diversidade, a diferença entre treino e validação, a dependência das regras e as prioridades de aliados registradas no JSON. Prioridade de contratação não é o mesmo que contratação efetiva em todas as partidas.

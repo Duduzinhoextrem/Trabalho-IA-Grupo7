@@ -1,4 +1,4 @@
-"""Geração de gráficos científicos reais e relatórios dos Experimentos 1, 2, 3, 4 e Análise de Falhas."""
+"""Gráficos e relatórios dos experimentos 1 a 4 e da análise de falhas."""
 
 from __future__ import annotations
 
@@ -15,12 +15,12 @@ def generate_experiment_charts(
     full_results: dict[str, Any],
     output_dir: Path = Path("results/experiments"),
 ) -> list[str]:
-    """Gera gráficos estáticos reais a partir das execuções dos 4 experimentos."""
+    """Gera gráficos estáticos com os resultados dos 4 experimentos."""
     output_dir.mkdir(parents=True, exist_ok=True)
     plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
     generated: list[str] = []
 
-    # 1. Experimento 1: Curvas de convergência e diversidade por Taxa de Mutação
+    # 1. Convergência e diversidade por taxa de mutação.
     exp1 = full_results["experiment_1_mutation"]["results"]
     fig, axes = plt.subplots(1, 2, figsize=(13.5, 4.8))
     colors = {"2%": "#1f77b4", "10%": "#2ca02c", "25%": "#d62728"}
@@ -47,7 +47,7 @@ def generate_experiment_charts(
     plt.close(fig)
     generated.append(str(p1.as_posix()))
 
-    # 2. Experimento 2: Configurações de População sob mesmo orçamento (240 avaliações)
+    # 2. Configurações de população com o mesmo orçamento (240 avaliações).
     exp2 = full_results["experiment_2_population"]["results"]
     fig, axes = plt.subplots(1, 2, figsize=(13.5, 4.8))
     pop_colors = ["#8e44ad", "#2980b9", "#e67e22"]
@@ -90,14 +90,11 @@ def generate_experiment_charts(
     plt.close(fig)
     generated.append(str(p2.as_posix()))
 
-    # 3. Experimento 3: Comparação com Baselines (Fixo vs Busca Aleatória vs Algoritmo Genético)
+    # 3. Comparação entre estratégia fixa, busca aleatória e algoritmo genético.
     exp3_m = full_results["experiment_3_baselines"]["methods"]
     fb_val = exp3_m["fixed_baseline"]["val_mean_rooms"]
-    fb_std = exp3_m["fixed_baseline"]["val_std_rooms"]
     rs_val = exp3_m["random_search"]["val_rooms_across_repeats"]["mean"]
-    rs_std = exp3_m["random_search"]["val_rooms_across_repeats"]["std"]
     ga_val = exp3_m["genetic_algorithm"]["val_rooms_across_repeats"]["mean"]
-    ga_std = exp3_m["genetic_algorithm"]["val_rooms_across_repeats"]["std"]
 
     fb_comp = exp3_m["fixed_baseline"]["val_completion_rate"] * 100.0
     rs_comp = exp3_m["random_search"]["val_completion_rate_mean"] * 100.0
@@ -106,13 +103,12 @@ def generate_experiment_charts(
     fig, axes = plt.subplots(1, 2, figsize=(13, 4.8))
     m_labels = ["Baseline Fixo", "Busca Aleatória\n(240 aval)", "Algoritmo Genético\n(240 aval)"]
     m_means = [fb_val, rs_val, ga_val]
-    m_stds = [fb_std, rs_std, ga_std]
     m_colors = ["#7f8c8d", "#e67e22", "#27ae60"]
 
-    axes[0].bar(m_labels, m_means, yerr=m_stds, capsize=6, color=m_colors, alpha=0.9)
+    axes[0].bar(m_labels, m_means, color=m_colors, alpha=0.9)
     axes[0].set_ylim(0, 108)
     axes[0].set_title("Exp. 3 — Média de Salas Concluídas em Validação")
-    axes[0].set_ylabel("Salas Concluídas (Média ± DP)")
+    axes[0].set_ylabel("Média de salas concluídas")
     for i, v in enumerate(m_means):
         axes[0].text(i, v + 2.5, f"{v:.1f}", ha="center", fontweight="bold")
 
@@ -129,7 +125,7 @@ def generate_experiment_charts(
     plt.close(fig)
     generated.append(str(p3.as_posix()))
 
-    # 4. Experimento 4: Generalização em diferentes cenários
+    # 4. Generalização em diferentes cenários.
     exp4_s = full_results["experiment_4_generalization"]["scenarios"]
     scen_names = [
         "Treino\n(In-Sample)",

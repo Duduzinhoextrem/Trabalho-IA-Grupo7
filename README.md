@@ -1,164 +1,112 @@
-# ⚔️ Masmorra Genética: A Evolução do Guerreiro — Grupo 7 (IA II — FIB)
+# Masmorra Genética
 
-Aplicação web científica e interativa que utiliza **Algoritmos Genéticos (Computação Evolutiva)** para evoluir estratégias de progressão de atributos, contratação de aliados e decisões econômicas em uma masmorra de **100 salas** construída diretamente a partir dos **334 monstros reais da API oficial Dungeons & Dragons 5e SRD (2014)**.
+Um guerreiro precisa atravessar uma masmorra de 100 salas. Qual estratégia ajuda mais: distribuir os pontos de forma equilibrada, experimentar escolhas aleatórias ou usar um algoritmo genético para procurar boas combinações?
 
----
+O projeto do Grupo 7, da disciplina Inteligência Artificial II da FIB, investiga essa pergunta usando um simulador de combates e dados de criaturas do D&D 5e SRD. A aplicação permite treinar e jogar automaticamente, montar uma estratégia própria, acompanhar a jornada e comparar os resultados.
 
-## 👥 Integrantes do Grupo 7 (Inteligência Artificial II — FIB)
+![Tela inicial da Masmorra Genética com o atlas das 100 salas](docs/images/inicio.jpg)
 
-| Integrante | Frente Principal | Responsabilidades |
-| :--- | :--- | :--- |
-| **Eduardo Coque Corrêa de Lima** | Coordenação Técnica & AG | Arquitetura, implementação do Algoritmo Genético (`src/genetic/`) e integração |
-| **Matheus Alcântara Pereira** | Dataset, ETL & EDA | Coleta D&D 5e SRD API, validação, pré-processamento, snapshot e EDA (`src/dataset/`) |
-| **Fernando Eduardo Motta Mendes** | Simulador, Combate & UI | Masmorra de 100 salas, motor de combate por turnos, economia (`src/game/`) e Streamlit (`app.py`) |
-| **Rogério Tiritan Marcone** | Documentação Acadêmica | Canvas Inicial, Metodologia, Model Card e Resumo Expandido (`docs/`) |
-| **Reuel Vitor Lanzetti** | Experimentos & Divulgação | Execução dos experimentos (`src/experiments/`), análise estatística/falhas, slides e vídeo |
+## Como usar
 
----
+1. Na tela inicial, escolha **Treinar e iniciar automaticamente** para procurar uma estratégia e acompanhar sua jornada. Ou abra **Aventura** para escolher o foco do guerreiro, um aliado preferido e a prioridade no mercado.
+2. Os combates e as decisões de compra são automáticos; a tela apresenta o registro da simulação, que pode ser revisto sala por sala.
+3. Após a busca automática, abra **Ver tentativas anteriores e evolução** para comparar estratégias que falharam, ver em que sala pararam e reproduzir o combate final de uma delas. O histórico é mantido durante a sessão e nas continuações da mesma busca.
+4. Compare a tentativa com a estratégia do algoritmo. Em **Como funciona**, é possível executar um treinamento pequeno e usar a estratégia gerada na aventura.
+5. Explore **Resultados**, **Bestiário**, **Dados e fonte** e **Laboratório** para conhecer os dados, os experimentos e testar outras condições. O Bestiário filtra por nome, tipo e nível de desafio; o recorte pode ser baixado em CSV.
+6. Na jornada, use **Mapa da expedição** para rever uma sala e **Salvar relatório da jornada** para baixar as regras, a semente, os genes e os resultados. O histórico da busca também pode ser baixado em CSV.
 
-## 📂 Arquitetura do Projeto
+Cada sessão é independente. A comparação interativa usa a mesma masmorra e semente para os dois métodos, mas as decisões podem fazer com que eles consumam a sequência aleatória de maneiras diferentes.
 
-```text
-Trabalho-IA-Grupo7/
-├── app.py                                      # Aplicação Web Interativa (6 páginas em Streamlit)
-├── requirements.txt                            # Dependências para reprodução local e Streamlit Cloud
-├── README.md                                   # Documentação principal do repositório
-├── .streamlit/
-│   └── config.toml                             # Configuração de tema e servidor Streamlit
-├── .github/
-│   └── workflows/
-│       └── ci_and_experiments.yml              # Pipeline GitHub Actions (Testes + Experimentos Científicos)
-├── config/
-│   └── balance.json                            # Parâmetros versionados de adaptação e economia
-├── data/
-│   ├── raw/
-│   │   └── monsters_raw_srd2014.json           # Snapshot bruto oficial (334 monstros da API D&D 5e SRD)
-│   ├── processed/
-│   │   ├── monsters_srd2014_processed.csv      # Dataset tratado e normalizado (CSV)
-│   │   └── monsters_srd2014_processed.parquet  # Dataset tratado e normalizado (Parquet)
-│   ├── metadata/
-│   │   ├── collection_manifest.json            # Manifesto de coleta, versão, licença e SHA-256
-│   │   └── validation_report.json              # Relatório de validação de tipos e campos
-│   └── experiments/
-│       └── scientific_experiments_v1.json      # Resultados auditáveis dos 4 experimentos científicos
-├── src/
-│   ├── dataset/
-│   │   ├── collector.py                        # Coleta HTTP concorrente com retry/backoff e fallback
-│   │   ├── validation.py                       # Validação de schema, limites e integridade
-│   │   ├── preprocessing.py                    # Normalização explícita e parsing de dados (NdS+M)
-│   │   └── exploration.py                      # Estatísticas, correlações (Pearson/Spearman) e gráficos
-│   ├── game/
-│   │   ├── monsters.py                         # Camada de transformação SRD -> Instância de Combate
-│   │   ├── dungeon.py                          # Gerador reproduzível por semente das 100 salas
-│   │   ├── characters.py                       # Guerreiro e 5 classes de aliados (Mago, Arqueiro, Monge, Padre, Alquimista)
-│   │   ├── economy.py                          # Mercado (4 armas, 4 armaduras, 3 escudos, venda 40%, baús)
-│   │   └── combat.py                           # Motor único de combate automático em turnos (headless)
-│   ├── genetic/
-│   │   ├── chromosome.py                       # Cromossomo de 16 genes, reparo e decodificação online
-│   │   ├── fitness.py                          # Função fitness lexicográfica multi-semente
-│   │   ├── operators.py                        # Torneio, BLX-alpha/uniforme, mutação, elitismo e diversidade
-│   │   └── optimizer.py                        # Ciclo evolutivo e registro por geração
-│   ├── experiments/
-│   │   ├── baselines.py                        # Baseline Fixo e Busca Aleatória (orçamento equivalente)
-│   │   ├── evaluation.py                       # Execução dos Experimentos 1, 2, 3, 4 e Análise de Falhas
-│   │   └── reports.py                          # Geração dos gráficos científicos (PNG)
-│   └── ui/
-├── scripts/
-│   ├── run_etl_and_eda.py                      # Script executável de coleta, validação, tratamento e EDA
-│   └── run_scientific_experiments.py           # Script executável dos 4 experimentos científicos
-├── tests/
-│   └── test_masmorra_genetica.py               # Suíte automatizada cobrindo os 17 critérios de aceitação
-├── docs/
-│   ├── eda_report.md                           # Relatório completo da Análise Exploratória de Dados
-│   ├── canvas_projeto.md                       # Canvas Inicial do Projeto
-│   ├── ficha_experimentos.md                   # Ficha de Experimentos e Análise de Falhas
-│   ├── model_card.md                           # Model Card da Solução
-│   ├── resumo_expandido.md                     # Resumo Expandido acadêmico (2 páginas)
-│   └── materiais_divulgacao_e_apresentacao.md  # Folder, Instagram, Roteiro de Vídeo, Slides (40 min) e Deploy
-└── results/
-    ├── eda/                                    # Gráficos reais da Análise Exploratória (PNG + JSON)
-    └── experiments/                            # Gráficos reais dos Experimentos Científicos (PNG + JSON)
-```
+No modo automático, a aplicação cria e evolui estratégias até encontrar uma que vença as 100 salas da masmorra escolhida, 201 por padrão. A busca também avalia as sementes 101–105 e usa a média de salas como fitness. Quando disponível, a estratégia salva nos experimentos integra a população inicial e é reavaliada. Cada rodada testa até 400 estratégias, com população de 16; se não encontrar uma vencedora nesse limite, a tela oferece **Continuar procurando** a partir da melhor tentativa encontrada.
 
----
+Como a masmorra escolhida participa da busca, a vitória nela é um resultado de treino, não um teste independente. Vencer as 100 salas nesse cenário também não prova que a estratégia seja ótima ou vença outras masmorras. Os experimentos científicos continuam com sementes de treino e validação separadas.
 
-## 🌐 Fonte de Dados Externa, Proveniência e Licenciamento
+## Executar localmente
 
-- **Endpoint Oficial de Listagem:** `https://www.dnd5eapi.co/api/2014/monsters`
-- **Exemplo de Registro Individual:** `https://www.dnd5eapi.co/api/2014/monsters/goblin`
-- **Repositório de Origem:** `https://github.com/5e-bits/5e-database`
-- **Licenciamento:** *System Reference Document 5.1 (Wizards of the Coast LLC)* — **Creative Commons Attribution 4.0 International (CC-BY-4.0)** / **OGL v1.0a**. Código da API sob licença **MIT**.
-- **Snapshot Congelado e Verificado:** `334` criaturas válidas (`0` falhas HTTP, `0` registros inventados), SHA-256 bruto `51a00f4785dcf07fcb4056cd97eaa1eb5b2ba0c235d2b7d5b2762a772691d397`.
+É necessário ter Python instalado. Na pasta do projeto:
 
----
-
-## 📊 Principais Resultados Verificados
-
-### 1. Descobertas da Análise Exploratória (EDA — `n = 334` criaturas)
-1. **Escalonamento Linear de HP vs. Exponencial de XP:** `challenge_rating` possui correlação linear fortíssima com `hit_points` ($r = 0,9404, p < 10^{-156}$) e `max_attack_bonus` ($r = 0,9068$), enquanto `xp` cresce exponencialmente ($\rho = 0,9995$, assimetria $+7,33$), fundamentando a compressão logarítmica de XP no simulador.
-2. **Bounded Accuracy e Independência de Destreza:** `armor_class` varia apenas entre `5` e `25` ($r = 0,7547$ com CR), e `dexterity` não possui correlação com `challenge_rating` ($r = -0,0100, p = 0,8556$).
-3. **Anomalias Tratadas:** Identificados e filtrados 4 registros sem ação de ataque direto (`frog`, `sea-horse`, `shrieker`, `vampire-mist` CR 13) e tratados conjuradores (`mage` CR 6, `archmage` CR 12).
-4. **Assimetria de Resistências:** `25,4%` das criaturas possuem resistência/imunidade física e `39,8%` resistência/imunidade elemental/mágica.
-
-### 2. Comparação com Baselines (Experimento 3 — Validação Fora da Amostra em 10 Sementes Holdout)
-| Método | Orçamento (Avaliações) | Salas em Treino (Média ± DP) | Salas em Validação (Média ± DP) | Mediana (Val) | Taxa Média Conclusão 100 Salas | Melhor Política em Validação | Tempo Médio |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Estratégia Fixa (Baseline)** | 1 | 79,20 ± 0,00 | 69,00 ± 7,23 | 70,50 | 0,00% | 69,00 (`0,0%`) | 0,03s |
-| **Busca Aleatória** | 240 | 95,11 ± 0,97 | **92,27 ± 4,16** | **94,30** | 25,71% | 95,50 (`40,0%`) | 8,20s |
-| **Algoritmo Genético** | 240 | **96,09 ± 1,04** | 90,96 ± 3,88 | 89,80 | **27,14%** | **96,90 ± 2,66** (`30,0%`) | 8,96s |
-
-- **Significância contra o Baseline Fixo:** A estratégia campeã do AG supera o Baseline Fixo em **`+27,90` salas** na validação ($96,90$ vs. $69,00$, Mann-Whitney $U = 100,0, p = 0,000166 < 0,001$).
-- **Generalização (Experimento 4):** Em novas composições de monstros (`301–310`), a estratégia campeã do AG atinge **`97,50 ± 1,75` salas** vs. **`75,50 ± 3,72`** do Baseline Fixo (**`+22,00` salas**); na dificuldade `+15%`, atinge **`73,40`** (mediana `92,0`) vs. **`51,40`** (`+22,00` salas); e sem baús (`enable_chests=False`), atinge **`80,00`** (mediana `94,5`) vs. **`61,10`** (`+18,90` salas).
-
----
-
-## 🚀 Instruções de Reprodução Local
-
-### 1. Instalar Dependências
 ```bash
 python -m pip install -r requirements.txt
+python -m streamlit run app.py
 ```
 
-### 2. Executar Pipeline ETL e Análise Exploratória (EDA)
-Usa o snapshot congelado por padrão; passe `--refresh` para reconsultar os 334 endpoints da API ao vivo:
+O Streamlit informa o endereço local no terminal. O dataset e os resultados já estão no repositório; a aplicação não precisa consultar a API a cada visita.
+
+Para executar os testes:
+
+```bash
+python -m pytest tests -q
+```
+
+Para validar o snapshot e gerar novamente a análise exploratória:
+
 ```bash
 python scripts/run_etl_and_eda.py
 ```
 
-### 3. Executar os 4 Experimentos Científicos Reais
+Por padrão, esse comando usa a cópia local. Para tentar uma nova coleta da API, acrescente `--refresh`. Uma nova coleta pode alterar os dados e não deve substituir o snapshot usado para reproduzir os resultados sem registrar a mudança.
+
+Para repetir os quatro experimentos científicos:
+
 ```bash
 python scripts/run_scientific_experiments.py
 ```
 
-### 4. Executar a Suíte de Testes Automatizados (17 Critérios de Aceitação)
-```bash
-python -m pytest -v
-```
+O processamento completo pode levar vários minutos. Ele grava os resultados em `data/experiments/scientific_experiments_v2.json` e os gráficos em `results/experiments_v2/`. O arquivo `v1` foi preservado como histórico, mas suas comparações não devem ser apresentadas como tendo orçamentos iguais: o AG realizou 218 avaliações onde a busca aleatória realizou 240. A versão `v2` corrige a comparação e também torna a composição alternativa reproduzível entre processos.
 
-### 5. Iniciar a Aplicação Web Interativa (Streamlit)
-```bash
-python -m streamlit run app.py
-```
+## Dados e regras
 
----
+**Dataset** é o conjunto de dados; **fonte** é a origem desses dados. Neste projeto, usamos os registros de criaturas da API D&D 5e SRD. As salas e os resultados de combate são gerados pelo simulador do grupo. A explicação e um texto para preencher o Canvas estão em [docs/dados_e_fonte.md](docs/dados_e_fonte.md); os arquivos podem ser baixados na tela **Dados e fonte**.
 
-## ☁️ Publicação no Streamlit Community Cloud
+O snapshot `srd-2014-v1.0.0`, coletado em 29/10/2026, contém **334 registros** de criaturas fictícias da [D&D 5e SRD API](https://docs.dnd5eapi.co/), mantida pela comunidade 5e-bits. A versão bruta, os dados tratados, o manifesto e a validação estão em `data/`.
 
-O repositório está integralmente configurado para publicação no **Streamlit Community Cloud** (`https://share.streamlit.io/`):
-- **Arquivo de entrada:** `app.py`
-- **Dependências:** `requirements.txt`
-- **Configuração de servidor/tema:** `.streamlit/config.toml`
-- **Dados e experimentos pré-computados:** versionados em `data/` e `results/` para carregamento instantâneo no plano gratuito de hospedagem, além do **Modo Demonstração** ao vivo na Página 4.
+Os registros do SRD são dados externos; as salas, equipamentos, fórmulas de combate e resultados das partidas são criações ou simulações do grupo. Cada inimigo da masmorra mantém um link para o registro de origem. O combate é uma adaptação simplificada, não uma implementação completa das regras de D&D.
 
-> **Status de Publicação:** A preparação técnica para o deploy no Streamlit Community Cloud está 100% concluída. Como a criação do vínculo no painel `share.streamlit.io` requer autenticação interativa OAuth da conta GitHub (`Duduzinhoextrem`), consulte a seção 5 de [`docs/materiais_divulgacao_e_apresentacao.md`](docs/materiais_divulgacao_e_apresentacao.md) para os 3 cliques finais de ativação da URL pública.
+O SRD 5.1 é disponibilizado pela Wizards of the Coast sob CC BY 4.0 e OGL 1.0a. A atribuição escolhida para o conteúdo do SRD consta em `data/metadata/collection_manifest.json`; consulte também o [SRD 5.1 e suas condições](https://www.dndbeyond.com/srd). A API e seu código são projetos separados do conteúdo do SRD. O antigo [repositório da base](https://github.com/5e-bits/5e-database) foi arquivado e aponta para o repositório atual da API.
 
----
+A exploração dos dados, os valores ausentes e as transformações estão em [docs/eda_report.md](docs/eda_report.md). A configuração de combate está em `config/balance.json`.
 
-## 📚 Documentação Acadêmica Completa (`docs/`)
+## Algoritmo e experimentos
 
-- [Relatório de Análise Exploratória de Dados (EDA)](docs/eda_report.md)
-- [Canvas Inicial do Projeto](docs/canvas_projeto.md)
-- [Ficha de Experimentos e Análise de Falhas](docs/ficha_experimentos.md)
-- [Model Card da Solução](docs/model_card.md)
-- [Resumo Expandido (2 Páginas)](docs/resumo_expandido.md)
-- [Materiais de Divulgação, Slides (40 min), Roteiro de Vídeo e Guia de Deploy](docs/materiais_divulgacao_e_apresentacao.md)
+Cada estratégia é representada por 16 valores que orientam a distribuição de atributos, as prioridades de aliados e as compras. O algoritmo cria uma população, testa os candidatos, seleciona estratégias, combina seus genes e aplica mutações. A principal métrica é a média de salas concluídas; a taxa de conclusão das 100 salas é apresentada separadamente.
+
+O conjunto de treino usa as sementes 101–105. O conjunto de validação usa 201–210, e a composição alternativa usa 301–310. As configurações comparam:
+
+- três taxas de mutação;
+- três tamanhos de população com o mesmo orçamento efetivo;
+- estratégia fixa, busca aleatória e algoritmo genético;
+- a estratégia selecionada no treino em novos cenários, com mudanças de composição, dificuldade e baús.
+
+Na comparação `v2`, busca aleatória e AG fizeram **240 avaliações efetivas por repetição**, em sete repetições. O elitismo preserva indivíduos já avaliados; por isso, a última geração pode ser parcial. As avaliações, sementes, configurações e resultados estão no JSON. A estratégia fixa é uma única regra, não uma busca com 240 candidatos.
+
+| Método | Média de salas na validação | Conclusão das 100 salas |
+| --- | ---: | ---: |
+| Estratégia fixa | 69,00 | 0,00% |
+| Busca aleatória | 92,27 | 25,71% |
+| Algoritmo genético | 91,27 | 28,57% |
+
+A tabela mostra a média das sete repetições para busca aleatória e AG, avaliadas nas mesmas dez sementes; a regra fixa foi avaliada uma vez nessas sementes. Nesta execução, a busca aleatória teve média maior de salas, e o AG teve taxa média de conclusão maior. Essas diferenças não demonstram superioridade geral de um método.
+
+A estratégia individual selecionada pelo desempenho no treino alcançou média de **96,9 salas** e concluiu as 100 salas em **4 das 10** sementes de validação. Não confunda esse resultado de um indivíduo com a média das sete repetições. A ficha em [docs/ficha_experimentos.md](docs/ficha_experimentos.md) apresenta a metodologia, outros cenários e casos de falha.
+
+## Limitações
+
+- As batalhas são simulações e dependem das fórmulas de balanceamento escolhidas pelo grupo. Não são dados de partidas reais.
+- Cinco masmorras de treino são uma amostra pequena. O mesmo conjunto de validação aparece em vários experimentos, portanto não deve ser tratado como uma prova de desempenho em qualquer masmorra ou como um teste independente adicional após decisões baseadas nele.
+- Os dados de monstros são adaptados e resumidos; ações especiais e resistência não reproduzem integralmente as regras do SRD.
+- O algoritmo não garante a melhor estratégia possível e pode perder para uma alternativa mais simples em uma execução ou cenário.
+- O teste automatizado dos arquivos de deploy não comprova que há uma URL pública disponível.
+
+## Materiais e entrega
+
+A [revisão de melhorias e pendências](docs/revisao_e_melhorias.md) registra o que mudou na interface e no motor da jornada, além dos ajustes restantes nos materiais.
+
+O repositório contém o [Canvas](docs/canvas_projeto.md), a [ficha de experimentos](docs/ficha_experimentos.md), o [Model Card](docs/model_card.md), um [rascunho de resumo](docs/resumo_expandido.md), a [análise exploratória](docs/eda_report.md) e um [roteiro de divulgação e apresentação](docs/materiais_divulgacao_e_apresentacao.md). Os roteiros não são o vídeo, o folder, o carrossel nem os slides finalizados. O resumo ainda precisa ser formatado no modelo vigente da Jornada Científica da FIB.
+
+O formulário em PDF fornecido anteriormente ao grupo descreve uma proposta de rotas; ele deve ser atualizado ou substituído pelo Canvas da masmorra antes da entrega, se ainda for usado.
+
+A aplicação está preparada para execução em Streamlit, mas **uma publicação e uma URL pública ainda não foram verificadas**. O prazo comum de entrega indicado nos materiais da disciplina é 17/11/2026 às 17h; a apresentação do Grupo 7 está indicada para 01/12/2026. É necessário testar o protótipo em outro computador ou navegador, preparar um plano sem internet e conferir os materiais e QR Codes após a publicação.
+
+## Integrantes
+
+Eduardo Coque Corrêa de Lima · Fernando Eduardo Motta Mendes · Matheus Alcântara Pereira · Reuel Vitor Lanzetti · Rogério Tiritan Marcone.

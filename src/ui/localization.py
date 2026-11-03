@@ -1,7 +1,6 @@
-"""Dicionários de Tradução e Funções de Linguagem Acessível em Português.
+"""Traduções para português dos termos, atributos e gráficos da interface.
 
-Garante que qualquer pessoa, mesmo sem conhecimento prévio de IA ou RPG,
-consiga entender claramente a aplicação, os termos, atributos e gráficos.
+Usa descrições voltadas a quem não conhece IA ou RPG.
 """
 
 from __future__ import annotations
@@ -37,7 +36,7 @@ CREATURE_SIZE_TRANSLATIONS: dict[str, str] = {
     "Gargantuan": "Colossal",
 }
 
-# Tradução amigável dos 16 genes do Algoritmo Genético
+# Nomes e descrições em português dos 16 genes do algoritmo genético.
 GENE_FRIENDLY_INFO: dict[str, dict[str, str]] = {
     "w_weight_str": {
         "nome": "Foco em Força do Guerreiro",
@@ -53,7 +52,7 @@ GENE_FRIENDLY_INFO: dict[str, dict[str, str]] = {
     },
     "ally_prio_mage": {
         "nome": "Preferência por contratar Mago",
-        "explicacao": "Prioridade de contratar o Mago (ataques mágicos à distância que ignoram armadura física).",
+        "explicacao": "Prioridade de contratar o Mago, que usa ataques mágicos à distância.",
     },
     "ally_prio_archer": {
         "nome": "Preferência por contratar Arqueiro",
@@ -110,7 +109,7 @@ ALLY_CLASS_LABELS: dict[str, dict[str, str]] = {
     "mage": {
         "nome": "Mago",
         "funcao": "Ataque Mágico à Distância",
-        "descricao": "Fica na retaguarda disparando magias que perfuram criaturas com alta armadura física.",
+        "descricao": "Fica na retaguarda e ataca com magias; a defesa e a resistência do alvo ainda afetam o dano.",
     },
     "archer": {
         "nome": "Arqueiro",
@@ -150,7 +149,7 @@ ITEM_CATEGORY_TRANSLATIONS: dict[str, str] = {
 
 
 def translate_creature_type(type_str: str) -> str:
-    """Retorna o tipo de monstro em português compreensível."""
+    """Retorna o tipo de monstro em português."""
     clean = str(type_str).lower().strip()
     return CREATURE_TYPE_TRANSLATIONS.get(clean, type_str.capitalize())
 

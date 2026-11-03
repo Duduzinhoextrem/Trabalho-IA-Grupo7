@@ -1,11 +1,11 @@
-"""Implementação das duas referências obrigatórias (Seção 10):
+"""Estratégias de referência da Seção 10:
 
-1. Baseline Fixo (`create_fixed_baseline_chromosome`):
-   Estratégia determinística de regras fixas com evolução equilibrada (1/3 Força, 1/3 Vitalidade, 1/3 Defesa),
-   reserva moderada fixa (35 ouro), compras conservadoras (limiar 1.25x) e contratação clássica (Arqueiro/Mago).
+1. Estratégia fixa (`create_fixed_baseline_chromosome`):
+   Distribui os atributos de forma equilibrada (1/3 Força, 1/3 Vitalidade, 1/3 Defesa),
+   mantém uma reserva fixa (35 ouro), compra com limiar de 1.25x e contrata Arqueiro/Mago.
 
-2. Busca Aleatória (`run_random_search`):
-   Amostra estratégias válidas aleatórias usando exatamente o mesmo orçamento de avaliações da função
+2. Busca aleatória (`run_random_search`):
+   Sorteia estratégias válidas com o mesmo orçamento de avaliações da função
    objetivo (`budget_evaluations`) que o Algoritmo Genético e retorna a melhor encontrada.
 """
 
@@ -22,31 +22,31 @@ from src.genetic.fitness import evaluate_chromosome
 
 
 def create_fixed_baseline_chromosome() -> Chromosome:
-    """Retorna o cromossomo representativo da Estratégia Fixa Equilibrada."""
+    """Retorna o cromossomo da estratégia fixa equilibrada."""
     fixed_genes = [
-        0.34,  # 0: w_weight_str (equilibrado)
-        0.33,  # 1: w_weight_vit (equilibrado)
-        0.33,  # 2: w_weight_def (equilibrado)
-        0.70,  # 3: ally_prio_mage
-        0.80,  # 4: ally_prio_archer (prefere arqueiro primeiro, depois mago)
-        0.40,  # 5: ally_prio_monk
-        0.35,  # 6: ally_prio_priest
-        0.30,  # 7: ally_prio_alchemist
-        0.34,  # 8: ally_weight_power
-        0.33,  # 9: ally_weight_vit
-        0.33,  # 10: ally_weight_def
-        0.50,  # 11: equip_offense_priority (equilibrado)
-        0.0,   # 12: hire_before_equip_discrete (compra equipamento básico antes de aliado)
-        40.0,  # 13: min_gold_reserve (reserva fixa de 40 moedas)
-        1.25,  # 14: equipment_buy_threshold (compra quando tem 125% do custo + reserva)
-        1.25,  # 15: ally_hire_threshold
+        0.34,  # 0: peso da força do guerreiro (w_weight_str) (equilibrado)
+        0.33,  # 1: peso da vitalidade do guerreiro (w_weight_vit) (equilibrado)
+        0.33,  # 2: peso da defesa do guerreiro (w_weight_def) (equilibrado)
+        0.70,  # 3: prioridade de contratação do mago (ally_prio_mage)
+        0.80,  # 4: prioridade de contratação do arqueiro (ally_prio_archer) (prefere arqueiro primeiro, depois mago)
+        0.40,  # 5: prioridade de contratação do monge (ally_prio_monk)
+        0.35,  # 6: prioridade de contratação do padre (ally_prio_priest)
+        0.30,  # 7: prioridade de contratação do alquimista (ally_prio_alchemist)
+        0.34,  # 8: peso do poder dos aliados (ally_weight_power)
+        0.33,  # 9: peso da vitalidade dos aliados (ally_weight_vit)
+        0.33,  # 10: peso da defesa dos aliados (ally_weight_def)
+        0.50,  # 11: prioridade de equipamento ofensivo (equip_offense_priority) (equilibrado)
+        0.0,   # 12: contratar antes de equipar (hire_before_equip_discrete) (compra equipamento básico antes de aliado)
+        40.0,  # 13: reserva mínima de ouro (min_gold_reserve) (reserva fixa de 40 moedas)
+        1.25,  # 14: limiar de compra de equipamento (equipment_buy_threshold) (compra quando tem 125% do custo + reserva)
+        1.25,  # 15: limiar de contratação de aliado (ally_hire_threshold)
     ]
     return Chromosome(genes=fixed_genes)
 
 
 @dataclass
 class RandomSearchResult:
-    """Resultado completo da Busca Aleatória com orçamento equivalente de avaliações."""
+    """Resultado da busca aleatória com orçamento equivalente de avaliações."""
 
     budget_evaluations: int
     seed: int
@@ -84,7 +84,7 @@ def run_random_search(
     enable_allies: bool = True,
     enable_chests: bool = True,
 ) -> RandomSearchResult:
-    """Executa Busca Aleatória avaliando `budget_evaluations` cromossomos válidos aleatórios."""
+    """Avalia `budget_evaluations` cromossomos válidos sorteados na busca aleatória."""
     if budget_evaluations <= 0:
         raise ValueError("budget_evaluations deve ser > 0")
 

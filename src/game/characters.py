@@ -1,10 +1,10 @@
-"""Modelagem do Guerreiro Principal e do Sistema de Aliados (5 classes contratáveis).
+"""Guerreiro principal e aliados das 5 classes contratáveis.
 
-Regras estritas (Seções 5 e 6):
-- Guerreiro inicia Nível 1, Sala 1, Espada Básica (tier 1), sem aliados, sem armadura (tier 0), sem escudo (tier 0).
+Regras das Seções 5 e 6:
+- O guerreiro começa no nível 1, sala 1, com espada básica (categoria 1), sem aliados, armadura ou escudo (categoria 0).
 - Evolução por XP com distribuição irreversível de pontos em Força, Vitalidade e Defesa.
 - Cinco classes de aliados: Mago (`mage`), Arqueiro (`archer`), Monge (`monk`), Padre (`priest`), Alquimista (`alchemist`).
-- Slot 1 liberado no nível 5; Slot 2 liberado no nível 15; máximo 2 aliados simultâneos; proibida classe duplicada.
+- A primeira vaga de aliado abre no nível 5 e a segunda no nível 15; são permitidos até 2 aliados, de classes diferentes.
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ def distribute_points_by_weights(
 ) -> tuple[int, int, int]:
     """Distribui `total_points` inteiros entre 3 atributos proporcionalmente aos pesos contínuos.
 
-    Garante soma exata igual a `total_points` e valores >= 0 (sem reembolso).
+    A soma é igual a `total_points`, os valores são >= 0 e os pontos não são reembolsados.
     """
     if total_points <= 0:
         return 0, 0, 0
@@ -48,10 +48,10 @@ def distribute_points_by_weights(
 class Ally:
     """Representa um aliado contratado com progressão própria de nível e atributos."""
 
-    ally_class: str  # "mage", "archer", "monk", "priest", "alchemist"
+    ally_class: str  # Mago ("mage"), arqueiro ("archer"), monge ("monk"), padre ("priest") ou alquimista ("alchemist").
     name: str
     role: str
-    position: str  # "frontline" ou "backline"
+    position: str  # Linha de frente ("frontline") ou retaguarda ("backline").
     level: int = 1
     xp: int = 0
     power: int = 10
@@ -92,7 +92,7 @@ class Ally:
         points_per_level: int,
         base_hp: int,
     ) -> int:
-        """Adiciona XP ao aliado e aplica irreversivelmente os pontos de atributo ao subir de nível."""
+        """Adiciona XP ao aliado e distribui os pontos de atributo ao subir de nível, sem reembolso."""
         if xp_amount <= 0 or not self.is_alive:
             return 0
         self.xp += xp_amount
@@ -121,7 +121,7 @@ class Ally:
 
 
 def create_ally(ally_class: str, balance_cfg: dict[str, Any], initial_level: int = 1) -> Ally:
-    """Instancia um novo aliado de uma das 5 classes permitidas."""
+    """Cria um aliado de uma das 5 classes permitidas."""
     classes_cfg = balance_cfg["allies"]["classes"]
     if ally_class not in classes_cfg:
         raise ValueError(f"Classe de aliado desconhecida: {ally_class}")
@@ -150,7 +150,7 @@ def create_ally(ally_class: str, balance_cfg: dict[str, Any], initial_level: int
         atk_buff_per_stack=float(c.get("atk_buff_per_stack", 0.0)),
         def_debuff_per_stack=float(c.get("def_debuff_per_stack", 0.0)),
     )
-    # Se contratado quando o guerreiro já está em nível mais alto, inicia com nível proporcional
+    # O aliado começa em um nível proporcional ao do guerreiro na contratação.
     if initial_level > 1:
         pts_per_lvl = int(balance_cfg["allies"].get("attribute_points_per_level", 3))
         for _ in range(initial_level - 1):
@@ -166,7 +166,7 @@ def create_ally(ally_class: str, balance_cfg: dict[str, Any], initial_level: int
 
 @dataclass
 class Warrior:
-    """Representa o Guerreiro protagonista da Masmorra Genética."""
+    """Guerreiro controlado pela estratégia na Masmorra Genética."""
 
     level: int = 1
     current_room: int = 1
@@ -177,9 +177,9 @@ class Warrior:
     defense: int = 8
     max_hp: int = 75
     current_hp: int = 75
-    weapon_tier: int = 1  # Começa com Espada Básica (tier 1)
-    armor_tier: int = 0   # Começa sem armadura (tier 0)
-    shield_tier: int = 0  # Começa sem escudo (tier 0)
+    weapon_tier: int = 1  # Começa com espada básica (categoria 1).
+    armor_tier: int = 0   # Começa sem armadura (categoria 0).
+    shield_tier: int = 0  # Começa sem escudo (categoria 0).
     allies: list[Ally] = field(default_factory=list)
     total_points_allocated: int = 0
     buff_stacks: int = 0
@@ -258,7 +258,7 @@ class Warrior:
         attr_weights: tuple[float, float, float],
         balance_cfg: dict[str, Any],
     ) -> int:
-        """Adiciona XP ao guerreiro e distribui pontos irreversivelmente ao subir de nível."""
+        """Adiciona XP ao guerreiro e distribui os pontos ao subir de nível, sem reembolso."""
         if xp_amount <= 0 or not self.is_alive:
             return 0
         self.xp += xp_amount
@@ -286,13 +286,13 @@ class Warrior:
         return 0
 
     def can_hire_ally(self, ally_class: str, balance_cfg: dict[str, Any]) -> bool:
-        """Verifica todas as regras de elegibilidade para contratar um aliado."""
+        """Verifica se o guerreiro pode contratar o aliado."""
         max_slots = self.unlocked_ally_slots(balance_cfg)
         active_allies = [a for a in self.allies if a.is_alive]
         if len(active_allies) >= max_slots:
             return False
         if any(a.ally_class == ally_class and a.is_alive for a in self.allies):
-            return False  # Proibida classe duplicada
+            return False  # Não permite dois aliados da mesma classe.
         classes_cfg = balance_cfg["allies"]["classes"]
         if ally_class not in classes_cfg:
             return False
@@ -301,7 +301,7 @@ class Warrior:
 
 
 def create_initial_warrior(balance_cfg: dict[str, Any]) -> Warrior:
-    """Cria o guerreiro inicial exatamente nas condições da Seção 5."""
+    """Cria o guerreiro com as condições iniciais da Seção 5."""
     w_cfg = balance_cfg["warrior"]
     w = Warrior(
         level=int(w_cfg["initial_level"]),

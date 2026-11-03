@@ -1,8 +1,8 @@
-"""Pré-processamento e normalização explícita dos registros brutos da API D&D 5e SRD.
+"""Pré-processamento dos registros brutos da API D&D 5e SRD.
 
-Separa rigorosamente:
+Separa os dados em:
 1. Colunas extraídas/normalizadas diretamente do registro externo (SRD 2014).
-2. Métricas auxiliares de parsing de dados de ataque (média matemática de dados XdY+Z).
+2. Métricas calculadas a partir das expressões de dados de ataque (média de XdY+Z).
 Exporta os dados tratados em CSV e Parquet (`data/processed/`).
 """
 
@@ -30,7 +30,7 @@ MAGICAL_ELEMENTAL_DAMAGE_TYPES = {
     "thunder",
 }
 
-# Tabela oficial SRD 5.1 de XP por Challenge Rating (usada apenas se xp vier nulo)
+# XP por nível de desafio (CR), conforme o SRD 5.1; usada quando xp é nulo.
 SRD_XP_BY_CR: dict[float, int] = {
     0.0: 10,
     0.125: 25,
@@ -71,7 +71,7 @@ DEFAULT_PARQUET_PATH = Path("data/processed/monsters_srd2014_processed.parquet")
 
 
 def parse_dice_average(dice_str: str | None) -> float:
-    """Calcula o valor esperado matemático de uma expressão de dados (ex: '2d6+3' -> 10.0).
+    """Calcula a média de uma expressão de dados (ex.: '2d6+3' -> 10.0).
 
     Fórmula exata: para N dados de S faces com modificador M, E[X] = N * (S + 1) / 2 + M.
     Também suporta valores inteiros fixos (ex: '1' -> 1.0) ou somas de múltiplos dados.
@@ -114,7 +114,7 @@ def extract_action_damage_components(action: dict[str, Any]) -> tuple[float, flo
             if not isinstance(dmg_item, dict):
                 continue
             dice_str = dmg_item.get("damage_dice")
-            # Algumas ações possuem escolha de dano (ex: armas versáteis em `from.options`)
+            # Algumas ações permitem escolher o dano, como armas versáteis em `from.options`.
             if not dice_str and isinstance(dmg_item.get("from"), dict):
                 options = dmg_item["from"].get("options", [])
                 if options and isinstance(options[0], dict):
@@ -130,7 +130,7 @@ def extract_action_damage_components(action: dict[str, Any]) -> tuple[float, flo
             else:
                 phys_dmg += avg_val
     else:
-        # Fallback: verifica se a descrição textual contém "Hit: X (NdM + K) <type> damage"
+        # Se faltar o dano estruturado, procura na descrição o padrão "Hit: X (NdM + K) <type> damage"
         desc = str(action.get("desc", ""))
         for match in DESC_HIT_DAMAGE_PATTERN.finditer(desc):
             avg_val = float(match.group(1))
@@ -145,7 +145,7 @@ def extract_action_damage_components(action: dict[str, Any]) -> tuple[float, flo
 
 
 def estimate_multiattack_multiplier(actions: list[dict[str, Any]]) -> int:
-    """Identifica o número de ataques em 'Multiattack' quando estruturado na API."""
+    """Identifica o número de ataques na ação de ataque múltiplo ('Multiattack') quando estruturada na API."""
     for act in actions:
         if not isinstance(act, dict):
             continue
@@ -170,7 +170,7 @@ def estimate_multiattack_multiplier(actions: list[dict[str, Any]]) -> int:
 
 
 def normalize_monster_record(raw: dict[str, Any]) -> dict[str, Any]:
-    """Transforma um registro JSON aninhado da API em um registro tabular plano e auditável."""
+    """Converte um registro JSON aninhado da API em uma linha da tabela."""
     idx = str(raw.get("index", "")).strip()
     name = str(raw.get("name", "")).strip()
     size = str(raw.get("size", "Medium")).strip()
@@ -323,7 +323,7 @@ def load_processed_dataset(
     parquet_path: Path = DEFAULT_PARQUET_PATH,
     csv_path: Path = DEFAULT_CSV_PATH,
 ) -> pd.DataFrame:
-    """Carrega o dataset tratado do snapshot congelado (Parquet ou CSV)."""
+    """Carrega a cópia dos dados tratados em Parquet ou CSV."""
     if parquet_path.exists():
         return pd.read_parquet(parquet_path)
     if csv_path.exists():

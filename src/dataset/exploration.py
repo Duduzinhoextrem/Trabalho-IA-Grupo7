@@ -1,8 +1,8 @@
-"""Análise Exploratória de Dados (EDA) do Dataset D&D 5e SRD (2014).
+"""Análise exploratória dos dados (EDA) do D&D 5e SRD (2014).
 
-Calcula estatísticas descritivas reais, matrizes de correlação (Pearson e Spearman),
+Calcula estatísticas descritivas, matrizes de correlação (Pearson e Spearman),
 distribuições por CR, HP, AC, XP, tipos de criaturas, valores ausentes/inconsistências
-e gera gráficos estáticos (PNG) e resumos JSON auditáveis.
+e gera gráficos estáticos (PNG) e resumos em JSON.
 """
 
 from __future__ import annotations
@@ -42,7 +42,7 @@ def compute_eda_metrics(
     df: pd.DataFrame,
     validation_report: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Calcula todas as métricas empíricas e correlações sobre o dataset tratado."""
+    """Calcula as métricas e correlações dos dados tratados."""
     total_valid = len(df)
 
     # Estatísticas descritivas de colunas numéricas
@@ -63,7 +63,7 @@ def compute_eda_metrics(
             "skewness": round(float(s.skew()), 4),
         }
 
-    # Pares de correlação específicos exigidos na Seção 3 + atributos ofensivos
+    # Correlações da Seção 3 e dos atributos ofensivos.
     correlation_pairs = [
         ("challenge_rating", "hit_points"),
         ("challenge_rating", "armor_class"),
@@ -98,7 +98,7 @@ def compute_eda_metrics(
     size_counts = df["size"].value_counts().to_dict()
     cr_counts = {str(k): int(v) for k, v in df["challenge_rating"].value_counts().sort_index().items()}
 
-    # Investigação de inconsistências e casos especiais nos dados externos
+    # Verifica inconsistências e casos especiais nos dados externos.
     zero_attack_actions = df[df["attack_actions_count"] == 0][
         ["index", "name", "challenge_rating", "actions_count"]
     ].to_dict(orient="records")
@@ -109,7 +109,7 @@ def compute_eda_metrics(
     phys_resistant_count = int(df["has_physical_resistance"].sum())
     mag_resistant_count = int(df["has_magical_resistance"].sum())
 
-    # Agregado por faixas de CR para análise de progressão
+    # Agrupa por faixas de CR para analisar a progressão.
     df_temp = df.copy()
     df_temp["cr_tier"] = pd.cut(
         df_temp["challenge_rating"],
@@ -158,13 +158,13 @@ def compute_eda_metrics(
 
 
 def generate_eda_charts(df: pd.DataFrame, output_dir: Path = Path("results/eda")) -> list[str]:
-    """Gera gráficos estáticos reais para o relatório de EDA e documentação."""
+    """Gera gráficos estáticos para o relatório de EDA e a documentação."""
     output_dir.mkdir(parents=True, exist_ok=True)
     generated_files: list[str] = []
 
     plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
 
-    # 1. Distribuição por Nível de Desafio (CR) e Pontos de Vida (HP)
+    # 1. Distribuição do nível de desafio (CR) e dos pontos de vida (HP).
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     axes[0].hist(df["challenge_rating"], bins=25, color="#2b5c8f", edgecolor="white", alpha=0.9)
     axes[0].set_title("Distribuição por Nível de Desafio (CR) — D&D 5e SRD (n=334)")
@@ -181,7 +181,7 @@ def generate_eda_charts(df: pd.DataFrame, output_dir: Path = Path("results/eda")
     plt.close(fig)
     generated_files.append(str(p1.as_posix()))
 
-    # 2. Relações CR vs Vida, CR vs Defesa (AC), CR vs Experiência (XP)
+    # 2. Relações do CR com vida, defesa (AC) e experiência (XP).
     fig, axes = plt.subplots(1, 3, figsize=(16, 4.8))
     axes[0].scatter(df["challenge_rating"], df["hit_points"], alpha=0.65, color="#1f77b4", edgecolors="none")
     m_hp, b_hp = np.polyfit(df["challenge_rating"], df["hit_points"], 1)
@@ -208,7 +208,7 @@ def generate_eda_charts(df: pd.DataFrame, output_dir: Path = Path("results/eda")
     plt.close(fig)
     generated_files.append(str(p2.as_posix()))
 
-    # 3. Distribuição dos Tipos de Criaturas
+    # 3. Distribuição dos tipos de criaturas.
     fig, ax = plt.subplots(figsize=(10, 5.5))
     type_series = df["type"].value_counts().sort_values(ascending=True)
     ax.barh(type_series.index, type_series.values, color="#3b7a57")
@@ -223,7 +223,7 @@ def generate_eda_charts(df: pd.DataFrame, output_dir: Path = Path("results/eda")
     plt.close(fig)
     generated_files.append(str(p3.as_posix()))
 
-    # 4. Comportamento dos Atributos Ofensivos (Bônus de Ataque e Dano por CR)
+    # 4. Bônus de ataque e dano por CR.
     fig, axes = plt.subplots(1, 2, figsize=(13, 4.8))
     axes[0].scatter(df["challenge_rating"], df["max_attack_bonus"], alpha=0.65, color="#e67e22")
     axes[0].set_title("CR vs Maior Bônus de Ataque")
@@ -240,7 +240,7 @@ def generate_eda_charts(df: pd.DataFrame, output_dir: Path = Path("results/eda")
     plt.close(fig)
     generated_files.append(str(p4.as_posix()))
 
-    # 5. Mapa de Calor de Correlação de Pearson
+    # 5. Mapa de calor das correlações de Pearson.
     corr_cols = [
         "challenge_rating",
         "hit_points",

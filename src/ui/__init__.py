@@ -1,1 +1,1 @@
-"""Componentes de interface gráfica interativa em Streamlit da Masmorra Genética."""
+"""Componentes da interface Streamlit da Masmorra Genética."""

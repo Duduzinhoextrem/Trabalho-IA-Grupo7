@@ -1,7 +1,7 @@
-"""Gerador determinístico por semente da Masmorra de 100 Salas baseado no Dataset D&D 5e SRD.
+"""Geração da masmorra de 100 salas com dados D&D 5e SRD e semente fixa.
 
 A montagem de cada sala considera:
-- Nível de desafio (CR) dos monstros no dataset externo
+- Nível de desafio (CR) dos monstros nos dados externos
 - Vida, defesa e potencial ofensivo (físico e mágico)
 - Número de inimigos (1 a 3 por sala conforme orçamento de encontro)
 - Dificuldade prevista crescente da Sala 1 à Sala 100
@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import copy
 from dataclasses import dataclass
+import hashlib
 import random
 from typing import Any
 
@@ -26,7 +27,7 @@ from src.game.monsters import (
 
 @dataclass
 class DungeonRoom:
-    """Representa uma das 100 salas da masmorra com sua composição de encontro e métricas."""
+    """Sala da masmorra com seus inimigos e métricas do encontro."""
 
     room_number: int
     target_cr: float
@@ -42,7 +43,7 @@ class DungeonRoom:
         return round(sum(e.physical_damage + e.magical_damage for e in self.enemies), 2)
 
     def clone_for_simulation(self) -> DungeonRoom:
-        """Retorna uma cópia limpa da sala para execução de combate sem mutar o template."""
+        """Retorna uma cópia da sala para o combate e preserva o modelo original."""
         return DungeonRoom(
             room_number=self.room_number,
             target_cr=self.target_cr,
@@ -64,7 +65,7 @@ class DungeonRoom:
 
 
 def compute_room_target_cr(room_number: int) -> float:
-    """Define a curva progressiva de Challenge Rating (CR) alvo para as salas 1 a 100."""
+    """Define a progressão do nível de desafio (CR) alvo nas salas 1 a 100."""
     if room_number <= 10:
         # Salas iniciais: CR 0.125 a 1.0
         return round(0.125 + (room_number - 1) * (0.875 / 9.0), 3)
@@ -80,7 +81,7 @@ def compute_room_target_cr(room_number: int) -> float:
     if room_number < 100:
         # Salas 91 a 99: CR 18.5 a 23.0
         return round(18.5 + (room_number - 90) * (4.5 / 9.0), 3)
-    # Sala 100 (Chefe Final): CR 24+
+    # Sala 100 (chefe final): CR 24+.
     return 24.0
 
 
@@ -91,14 +92,14 @@ def build_dungeon_100_rooms(
     difficulty_multiplier: float = 1.0,
     composition_mode: str = "standard",
 ) -> list[DungeonRoom]:
-    """Constrói exatamente 100 salas reproduzíveis por semente a partir do dataset externo.
+    """Monta 100 salas a partir dos dados externos, reproduzíveis pela semente.
 
     Parâmetros:
     - `seed`: semente do gerador pseudoaleatório para reprodutibilidade exata.
     - `difficulty_multiplier`: fator multiplicador de dificuldade (1.0 padrão; >1.0 para testes de generalização).
     - `composition_mode`:
-        - `"standard"`: utiliza todo o pool elegível do SRD.
-        - `"alternate_pool"`: privilegia subconjunto alternativo de espécies/tipos para teste de generalização fora da amostra.
+        - `"standard"`: usa todos os monstros elegíveis do SRD.
+        - `"alternate_pool"`: favorece um subconjunto alternativo de espécies e tipos para testar a generalização fora da amostra.
     """
     eligible_df = filter_combat_eligible_monsters(monsters_df)
     if eligible_df.empty:
@@ -108,8 +109,15 @@ def build_dungeon_100_rooms(
     records = eligible_df.to_dict(orient="records")
 
     if composition_mode == "alternate_pool":
-        # Desloca a preferência de amostragem para testar generalização em novas composições
+        # Muda a preferência de seleção para testar a generalização em outras composições.
         rng.shuffle(records)
+
+    species_biases = {}
+    if composition_mode == "alternate_pool":
+        for rec in records:
+            key = str(rec["index"])
+            digest = hashlib.sha256(f"{seed}:{key}".encode("utf-8")).digest()
+            species_biases[key] = (int.from_bytes(digest[:4], "big") % 100) / 250.0
 
     total_rooms = int(balance_cfg["dungeon"].get("total_rooms", 100))
     rooms: list[DungeonRoom] = []
@@ -117,7 +125,7 @@ def build_dungeon_100_rooms(
     for room_num in range(1, total_rooms + 1):
         target_cr = compute_room_target_cr(room_num)
 
-        # Determina quantidade de inimigos na sala (1 a 3) conforme progressão e semente
+        # Define de 1 a 3 inimigos por sala conforme a progressão e a semente.
         if room_num in (1, 2, 3, 25, 50, 75, 100):
             num_enemies = 1  # Salas iniciais e salas de chefe/subchefe têm 1 inimigo principal
         elif room_num < 12:
@@ -133,7 +141,7 @@ def build_dungeon_100_rooms(
         else:
             num_enemies = 1 if rng.random() < 0.58 else 2
 
-        # Ajusta o CR individual quando há múltiplos inimigos para manter o orçamento de dificuldade coerente
+        # Ajusta o CR de cada inimigo para manter a dificuldade prevista da sala.
         if num_enemies == 1:
             individual_target_cr = target_cr
         elif num_enemies == 2:
@@ -141,22 +149,20 @@ def build_dungeon_100_rooms(
         else:
             individual_target_cr = max(0.125, target_cr * 0.44)
 
-        # Seleciona candidatos próximos ao individual_target_cr
+        # Seleciona monstros próximos do CR individual alvo (individual_target_cr).
         scored_candidates: list[tuple[float, dict[str, Any]]] = []
         for rec in records:
             cr_val = float(rec["challenge_rating"])
             cr_dist = abs(cr_val - individual_target_cr)
-            # Em modo alternate_pool, adiciona perturbação controlada por índice para variar espécies
-            species_bias = 0.0
-            if composition_mode == "alternate_pool":
-                species_bias = (hash(str(rec["index"]) + str(seed)) % 100) / 250.0
+            # No modo alternate_pool, varia a seleção pelo índice para incluir outras espécies.
+            species_bias = species_biases.get(str(rec["index"]), 0.0)
             scored_candidates.append((cr_dist + species_bias, rec))
 
         scored_candidates.sort(key=lambda item: (round(item[0], 4), str(item[1]["index"])))
         top_k = min(len(scored_candidates), 12 if composition_mode == "standard" else 18)
         candidate_pool = [item[1] for item in scored_candidates[:top_k]]
 
-        # Se múltiplos inimigos na mesma sala, reduz os atributos individuais ligeiramente para manter progressão suave
+        # Reduz um pouco os atributos de cada inimigo nas salas com mais de um para suavizar a progressão.
         group_balance_scale = 1.0 if num_enemies == 1 else (0.72 if num_enemies == 2 else 0.56)
         effective_mult = difficulty_multiplier * group_balance_scale
 
@@ -172,11 +178,11 @@ def build_dungeon_100_rooms(
             )
             room_enemies.append(inst)
 
-        # Garante que pelo menos 1 inimigo esteja na linha de frente no início do combate
+        # Coloca pelo menos 1 inimigo na linha de frente no início do combate.
         if room_enemies and all(e.position == "backline" for e in room_enemies):
             room_enemies[0].position = "frontline"
 
-        # Calcula índice composto de dificuldade prevista para a sala
+        # Combina as métricas no índice de dificuldade prevista da sala.
         expected_diff = round(
             sum(
                 e.max_hp * 0.35 + (e.physical_damage + e.magical_damage) * 2.2 + e.defense * 1.4

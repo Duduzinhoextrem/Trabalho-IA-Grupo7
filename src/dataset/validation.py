@@ -1,4 +1,4 @@
-"""Validação de integridade, tipos e campos obrigatórios do dataset D&D 5e SRD."""
+"""Validação de integridade, tipos e campos obrigatórios dos dados D&D 5e SRD."""
 
 from __future__ import annotations
 
@@ -60,7 +60,7 @@ class RecordValidationResult:
 
 @dataclass
 class DatasetValidationReport:
-    """Relatório consolidado de validação do dataset bruto e tratado."""
+    """Relatório de validação dos dados brutos e tratados."""
 
     total_records: int
     valid_records_count: int
@@ -76,7 +76,7 @@ class DatasetValidationReport:
 
 
 def extract_armor_class_value(raw_ac: Any) -> tuple[int | None, str]:
-    """Extrai o valor numérico e o tipo da Classe de Armadura (AC) do formato aninhado da API.
+    """Extrai o valor e o tipo da classe de armadura (AC) do registro aninhado da API.
 
     Na API D&D 5e 2014, `armor_class` é uma lista de objetos como:
     `[{"type": "armor", "value": 15, ...}]` ou um inteiro direto em versões legadas.

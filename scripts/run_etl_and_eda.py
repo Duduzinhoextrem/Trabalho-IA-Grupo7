@@ -1,4 +1,4 @@
-"""Script executável de ETL, Validação, Pré-processamento e EDA do Dataset D&D 5e SRD."""
+"""Coleta, validação, pré-processamento e análise exploratória dos dados D&D 5e SRD."""
 
 from __future__ import annotations
 

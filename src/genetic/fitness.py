@@ -1,10 +1,10 @@
-"""Função de Aptidão (Fitness) Multi-Semente da Masmorra Genética.
+"""Cálculo da aptidão da estratégia em várias sementes da Masmorra Genética.
 
 Regras (Seção 9):
 - Prioriza estritamente a média de salas concluídas (`mean_rooms_cleared`).
-- Reporta separadamente a taxa de conclusão das 100 salas (`completion_rate`).
-- Critérios secundários (vida restante e ouro restante) possuem peso total <= 0.009,
-  garantindo matematicamente que NUNCA invertam a prioridade de avanço de salas.
+- Informa separadamente a taxa de conclusão das 100 salas (`completion_rate`).
+- Os critérios secundários (vida e ouro restantes) têm peso total <= 0.009
+  para preservar a prioridade do avanço de salas.
 """
 
 from __future__ import annotations
@@ -21,10 +21,10 @@ def compute_lexicographic_fitness(
     mean_hp_ratio: float,
     mean_gold: float,
 ) -> float:
-    """Calcula o valor escalar de fitness preservando a ordem lexicográfica estrita por salas.
+    """Calcula a aptidão com prioridade lexicográfica estrita para as salas concluídas.
 
     O bônus secundário máximo é 0.006 + 0.003 = 0.009 < 1/K (para qualquer K <= 100 sementes),
-    impedindo que vida ou ouro superem sequer +1 sala concluída em uma única semente.
+    de modo que vida e ouro não superem o ganho de +1 sala concluída em uma única semente.
     """
     hp_component = 0.006 * max(0.0, min(1.0, mean_hp_ratio))
     gold_component = 0.003 * max(0.0, min(1.0, mean_gold / 2000.0))

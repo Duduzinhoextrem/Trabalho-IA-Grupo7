@@ -1,9 +1,9 @@
-"""Sistema de Mercado, Economia, Contratações e Baús Controlados por Semente.
+"""Mercado, contratações e sorteio de baús por semente.
 
 Regras (Seção 8):
-- Quatro níveis de armas (Tier 1 inicial a Tier 4).
-- Quatro níveis de armaduras compráveis (Tier 0 inicial sem armadura; Tiers 1 a 4 compráveis).
-- Três níveis de escudos compráveis (Tier 0 inicial sem escudo; Tiers 1 a 3 compráveis).
+- Quatro categorias de armas (da 1, inicial, até a 4).
+- Quatro categorias de armaduras à venda (1 a 4); o guerreiro começa sem armadura (categoria 0).
+- Três categorias de escudos à venda (1 a 3); o guerreiro começa sem escudo (categoria 0).
 - Venda do item substituído por 40% do preço-base (`sell_price_ratio = 0.40`).
 - Proibido saldo negativo (`gold >= 0`) ou compras impossíveis.
 - Baús pós-vitória controlados por semente e desligáveis (`enable_chests=False`) nos experimentos.
@@ -28,7 +28,7 @@ def get_next_tier_item(
     catalog_list: list[dict[str, Any]],
     current_tier: int,
 ) -> dict[str, Any] | None:
-    """Busca o próximo nível de equipamento imediatamente superior ao atual."""
+    """Busca o nível de equipamento seguinte ao atual."""
     for item in catalog_list:
         if int(item["tier"]) == current_tier + 1:
             return item
@@ -37,17 +37,17 @@ def get_next_tier_item(
 
 def try_purchase_equipment_upgrade(
     warrior: Warrior,
-    category: str,  # "weapon", "armor", "shield"
+    category: str,  # Arma ("weapon"), armadura ("armor") ou escudo ("shield").
     balance_cfg: dict[str, Any],
     min_gold_reserve: int = 0,
     buy_threshold_multiplier: float = 1.0,
 ) -> dict[str, Any] | None:
     """Avalia o catálogo da categoria e decide se compra um nível superior agora ou economiza.
 
-    Todos os níveis superiores ao atual estão disponíveis no catálogo conforme o dinheiro existente.
-    Como a venda do item substituído retorna apenas 40% do preço-base, trocar de item repetidas
-    vezes gera perda de 60% do capital investido; por outro lado, economizar demais deixa o
-    guerreiro vulnerável. O gene `buy_threshold_multiplier` e `min_gold_reserve` governam essa decisão.
+    O catálogo permite comprar qualquer nível superior ao atual que caiba no orçamento.
+    Cada revenda devolve 40% do preço-base, com perda de 60% do valor investido.
+    Trocas frequentes custam ouro, mas adiar a compra deixa o guerreiro vulnerável.
+    Os parâmetros `buy_threshold_multiplier` e `min_gold_reserve` controlam essa decisão.
     """
     econ = balance_cfg["economy"]
     sell_ratio = float(econ.get("sell_price_ratio", 0.40))
@@ -76,15 +76,15 @@ def try_purchase_equipment_upgrade(
     if spendable_gold <= 0:
         return None
 
-    # Se o limiar de compra é alto (> 1.32) e existe um tier 2 níveis acima cujo custo já está > 60% coberto,
-    # a estratégia opta por economizar para pular o tier intermediário e evitar a perda de 60% na revenda.
+    # Com limiar de compra > 1.32 e mais de 60% do custo de um item duas categorias acima,
+    # economiza para pular a categoria intermediária e evitar a perda de 60% na revenda.
     if buy_threshold_multiplier >= 1.32 and len(higher_items) >= 2:
         skip_target = higher_items[1]
         skip_net_cost = max(0, int(skip_target["cost"]) - resale_val)
         if spendable_gold >= int(skip_net_cost * 0.58) and spendable_gold < skip_net_cost:
             return None
 
-    # Seleciona o maior tier superior que cabe no orçamento respeitando o multiplicador de limiar
+    # Escolhe a maior categoria superior à atual que cabe no orçamento, respeitando o multiplicador de compra.
     chosen_item: dict[str, Any] | None = None
     for candidate in sorted(higher_items, key=lambda x: int(x["tier"]), reverse=True):
         net_c = max(0, int(candidate["cost"]) - resale_val)
@@ -129,13 +129,13 @@ def try_hire_ally_by_priority(
     min_gold_reserve: int = 0,
     hire_threshold_multiplier: float = 1.0,
 ) -> dict[str, Any] | None:
-    """Avalia a contratação de aliado conforme a ordem de prioridade genética e recursos disponíveis."""
+    """Avalia a contratação de aliados pela prioridade dos genes e pelo ouro disponível."""
     max_slots = warrior.unlocked_ally_slots(balance_cfg)
     active_allies = [a for a in warrior.allies if a.is_alive]
     if len(active_allies) >= max_slots:
         return None
 
-    # Limpa aliados mortos da lista ativa caso o slot precise ser ocupado por uma nova classe
+    # Remove os aliados mortos para liberar vagas para novas classes.
     warrior.allies = active_allies
     existing_classes = {a.ally_class for a in warrior.allies}
 
@@ -172,7 +172,7 @@ def execute_market_phase(
     balance_cfg: dict[str, Any],
     enable_allies: bool = True,
 ) -> list[dict[str, Any]]:
-    """Executa decisões de mercado (contratação de aliados e compra de equipamentos) guiadas pela política."""
+    """Aplica a política para contratar aliados e comprar equipamentos."""
     transactions: list[dict[str, Any]] = []
     min_reserve = int(round(float(policy_params.get("min_gold_reserve", 15.0))))
     buy_thresh = float(policy_params.get("equipment_buy_threshold", 1.05))
@@ -248,7 +248,7 @@ def roll_post_victory_chest(
     sell_ratio = float(econ.get("sell_price_ratio", 0.40))
     cat = rng.choice(["weapon", "armor", "shield"])
 
-    # Escolhe tier compatível com a profundidade da sala
+    # Escolhe uma categoria de equipamento compatível com a profundidade da sala.
     if room_number <= 25:
         max_drop_tier = 2
     elif room_number <= 60:
