@@ -1,0 +1,49 @@
+================================================================================
+MASMORRA GENÉTICA — GRUPO 7 | INTELIGÊNCIA ARTIFICIAL II (FIB 2026)
+LINK DA APLICAÇÃO E ORIENTAÇÕES DE HOSPEDAGEM
+================================================================================
+
+1. EXECUÇÃO LOCAL (OFFLINE & PREFERENCIAL PARA BANCA)
+--------------------------------------------------------------------------------
+A aplicação do Grupo 7 é 100% autossuficiente e funciona localmente sem 
+necessidade de conexão com a internet, garantindo que durante a apresentação de
+01/12/2026 nenhuma oscilação de Wi-Fi ou instabilidade de rede afete a defesa.
+
+URL Local Padrão:
+http://localhost:8501
+(ou http://localhost:8599 quando executado com porta alternativa)
+
+Como iniciar:
+- Dê dois cliques em "executar_prototipo.bat" na raiz do projeto; OU
+- No terminal: python -m streamlit run app.py
+
+
+2. HOSPEDAGEM PÚBLICA (STREAMLIT COMMUNITY CLOUD)
+--------------------------------------------------------------------------------
+Status de Deploy Público: PRONTO PARA PUBLICAÇÃO EM 1 CLIQUE PELOS ALUNOS
+
+Para publicar na nuvem pública gratuita do Streamlit:
+1. Acesse https://share.streamlit.io com a conta GitHub que hospeda o repositório.
+2. Clique em "New app".
+3. Selecione o repositório: <usuario-aluno>/Trabalho-IA-Grupo7
+4. Selecione a Branch: main (ou finalizacao-total)
+5. Defina o Main file path: app.py
+6. Clique em "Deploy!".
+
+A aplicação já possui todas as dependências mapeadas em "requirements.txt",
+o dataset local incluído em "data/raw/srd_2014/" e não requer nenhuma chave 
+privada (API Key) secreta nem banco de dados externo.
+
+Nota Institucional:
+Por determinação das diretrizes de segurança e privacidade do ambiente de IA,
+a vinculação de credenciais OAuth pessoais do GitHub e deploy público direto
+deve ser acionada pelos próprios estudantes proprietários do repositório.
+
+
+3. ESTRATÉGIA DE CONTINGÊNCIA PARA O DIA DA APRESENTAÇÃO
+--------------------------------------------------------------------------------
+- Notebook 1 (Apresentador): Executando localmente via localhost:8501.
+- Notebook 2 (Membro de apoio): Backup local já instalado com virtualenv.
+- Arquivos de Apoio: Slides em PDF e Vídeo da demonstração (MP4) na pasta
+  "ENTREGA_FINAL_GRUPO7/02_DIVULGACAO/Video/" caso ocorra falha de hardware.
+================================================================================

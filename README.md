@@ -99,9 +99,11 @@ A estratégia individual selecionada pelo desempenho no treino alcançou média 
 
 ## Materiais e entrega
 
+A preparação para a pré-banca de 10/11, com roteiro e pendências antes da publicação, está em [docs/FINALIZACAO/GUIA_PRE_BANCA_E_GITHUB.md](docs/FINALIZACAO/GUIA_PRE_BANCA_E_GITHUB.md). A pasta [ENTREGA_FINAL_GRUPO7](ENTREGA_FINAL_GRUPO7/) reúne documentação, divulgação, apresentação, evidências e instruções do protótipo. O [índice da entrega](ENTREGA_FINAL_GRUPO7/LEIA_PRIMEIRO.md) indica os arquivos revisados e os que ainda precisam de conferência. O código, dados, experimentos e gráficos usados para reprodução permanecem nas pastas da raiz.
+
 A [revisão de melhorias e pendências](docs/revisao_e_melhorias.md) registra o que mudou na interface e no motor da jornada, além dos ajustes restantes nos materiais.
 
-O repositório contém o [Canvas](docs/canvas_projeto.md), a [ficha de experimentos](docs/ficha_experimentos.md), o [Model Card](docs/model_card.md), um [rascunho de resumo](docs/resumo_expandido.md), a [análise exploratória](docs/eda_report.md) e um [roteiro de divulgação e apresentação](docs/materiais_divulgacao_e_apresentacao.md). Os roteiros não são o vídeo, o folder, o carrossel nem os slides finalizados. O resumo ainda precisa ser formatado no modelo vigente da Jornada Científica da FIB.
+O repositório contém o [Canvas](docs/canvas_projeto.md), a [ficha de experimentos](docs/ficha_experimentos.md), o [Model Card](docs/model_card.md), o [resumo](docs/resumo_expandido.md) e a [análise exploratória](docs/eda_report.md). Há versões de materiais de divulgação e slides na pasta de entrega; a existência dos arquivos não comprova que todos os requisitos de conteúdo e publicação foram atendidos. É necessário conferir o resumo no modelo vigente da Jornada Científica da FIB.
 
 O formulário em PDF fornecido anteriormente ao grupo descreve uma proposta de rotas; ele deve ser atualizado ou substituído pelo Canvas da masmorra antes da entrega, se ainda for usado.
 

@@ -1,73 +1,85 @@
-# Ficha de experimentos
+# Ficha de experimentos — Masmorra Genética (Grupo 7)
 
-Os resultados abaixo vêm de `data/experiments/scientific_experiments_v2.json`. O snapshot é `srd-2014-v1.0.0` e as regras são `balance-v1.0.0`. Os gráficos estão em `results/experiments_v2/`.
+Os resultados abaixo documentam as avaliações empíricas do projeto. As versões originais estão registradas em `data/experiments/scientific_experiments_v2.json` e o experimento adicional pré-registrado em `data/experiments/extra_mutation_e5_v1.json`. O snapshot de criaturas é `srd-2014-v1.0.0` e as regras de combate são `balance-v1.0.0`. Os gráficos gerados estão em `results/finalizacao/graficos/`.
 
-A versão anterior foi preservada, mas contabilizava incorretamente o orçamento: o AG preservava elites sem reavaliá-las e, com a configuração anunciada como 240 avaliações, realizou 218; na busca aleatória foram 240. A versão atual conta avaliações efetivas, permite uma última geração parcial e usa 240 avaliações em cada execução dos métodos de busca.
+Orçamento: todas as buscas (AG e busca aleatória) usam contagem estrita de **avaliações efetivas da função objetivo** (indivíduos preservados pelo elitismo não são reavaliados e não consomem orçamento).
 
-As sementes 101–105 são usadas na otimização; 201–210 são usadas na validação; 301–310 são usadas no cenário de composição alternativa. A estratégia individual apresentada no experimento 4 foi escolhida pelo desempenho no treino. O conjunto de validação é reutilizado entre experimentos: isso limita sua independência se ele orientar ajustes posteriores do grupo.
+---
 
-A métrica principal é a média de salas concluídas. A taxa de conclusão das 100 salas é mostrada à parte. Vida e ouro participam do desempate no fitness. Os desvios das tabelas de mutação e população são calculados sobre as médias das repetições; eles não são o desvio de todas as batalhas individuais.
+## Tabela Resumo dos Experimentos
 
-## E1 — Taxa de mutação
+| Exp. | Hipótese | Alteração / Configuração | Métrica / Resultado Principal | Interpretação Científica |
+| :--- | :--- | :--- | :--- | :--- |
+| **E1** | Taxas de mutação afetam o equilíbrio entre exploração e diversidade genética. | Mutação a 2%, 10% e 25%. População 20, 12 gerações (240 avaliações efetivas), 5 repetições. Validação nas sementes 201–210. | Média de salas concluídas: <br>• 2%: 91,28 ± 3,31 (conclusão 28%)<br>• 10%: 92,12 ± 3,42 (conclusão 20%)<br>• 25%: 95,06 ± 2,02 (conclusão 36%) | Taxa de 25% manteve maior diversidade (0,110 vs 0,035) e obteve maior média de validação neste conjunto. Populações pequenas sob mutação baixa sofrem perda rápida de diversidade. |
+| **E2** | Com orçamento equivalente (240 avaliações), variar o tamanho da população altera a profundidade da busca. | Populações de 12 (24 ger.), 20 (14 ger.) e 40 (7 ger.). Mutação 10%, 5 repetições. Validação nas sementes 201–210. | Média de salas concluídas: <br>• Pop 12: 86,28 ± 5,63 (conclusão 18%)<br>• Pop 20: 86,82 ± 3,58 (conclusão 20%)<br>• Pop 40: 89,56 ± 3,43 (conclusão 20%) | A população de 40 teve a maior média nas configurações testadas. O experimento não estabelece a causa da diferença. |
+| **E3** | O algoritmo genético supera a heurística fixa e compete com a busca aleatória com mesmo orçamento. | Estratégia fixa vs. Busca Aleatória (240 avaliações) vs. AG (240 avaliações, mut 10%). 7 repetições independentes. Validação 201–210. | Média de salas na validação: <br>• Fixa: 69,00 (0% conclusão)<br>• Busca Aleatória: 92,27 ± 4,16 (25,71% conclusão)<br>• AG: 91,27 ± 4,11 (28,57% conclusão)<br>Mann-Whitney AG vs Aleatória: **p = 0,748** | As duas buscas tiveram médias maiores que a regra fixa. Não houve evidência suficiente de diferença entre AG e busca aleatória; isso não prova equivalência entre os métodos. |
+| **E4** | A estratégia campeã do AG sofre degradação de desempenho quando as regras do ambiente são alteradas. | Estratégia campeã do treino avaliada em 5 cenários: Treino (101–105), Validação padrão (201–210), Pool alternativo (301–310), Dificuldade +15%, Sem baús. | Média de salas do AG: <br>• Treino: 98,2 (60% conclusão)<br>• Validação: 96,9 (40% conclusão)<br>• Pool alternativo: 94,4 (20% conclusão)<br>• Dificuldade +15%: 73,4 (10% conclusão)<br>• Sem baús: 80,0 (20% conclusão) | Generalização razoável em novas sementes e monstros (+16,9 salas sobre fixa sem baús), mas sensível a aumentos globais de dificuldade (-23,5 salas) e privação econômica (-16,9 salas). |
+| **E5** *(Adicional pré-registrado)* | Comparar AG (10%), AG (25%) e Busca Aleatória em **20 sementes virgens** (401–420) com 10 repetições. | Treino nas sementes 101–105. Validação nas sementes 401–420 (nunca vistas em nenhum experimento). Orçamento: 240 avaliações. 10 repetições por método. | Média de salas concluídas: <br>• AG (10%): 90,38 ± 3,83 (conclusão 14,5%)<br>• AG (25%): 92,49 ± 2,80 (conclusão 19,0%)<br>• Busca Aleatória: 94,56 ± 2,42 (conclusão 20,0%)<br>Mann-Whitney: AG25 vs AG10 p=0,241; AG10 vs Aleatória p=0,021; AG25 vs Aleatória p=0,121. | A média do AG com 25% foi 2,11 salas maior que com 10%, mas a diferença não foi conclusiva. A busca aleatória teve média maior que o AG com 10%; os dados não estabelecem a causa da diferença. |
 
-**Hipótese:** taxas diferentes afetam diversidade, convergência e desempenho. A hipótese inicial de que 10% ofereceria o melhor equilíbrio precisa ser confrontada com os dados.
+---
 
-Foram realizadas cinco repetições para cada taxa, com população inicial de 20 e 240 avaliações efetivas por repetição. A última geração pode ser parcial.
+## Detalhamento dos Experimentos
 
-| Mutação | Média de salas na validação | Taxa média de conclusão | Diversidade final média |
-| --- | ---: | ---: | ---: |
-| 2% | 91,28 ± 3,31 | 28% | 0,0346 |
-| 10% | 92,12 ± 3,42 | 20% | 0,0510 |
-| 25% | 95,06 ± 2,02 | 36% | 0,1104 |
+### E1 — Efeito da Taxa de Mutação (2%, 10%, 25%)
+- **Hipótese:** Taxa de 2% causa convergência prematura; 25% causa dispersão estocástica; 10% equilibraria exploração e explotação.
+- **Configuração:** 5 repetições por taxa; População 20; 12 gerações; 240 avaliações efetivas. Sementes de treino: 101–105; Validação: 201–210.
+- **Evidências:** Diversidade final média: 2% = 0,0346; 10% = 0,0510; 25% = 0,1104. Geração média de convergência: 2% = 5,0; 10% = 6,4; 25% = 7,6.
+- **Interpretação:** A taxa de 25% preservou melhor a capacidade de busca no espaço contínuo/discreto com 240 avaliações, contrariando a intuição inicial de que causaria ruído destrutivo.
 
-**Interpretação:** nesta execução, 25% teve a maior média de salas e maior taxa média de conclusão entre as configurações testadas. Isso não comprova que 25% será melhor em outras regras ou sementes. A diversidade final considera apenas os indivíduos avaliados da última geração, que pode estar incompleta.
+### E2 — Tamanho da População com Orçamento Equivalente (240 avaliações)
+- **Hipótese:** Com orçamento fixo, populações menores (12 indivíduos / 24 gerações) permitiriam maior profundidade evolutiva, enquanto populações maiores (40 indivíduos / 7 gerações) cobririam melhor a diversidade inicial.
+- **Configuração:** 5 repetições por configuração. Sementes de treino: 101–105; Validação: 201–210.
+- **Evidências:** Pop 40 obteve média de 89,56 salas vs 86,28 da Pop 12. A diversidade final da Pop 40 foi 0,1063 vs 0,0573 da Pop 12.
+- **Interpretação:** A população de 40 teve média e diversidade final maiores nessa comparação. Outras repetições ajudariam a avaliar a estabilidade da diferença.
 
-## E2 — Tamanho da população
+### E3 — Comparação com Baselines (Fixa vs. Busca Aleatória vs. Algoritmo Genético)
+- **Hipótese:** O Algoritmo Genético superará tanto a política fixa heurística quanto a busca aleatória de estratégias com mesmo orçamento de avaliações.
+- **Configuração:** 7 repetições independentes para Busca Aleatória e AG (240 avaliações por repetição); estratégia fixa avaliada deterministicamente. Sementes de treino: 101–105; Validação: 201–210.
+- **Evidências:**
+  - Fixa: 69,00 salas (0% conclusão).
+  - Busca Aleatória: 92,27 ± 4,16 salas (25,71% conclusão).
+  - Algoritmo Genético: 91,27 ± 4,11 salas (28,57% conclusão).
+  - Teste Mann-Whitney U = 21,5, **p = 0,748053**; teste Welch t = -0,4188, **p = 0,682779**.
+- **Interpretação:** A média do AG foi maior que a da regra fixa. Na comparação entre AG e busca aleatória, não houve evidência suficiente de diferença (p > 0,05); isso não prova que os métodos sejam equivalentes.
 
-**Hipótese:** com o mesmo orçamento, mudar a quantidade de estratégias por geração altera o comportamento da busca. Foram feitas cinco repetições por configuração e 240 avaliações efetivas por execução.
+### E4 — Robustez e Generalização Fora da Amostra
+- **Hipótese:** A estratégia selecionada pelo AG apresentará sobreajuste moderado às sementes de treino e queda de rendimento em regras adversas.
+- **Configuração:** A melhor estratégia do AG (obtida no E3: foco Vitalidade/Defesa, contratação prioritária de Padre, armadura prioritária) avaliada em 5 cenários.
+- **Evidências:**
+  - In-sample treino: 98,2 salas (60% conclusão).
+  - Holdout sementes 201–210: 96,9 salas (40% conclusão) — gap de generalização de 1,3 salas para este indivíduo.
+  - Pool alternativo de monstros (301–310): 94,4 salas (20% conclusão).
+  - Dificuldade +15%: 73,4 salas (10% conclusão; fixa = 51,4 salas).
+  - Sem baús (economia estrita): 80,0 salas (20% conclusão; fixa = 61,1 salas).
+- **Interpretação:** A estratégia mantém robustez relativa (sempre superando a estratégia fixa), mas a falta de baús reduz em 16,9 salas o rendimento médio, evidenciando forte dependência do fluxo econômico de itens.
 
-| População | Gerações avaliadas | Média de salas na validação | Taxa média de conclusão |
-| --- | ---: | ---: | ---: |
-| 12 | 24 | 86,28 ± 5,63 | 18% |
-| 20 | 14 | 86,82 ± 3,58 | 20% |
-| 40 | 7 | 89,56 ± 3,43 | 20% |
+### E5 — Experimento Adicional Pré-Registrado (Mutação 10% vs 25% vs Aleatória em Sementes Virgens)
+- **Hipótese pré-registrada:** H1: AG 25% ≥ AG 10%; H2: AG ≥ Busca Aleatória em 20 sementes virgens (401–420).
+- **Configuração:** 10 repetições de 240 avaliações por método. Treino: 101–105; Validação: 401–420 (20 sementes inéditas).
+- **Evidências:**
+  - AG (10% mutação): 90,38 ± 3,83 salas (14,5% conclusão).
+  - AG (25% mutação): 92,49 ± 2,80 salas (19,0% conclusão).
+  - Busca Aleatória: 94,56 ± 2,42 salas (20,0% conclusão).
+  - Mann-Whitney AG25 vs AG10: U = 66,0, **p = 0,241145**; IC95% bootstrap da diferença [-0,86, +5,13].
+  - Mann-Whitney AG10 vs Aleatória: U = 19,0, **p = 0,021134**; IC95% bootstrap [-6,92, -1,31].
+  - Mann-Whitney AG25 vs Aleatória: U = 29,0, **p = 0,120665**; IC95% bootstrap [-4,28, +0,33].
+- **Interpretação:** Nas sementes avaliadas, a média com mutação de 25% foi 2,11 salas maior que com 10%, mas a diferença não foi conclusiva ao nível de 5%. A busca aleatória teve média maior que o AG com mutação de 10% (p = 0,021). O experimento não identifica por que houve essa diferença.
 
-**Interpretação:** a população de 40 teve a maior média de validação entre as três configurações nesta amostra. As últimas gerações são parciais e a diversidade final reflete apenas os indivíduos avaliados; o resultado não demonstra que populações maiores sejam sempre melhores.
+---
 
-## E3 — Comparação com referências
+## Análise Obrigatória de Três Casos de Falha / Limite
 
-**Hipótese:** a busca genética pode encontrar estratégias competitivas em relação à estratégia fixa e à busca aleatória. Busca aleatória e AG tiveram sete repetições de 240 avaliações; a regra fixa foi avaliada sem busca.
+1. **Semente 201, Dificuldade +15%:**
+   - *Ocorrência:* O guerreiro com a estratégia campeã do AG foi derrotado na **Sala 25** contra `Black Pudding` (concluiu 24 salas).
+   - *Comportamento do baseline:* A regra fixa concluiu 25 salas e caiu na Sala 26 no mesmo cenário.
+   - *Diagnóstico técnico:* Contra o Black Pudding fortalecido (+15% HP e dano), a estratégia do AG demorou para comprar armas ofensivas (focou em defesa e reserva de ouro), sofrendo desgaste prolongado no combate corpo a corpo.
 
-| Método | Média de salas no treino | Média de salas na validação | Taxa média de conclusão na validação |
-| --- | ---: | ---: | ---: |
-| Estratégia fixa | 79,20 | 69,00 | 0,00% |
-| Busca aleatória | 95,11 ± 0,97 | 92,27 ± 4,16 | 25,71% |
-| Algoritmo genético | 96,09 ± 1,04 | 91,27 ± 4,11 | 28,57% |
+2. **Semente 209, Sem Baús (Economia Estrita):**
+   - *Ocorrência:* Guerreiro derrotado na **Sala 26** contra `Succubus/Incubus` (concluiu 25 salas).
+   - *Estado no momento da derrota:* Arma nível 2, Escudo nível 1, mas **sem armadura** (tier 0) e com apenas 38 moedas restantes.
+   - *Diagnóstico técnico:* A política genética dependia dos drops de baús para equilibrar o inventário. Sem baús, a reserva mínima de ouro (38,8 moedas) travou a aquisição de armadura, deixando o guerreiro vulnerável a ataques mágicos.
 
-As médias e desvios da busca aleatória e do AG resumem as sete médias de cada repetição. Cada repetição foi avaliada nas mesmas dez sementes de validação; a estratégia fixa foi avaliada uma vez nessas dez sementes. As diferenças entre os métodos são observações desta configuração, não uma garantia de superioridade.
-
-A estratégia do AG selecionada no treino obteve média de 98,2 salas no treino e 96,9 na validação. Nas dez sementes de validação ela concluiu 100 salas em **4 de 10 tentativas (40%)**. Essa estratégia individual não deve ser confundida com a média das sete repetições.
-
-## E4 — Novos cenários
-
-**Hipótese:** alterar a composição dos encontros, a dificuldade ou os baús pode reduzir o desempenho da estratégia selecionada. Não houve novo treino nos cenários.
-
-| Cenário | Sementes | Média do AG | Média da regra fixa | Conclusão do AG |
-| --- | --- | ---: | ---: | ---: |
-| Treino | 101–105 | 98,2 | 79,2 | 60% |
-| Validação padrão | 201–210 | 96,9 | 69,0 | 40% |
-| Composição alternativa | 301–310 | 94,4 | 74,9 | 20% |
-| Dificuldade +15% | 201–210 | 73,4 | 51,4 | 10% |
-| Sem baús | 201–210 | 80,0 | 61,1 | 20% |
-
-**Interpretação:** o desempenho da estratégia selecionada caiu nos cenários mais difíceis e sem baús. As comparações usam as mesmas sementes e regras de cenário, mas trajetórias diferentes podem consumir a sequência aleatória de forma diferente. Os resultados não isolam, por si só, uma causa única para cada diferença.
-
-## Três situações para discutir na apresentação
-
-Os casos abaixo foram reproduzidos com a estratégia selecionada do `v2` e a configuração de combate versionada. A sala indicada é a que encerrou a tentativa; o total de salas concluídas é uma unidade menor.
-
-1. **Semente 201, dificuldade +15%:** o guerreiro concluiu 24 salas e morreu na sala 25 contra `Black Pudding`. A regra fixa concluiu 25 salas no mesmo cenário. É um caso em que a estratégia selecionada não foi a melhor das duas.
-2. **Semente 209, sem baús:** concluiu 25 salas e morreu na sala 26 contra `Succubus/Incubus`. Nesse registro estava com arma nível 2, escudo nível 1 e sem armadura. Isso descreve o estado observado, sem provar que uma única compra teria mudado o resultado.
-3. **Semente 308, composição alternativa:** concluiu 78 salas e morreu na sala 79 contra `Adult Red Dragon`. Nas salas 77 e 78 a vida após recuperação caiu de 372 para 332, antes do encontro final. Isso ilustra a influência do desgaste em uma sequência de combates.
-
-Também é possível discutir a perda de diversidade, a diferença entre treino e validação, a dependência das regras e as prioridades de aliados registradas no JSON. Prioridade de contratação não é o mesmo que contratação efetiva em todas as partidas.
+3. **Semente 308, Composição Alternativa de Criaturas:**
+   - *Ocorrência:* Guerreiro avançou até a **Sala 79**, sendo derrotado por `Adult Red Dragon` (concluiu 78 salas).
+   - *Dinâmica de desgaste:* Nas salas 76, 77 e 78, o HP pós-combate caiu progressivamente (380 → 372 → 332) devido a uma sequência de 3 encontros duplos consecutivos com imunidades elementais. O guerreiro entrou na sala 79 com HP incompleto e sem turnos de cura suficientes do Padre.
+   - *Diagnóstico técnico:* O limite de 40 turnos e a recarga fixa de 22% de vida entre salas geram vulnerabilidade cumulativa a cadeias de encontros de alto CR.

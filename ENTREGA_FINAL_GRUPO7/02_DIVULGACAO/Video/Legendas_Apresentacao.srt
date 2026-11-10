@@ -1,0 +1,31 @@
+1
+00:00:01,000 --> 00:00:08,000
+Masmorra Genética: Como a Inteligência Artificial pode evoluir a estratégia de um personagem?
+
+2
+00:00:08,500 --> 00:00:16,000
+Em uma masmorra de 100 salas, o guerreiro enfrenta desafios gerados com dados reais do D&D 5e SRD.
+
+3
+00:00:16,500 --> 00:00:26,000
+Cada estratégia é codificada em 16 genes: atributos de combate, prioridades de 5 aliados e mercado.
+
+4
+00:00:26,500 --> 00:00:38,000
+O Algoritmo Genético opera seleção por torneio, recombinação BLX-alfa, mutação gaussiana e elitismo.
+
+5
+00:00:38,500 --> 00:00:52,000
+No aplicativo Streamlit, o usuário pode testar estratégias próprias ou acionar a busca automática.
+
+6
+00:00:52,500 --> 00:01:06,000
+Em 240 avaliações, o AG atingiu média de 91 salas e 28% de vitória, superando a regra fixa de 69 salas.
+
+7
+00:01:06,500 --> 00:01:20,000
+Na comparação com a busca aleatória, não encontramos evidência suficiente de diferença (p = 0,748).
+
+8
+00:01:20,500 --> 00:01:30,000
+Grupo 7 · Ciência da Computação · Faculdades Integradas de Bauru (FIB 2026).

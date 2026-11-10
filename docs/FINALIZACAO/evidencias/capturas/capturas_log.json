@@ -1,0 +1,28 @@
+{
+  "url": "http://127.0.0.1:8599",
+  "capturas": [
+    "01_inicio.png",
+    "02_aventura_sala1.png",
+    "03_aventura_final_e_comparacao.png",
+    "04_como_funciona_experimento.png",
+    "05_como_funciona_passo_a_passo.png",
+    "06_como_funciona_demonstracao.png",
+    "07_resultados.png",
+    "08_resultados_populacao.png",
+    "09_resultados_cenarios.png",
+    "10_resultados_limites.png",
+    "11_bestiario.png",
+    "12_dados_e_fonte.png",
+    "13_laboratorio.png",
+    "14_treino_automatico.png",
+    "15_inicio_mobile.png"
+  ],
+  "console_errors": [],
+  "tempos_s": {
+    "abertura_inicial": 4.74,
+    "demonstracao_ag_padrao": 4.04,
+    "laboratorio_comparacao": 2.65,
+    "treino_automatico_masmorra_201": 5.94
+  },
+  "largura_documento_mobile": 390
+}

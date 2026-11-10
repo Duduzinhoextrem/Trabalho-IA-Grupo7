@@ -1,6 +1,6 @@
 # Roteiros de divulgação e apresentação
 
-Este arquivo reúne conteúdo inicial. Ele não substitui o folder diagramado, o carrossel, o vídeo gravado, os slides ou o teste da aplicação publicada.
+Este arquivo reúne ideias para os materiais de divulgação e a apresentação. As versões produzidas estão em `ENTREGA_FINAL_GRUPO7/` e precisam ser conferidas antes da entrega.
 
 ## Folder de uma página com dobra
 
@@ -27,7 +27,7 @@ Este arquivo reúne conteúdo inicial. Ele não substitui o folder diagramado, o
 - Explicação: mostrar rapidamente como uma geração de estratégias é testada.
 - Encerramento: apresentar um resultado real, uma limitação e o endereço verificado da aplicação.
 
-O roteiro precisa ser gravado e revisado pelo grupo. Não há vídeo final ou link verificado neste repositório.
+Há um vídeo na pasta de entrega. O grupo precisa assistir à versão produzida e conferir o roteiro, as legendas e o link antes de divulgá-lo.
 
 ## Apresentação — núcleo de aproximadamente 40 minutos
 

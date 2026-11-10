@@ -18,6 +18,7 @@ from src.game.dungeon import build_dungeon_100_rooms
 from src.genetic.chromosome import Chromosome
 from src.genetic.optimizer import GenerationRecord, run_genetic_algorithm
 from src.services.journey import journey_report, search_journey, simulate_journey
+from src.ui.algorithm_explainer import DEFAULT_PARAMETERS, gene_table, reproduction_example
 from src.ui.design import BRASS, GREEN, RED, atlas_html, creature_seal, heading, section_label, strategy_summary
 from src.ui.experience import ALLY_OPTIONS, EQUIPMENT_OPTIONS, FOCUS_PRESETS, make_manual_strategy, termination_label
 from src.ui.localization import ALLY_CLASS_LABELS, GENE_FRIENDLY_INFO
@@ -460,7 +461,9 @@ def evolution(monsters: pd.DataFrame, settings: dict, payload: dict | None) -> N
                 st.write(body)
     st.caption("O processo busca boas soluções; ele não garante encontrar a melhor estratégia possível.")
 
-    official, demo = st.tabs(["Experimento do grupo", "Faça uma demonstração"])
+    official, demo, anatomy = st.tabs(["Experimento do grupo", "Faça uma demonstração", "Passo a passo do algoritmo"])
+    with anatomy:
+        _algorithm_anatomy(payload)
     with official:
         if _champion(payload) is None:
             st.info("Os resultados científicos atualizados ainda não estão disponíveis.")
@@ -512,6 +515,62 @@ def evolution(monsters: pd.DataFrame, settings: dict, payload: dict | None) -> N
             st.line_chart(hist.set_index("generation")[["best_mean_rooms"]].rename(columns={"best_mean_rooms": "Melhor média no treino"}))
             st.caption(f"{demo_result.total_objective_evaluations} estratégias avaliadas · {demo_result.elapsed_seconds:.1f} segundos · sementes 101, 102 e 103")
             st.button("Usar esta estratégia na aventura", on_click=_use_demo)
+
+
+def _algorithm_anatomy(payload: dict | None) -> None:
+    """Explica cada etapa do algoritmo com os parâmetros e operadores reais do código."""
+    params = DEFAULT_PARAMETERS
+    st.write("Cada passo abaixo corresponde ao código em `src/genetic/`. Os valores são os padrões usados nos experimentos do grupo.")
+    steps = [
+        ("1 · Cromossomo e genes",
+         "Uma estratégia é uma lista de **16 números (genes)**. Eles definem como distribuir os pontos do guerreiro, "
+         "quais aliados contratar primeiro, como evoluir esses aliados e quando comprar equipamentos. Não são dados de jogadores: "
+         "são decisões que o simulador executa."),
+        ("2 · População inicial",
+         "O algoritmo começa com várias estratégias. O intervalo de cada gene é dividido em faixas, e cada estratégia sorteia um valor "
+         "em uma faixa diferente, para que o grupo inicial cubra opções variadas (amostragem estratificada, estilo hipercubo latino)."),
+        ("3 · Aptidão (fitness)",
+         "Cada estratégia enfrenta as mesmas masmorras de treino. A aptidão é a **média de salas concluídas**. Vida restante e ouro "
+         "entram só como desempate: somam no máximo 0,009, menos que o ganho de uma sala em uma única masmorra."),
+        ("4 · Seleção",
+         f"Seleção por torneio: sorteiam-se {params['tournament_size']} estratégias e a de maior aptidão vira pai ou mãe. "
+         "Estratégias melhores são escolhidas com mais frequência, mas as piores ainda têm chance."),
+        ("5 · Cruzamento",
+         f"Com chance de {params['crossover_rate']:.0%}, dois pais geram filhos. Genes numéricos recebem um valor sorteado no intervalo entre os pais, "
+         f"ampliado em {params['blx_alpha']:.0%} para cada lado (BLX-α). O gene discreto vem de um dos pais. Depois, os pesos são normalizados para somar 1."),
+        ("6 · Mutação",
+         f"Cada gene muda com a chance definida (padrão de 10%, testamos 2%, 10% e 25%). A mudança é um ruído gaussiano com desvio de "
+         f"{params['mutation_sigma_fraction']:.0%} do intervalo do gene; o gene discreto é invertido. A mutação evita que a população fique parada."),
+        ("7 · Elitismo",
+         f"As {params['elite_count']} melhores estratégias passam intactas para a próxima geração, para que o melhor resultado não se perca. "
+         "Como elas já foram avaliadas, não são reavaliadas e não consomem orçamento."),
+        ("8 · Gerações e diversidade",
+         "Repete-se o ciclo: avaliar, selecionar, cruzar, mutar. Clones exatos na prole são alterados e, se a diversidade cair demais, "
+         "entram imigrantes aleatórios. A busca termina por limite de gerações, orçamento de avaliações, estagnação "
+         f"({params['stagnation_limit']} gerações sem melhora) ou, na busca interativa, quando uma estratégia vence as 100 salas."),
+        ("9 · Escolha da melhor estratégia",
+         "O resultado é a estratégia de maior aptidão encontrada em qualquer geração. Nos experimentos, ela é depois testada em masmorras de validação "
+         "que não participaram da busca."),
+    ]
+    for title, body in steps:
+        with st.expander(title):
+            st.write(body)
+            if title.startswith("1"):
+                st.dataframe(gene_table(), hide_index=True)
+
+    st.subheader("Exemplo real: cruzamento e mutação")
+    st.caption("Os pais são duas estratégias reais do projeto. A tabela é produzida pelos operadores do algoritmo, com a semente escolhida; "
+               "o cruzamento é forçado para mostrar a recombinação.")
+    fixed = create_fixed_baseline_chromosome()
+    champion = _champion(payload)
+    parent_b = champion if champion is not None else Chromosome(genes=[0.2, 0.5, 0.3, 0.1, 0.2, 0.3, 0.5, 0.2, 0.6, 0.1, 0.3, 0.1, 0.0, 40.0, 1.4, 1.1])
+    col_seed, col_rate = st.columns(2)
+    sample_seed = col_seed.number_input("Semente do exemplo", min_value=0, max_value=9999, value=7, step=1, key="anatomy_seed")
+    sample_rate = col_rate.slider("Chance de mutação por gene", 0.0, 0.5, 0.10, 0.05, key="anatomy_rate")
+    table, counts = reproduction_example(fixed, parent_b, int(sample_seed), float(sample_rate))
+    st.dataframe(table, hide_index=True)
+    label_b = "estratégia selecionada nos experimentos" if champion is not None else "estratégia de exemplo"
+    st.caption(f"Pai A: estratégia fixa. Pai B: {label_b}. {counts['mutated_genes']} de {counts['total_genes']} genes sofreram mutação neste exemplo.")
 
 
 def _show_genes(chromosome: Chromosome) -> None:
